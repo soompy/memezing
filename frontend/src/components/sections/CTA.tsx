@@ -47,7 +47,7 @@ export default function CTA() {
           
           <p className="text-xl mb-8 max-w-2xl mx-auto" style={{ color: '#495057' }}>
             회원가입부터 첫 밈 완성까지 단 3분! 
-            수천 명의 크리에이터들이 이미 밈징어와 함께하고 있어요.
+            누구나 쉽게 바이럴 밈을 만들 수 있어요.
           </p>
 
           {/* CTA 버튼들 */}
