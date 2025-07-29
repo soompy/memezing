@@ -44,34 +44,34 @@ const stats = [
   },
 ];
 
-const colorClasses = {
+const colorStyles = {
   blue: {
-    bg: 'bg-blue-100',
-    icon: 'text-blue-600',
-    accent: 'bg-blue-500',
+    bg: '#FFF5F3',
+    icon: '#FF6B47',
+    accent: '#FF6B47',
   },
   purple: {
-    bg: 'bg-purple-100',
-    icon: 'text-purple-600',
-    accent: 'bg-purple-500',
+    bg: '#F0FDFC',
+    icon: '#4ECDC4',
+    accent: '#4ECDC4',
   },
   green: {
-    bg: 'bg-green-100',
-    icon: 'text-green-600',
-    accent: 'bg-green-500',
+    bg: '#FFFBEB',
+    icon: '#FFD93D',
+    accent: '#FFD93D',
   },
 };
 
 export default function Features() {
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20" style={{ backgroundColor: '#F9FAFB' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 섹션 헤더 */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#2C3E50' }}>
             왜 밈징어를 선택해야 할까요?
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl max-w-3xl mx-auto" style={{ color: '#495057' }}>
             복잡한 편집 프로그램은 이제 그만! 밈징어와 함께 누구나 5분 만에 바이럴 밈을 만들어보세요.
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function Features() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
           {features.map((feature, index) => {
             const Icon = feature.icon;
-            const colors = colorClasses[feature.color as keyof typeof colorClasses];
+            const colors = colorStyles[feature.color as keyof typeof colorStyles];
             
             return (
               <div
@@ -89,22 +89,28 @@ export default function Features() {
               >
                 <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2 h-full">
                   {/* 아이콘 */}
-                  <div className={`inline-flex items-center justify-center w-16 h-16 ${colors.bg} rounded-xl mb-6`}>
-                    <Icon className={`w-8 h-8 ${colors.icon}`} />
+                  <div 
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-xl mb-6"
+                    style={{ backgroundColor: colors.bg }}
+                  >
+                    <Icon className="w-8 h-8" style={{ color: colors.icon }} />
                   </div>
 
                   {/* 제목 */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
                     {feature.title}
                   </h3>
 
                   {/* 설명 */}
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="leading-relaxed" style={{ color: '#495057' }}>
                     {feature.description}
                   </p>
 
                   {/* 호버 액센트 */}
-                  <div className={`absolute bottom-0 left-0 w-full h-1 ${colors.accent} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-2xl`}></div>
+                  <div 
+                    className="absolute bottom-0 left-0 w-full h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-2xl"
+                    style={{ backgroundColor: colors.accent }}
+                  ></div>
                 </div>
               </div>
             );
@@ -114,10 +120,10 @@ export default function Features() {
         {/* 통계 섹션 */}
         <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-lg">
           <div className="text-center mb-12">
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: '#2C3E50' }}>
               숫자로 보는 밈징어
             </h3>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg" style={{ color: '#495057' }}>
               많은 사용자들이 밈징어와 함께 창의적인 콘텐츠를 만들고 있습니다
             </p>
           </div>
@@ -128,16 +134,19 @@ export default function Features() {
               
               return (
                 <div key={index} className="text-center group">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                  <div 
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300"
+                    style={{ background: 'linear-gradient(135deg, #FF6B47 0%, #4ECDC4 100%)' }}
+                  >
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+                  <div className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: '#2C3E50' }}>
                     {stat.value}
                   </div>
-                  <div className="text-lg font-semibold text-gray-700 mb-1">
+                  <div className="text-lg font-semibold mb-1" style={{ color: '#343A40' }}>
                     {stat.label}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm" style={{ color: '#6B7280' }}>
                     {stat.description}
                   </div>
                 </div>
@@ -151,7 +160,7 @@ export default function Features() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* 왼쪽: 특징 리스트 */}
             <div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+              <h3 className="text-2xl sm:text-3xl font-bold mb-8" style={{ color: '#2C3E50' }}>
                 더 많은 놀라운 기능들
               </h3>
               
@@ -175,14 +184,17 @@ export default function Features() {
                   },
                 ].map((item, index) => (
                   <div key={index} className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mt-1">
+                    <div 
+                      className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-1"
+                      style={{ background: 'linear-gradient(to right, #FF6B47, #4ECDC4)' }}
+                    >
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                      <h4 className="text-lg font-semibold mb-1" style={{ color: '#2C3E50' }}>
                         {item.title}
                       </h4>
-                      <p className="text-gray-600">
+                      <p style={{ color: '#495057' }}>
                         {item.description}
                       </p>
                     </div>
