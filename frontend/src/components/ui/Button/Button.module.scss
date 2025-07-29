@@ -1,0 +1,146 @@
+@import '../../../styles/variables.scss';
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-weight-semibold;
+  border-radius: $border-radius-lg;
+  transition: all $transition-base;
+  border: none;
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba($primary, 0.5);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Variants
+.primary {
+  background-color: $primary;
+  color: $white;
+  box-shadow: $shadow-lg;
+  
+  &:hover:not(:disabled) {
+    background-color: $primary-600;
+    box-shadow: $shadow-xl;
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($primary, 0.5);
+  }
+}
+
+.secondary {
+  background-color: $secondary;
+  color: $white;
+  box-shadow: $shadow-md;
+  
+  &:hover:not(:disabled) {
+    background-color: $secondary-600;
+    box-shadow: $shadow-lg;
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($secondary, 0.5);
+  }
+}
+
+.outline {
+  background-color: transparent;
+  color: $primary;
+  border: 2px solid $primary;
+  
+  &:hover:not(:disabled) {
+    background-color: $primary-50;
+    color: $primary;
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($primary, 0.5);
+  }
+}
+
+.ghost {
+  background-color: transparent;
+  color: $text-600;
+  
+  &:hover:not(:disabled) {
+    background-color: $primary-50;
+    color: $primary;
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($primary, 0.5);
+  }
+}
+
+.white {
+  background-color: $white;
+  color: $primary;
+  box-shadow: $shadow-xl;
+  
+  &:hover:not(:disabled) {
+    background-color: $gray-100;
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($primary, 0.5);
+  }
+}
+
+.gradient {
+  background: linear-gradient(to right, $primary, $secondary);
+  color: $white;
+  box-shadow: $shadow-lg;
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(to right, $primary-600, $secondary-600);
+    box-shadow: $shadow-xl;
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 2px rgba($primary, 0.5);
+  }
+}
+
+// Sizes
+.sm {
+  padding: $spacing-2 $spacing-4;
+  font-size: $font-size-sm;
+}
+
+.md {
+  padding: $spacing-3 $spacing-6;
+  font-size: $font-size-base;
+}
+
+.lg {
+  padding: $spacing-4 $spacing-8;
+  font-size: $font-size-lg;
+}
+
+// Loading state
+.loading {
+  .spinner {
+    animation: spin 1s linear infinite;
+    margin-right: $spacing-2;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
