@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Play, ArrowRight, Download, Share2 } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui';
 
 const demoSteps = [
   {
@@ -86,10 +86,10 @@ export default function Demo() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 섹션 헤더 */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#2C3E50' }}>
             밈 만들기, 이렇게 쉬워요!
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl max-w-3xl mx-auto mb-8" style={{ color: '#495057' }}>
             복잡한 편집 프로그램 없이도 4단계만 따라하면 누구나 프로급 밈을 만들 수 있어요
           </p>
           
@@ -110,35 +110,47 @@ export default function Demo() {
             {demoSteps.map((step, index) => (
               <div
                 key={step.id}
-                className={`relative flex items-center p-6 rounded-2xl transition-all duration-500 cursor-pointer ${
+                className={`relative flex items-center p-6 rounded-2xl transition-all duration-500 cursor-pointer border-2 ${
                   currentStep === step.id
-                    ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 shadow-lg'
-                    : 'bg-gray-50 hover:bg-gray-100 border-2 border-transparent'
+                    ? 'shadow-lg'
+                    : 'hover:bg-gray-100 border-transparent'
                 }`}
+                style={{
+                  background: currentStep === step.id 
+                    ? 'linear-gradient(to right, #FFF5F3, #F0FDFC)' 
+                    : '#F9FAFB',
+                  borderColor: currentStep === step.id ? '#FFD1C7' : 'transparent'
+                }}
                 onClick={() => setCurrentStep(step.id)}
               >
                 {/* 스텝 번호 */}
                 <div
                   className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all duration-300 ${
                     currentStep === step.id
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                      : 'bg-gray-200 text-gray-600'
+                      ? 'text-white shadow-lg'
+                      : ''
                   }`}
+                  style={{
+                    background: currentStep === step.id 
+                      ? 'linear-gradient(to right, #FF6B47, #4ECDC4)' 
+                      : '#E5E7EB',
+                    color: currentStep === step.id ? '#ffffff' : '#6B7280'
+                  }}
                 >
                   {step.id}
                 </div>
 
                 {/* 스텝 내용 */}
                 <div className="ml-6 flex-grow">
-                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                  <h3 className="text-lg font-bold mb-1" style={{ color: '#2C3E50' }}>
                     {step.title}
                   </h3>
-                  <p className="text-gray-600 mb-3">
+                  <p className="mb-3" style={{ color: '#495057' }}>
                     {step.description}
                   </p>
                   
                   {currentStep === step.id && (
-                    <div className="inline-flex items-center text-sm font-medium text-blue-600">
+                    <div className="inline-flex items-center text-sm font-medium" style={{ color: '#FF6B47' }}>
                       {step.action}
                       <ArrowRight className="ml-1 w-4 h-4" />
                     </div>
@@ -152,7 +164,10 @@ export default function Demo() {
 
                 {/* 연결선 */}
                 {index < demoSteps.length - 1 && (
-                  <div className="absolute -bottom-3 left-6 w-0.5 h-6 bg-gray-200"></div>
+                  <div 
+                    className="absolute -bottom-3 left-6 w-0.5 h-6"
+                    style={{ backgroundColor: '#E5E7EB' }}
+                  ></div>
                 )}
               </div>
             ))}
@@ -175,7 +190,7 @@ export default function Demo() {
                   <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mb-4 bg-gray-50">
                     <div className="text-center">
                       <div className="text-4xl mb-2">📁</div>
-                      <div className="text-gray-500">이미지를 드래그하세요</div>
+                      <div style={{ color: '#6B7280' }}>이미지를 드래그하세요</div>
                     </div>
                   </div>
                   <Button variant="outline" className="w-full">
@@ -186,7 +201,10 @@ export default function Demo() {
 
               {currentStep === 2 && (
                 <div className="space-y-4">
-                  <div className="w-full h-32 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg flex items-center justify-center relative">
+                  <div 
+                    className="w-full h-32 rounded-lg flex items-center justify-center relative"
+                    style={{ background: 'linear-gradient(to right, #FFE6E0, #D9F9F6)' }}
+                  >
                     <div className="absolute top-2 left-2 right-2 bg-white/90 rounded p-2 text-center text-sm font-bold">
                       상단 텍스트 입력...
                     </div>
@@ -204,7 +222,10 @@ export default function Demo() {
 
               {currentStep === 3 && (
                 <div className="space-y-4">
-                  <div className="w-full h-32 bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg flex items-center justify-center relative">
+                  <div 
+                    className="w-full h-32 rounded-lg flex items-center justify-center relative"
+                    style={{ background: 'linear-gradient(to right, #FFF5F3, #F0FDFC)' }}
+                  >
                     <div className="absolute top-2 left-2 right-2 bg-black/80 text-white rounded p-2 text-center text-sm font-bold">
                       나만의 스타일로!
                     </div>
@@ -256,19 +277,25 @@ export default function Demo() {
             </div>
 
             {/* 플로팅 인디케이터 */}
-            <div className="absolute -top-4 -right-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+            <div 
+              className="absolute -top-4 -right-4 px-4 py-2 rounded-full text-sm font-medium"
+              style={{ 
+                backgroundColor: '#FFFBEB', 
+                color: '#374151' 
+              }}
+            >
               {currentStep}/4 단계
             </div>
           </div>
         </div>
 
         {/* 인기 템플릿 섹션 */}
-        <div className="bg-gray-50 rounded-3xl p-8 sm:p-12">
+        <div className="rounded-3xl p-8 sm:p-12" style={{ backgroundColor: '#F9FAFB' }}>
           <div className="text-center mb-12">
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: '#2C3E50' }}>
               지금 가장 인기있는 템플릿
             </h3>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg" style={{ color: '#495057' }}>
               다른 사용자들이 가장 많이 사용하는 밈 템플릿들을 확인해보세요
             </p>
           </div>
@@ -282,20 +309,21 @@ export default function Demo() {
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
                   {template.emoji}
                 </div>
-                <h4 className="font-bold text-gray-900 mb-2">
+                <h4 className="font-bold mb-2" style={{ color: '#2C3E50' }}>
                   {template.name}
                 </h4>
-                <div className="text-sm text-gray-500 mb-3">
+                <div className="text-sm mb-3" style={{ color: '#6B7280' }}>
                   {template.category}
                 </div>
                 <div className="flex items-center justify-center space-x-2">
-                  <div className="w-16 bg-gray-200 rounded-full h-2">
+                  <div className="w-16 rounded-full h-2" style={{ backgroundColor: '#E5E7EB' }}>
                     <div 
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{ background: 'linear-gradient(to right, #FF6B47, #4ECDC4)' }}
                       style={{ width: template.usage }}
                     ></div>
                   </div>
-                  <span className="text-xs font-medium text-gray-600">
+                  <span className="text-xs font-medium" style={{ color: '#6B7280' }}>
                     {template.usage}
                   </span>
                 </div>
