@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
+import styles from './TabGroup.module.scss';
 
 export interface TabItem {
   key: string;
@@ -25,19 +26,17 @@ export default function TabGroup({
 }: TabGroupProps) {
   if (variant === 'pills') {
     return (
-      <div className={cn('flex flex-wrap gap-2', className)}>
+      <div className={cn(styles.pillsGroup, className)}>
         {items.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => onChange(key)}
             className={cn(
-              'px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center space-x-1',
-              activeKey === key
-                ? 'bg-primary text-white'
-                : 'bg-gray-100 text-700 hover:bg-gray-200'
+              styles.pill,
+              activeKey === key ? styles.active : styles.inactive
             )}
           >
-            {Icon && <Icon className="w-4 h-4" />}
+            {Icon && <Icon className={styles.icon} />}
             <span>{label}</span>
           </button>
         ))}
@@ -46,19 +45,17 @@ export default function TabGroup({
   }
 
   return (
-    <div className={cn('flex space-x-1 bg-gray-100 rounded-lg p-1', className)}>
+    <div className={cn(styles.tabGroup, className)}>
       {items.map(({ key, label, icon: Icon }) => (
         <button
           key={key}
           onClick={() => onChange(key)}
           className={cn(
-            'flex-1 flex items-center justify-center space-x-1 py-2 px-3 rounded-md text-sm font-medium transition-all',
-            activeKey === key
-              ? 'bg-white shadow-sm text-primary'
-              : 'text-600 hover:text-900'
+            styles.tab,
+            activeKey === key ? styles.active : styles.inactive
           )}
         >
-          {Icon && <Icon className="w-4 h-4" />}
+          {Icon && <Icon className={styles.icon} />}
           <span>{label}</span>
         </button>
       ))}
