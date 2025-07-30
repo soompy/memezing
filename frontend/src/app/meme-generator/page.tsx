@@ -256,12 +256,13 @@ export default function MemeGenerator() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* 템플릿 선택 */}
-          <div className="lg:col-span-1">
+        <div className="space-y-8">
+          {/* 상단: 1단계와 2단계 */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* 1단계: 템플릿 선택 */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold text-800 mb-4">
-                템플릿 선택
+                📋 1단계: 템플릿 선택
               </h2>
               
               {/* 탭 선택 */}
@@ -277,13 +278,13 @@ export default function MemeGenerator() {
 
               {/* 인기 템플릿 */}
               {templateType === 'popular' && (
-                <div className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {popularTemplates.map((template) => (
                     <div
                       key={template.id}
-                      className={`cursor-pointer rounded-lg border-2 p-3 transition-all ${
+                      className={`cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md ${
                         selectedTemplate?.id === template.id && templateType === 'popular'
-                          ? 'border-primary bg-primary-50'
+                          ? 'border-primary bg-primary-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => handleTemplateSelect(template)}
@@ -291,9 +292,9 @@ export default function MemeGenerator() {
                       <img
                         src={template.url}
                         alt={template.name}
-                        className="w-full h-24 object-cover rounded mb-2"
+                        className="w-full h-20 object-cover rounded mb-2"
                       />
-                      <p className="text-sm font-medium text-700">
+                      <p className="text-xs font-medium text-700 text-center">
                         {template.name}
                       </p>
                     </div>
@@ -315,13 +316,13 @@ export default function MemeGenerator() {
                       <h3 className="text-sm font-medium text-700 mb-3">
                         업로드된 이미지
                       </h3>
-                      <div className="space-y-3">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {uploadedImages.map((imageUrl, index) => (
                           <div
                             key={index}
-                            className={`cursor-pointer rounded-lg border-2 p-3 transition-all ${
+                            className={`cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-md ${
                               selectedTemplate?.url === imageUrl && templateType === 'upload'
-                                ? 'border-primary bg-primary-50'
+                                ? 'border-primary bg-primary-50 shadow-md'
                                 : 'border-gray-200 hover:border-gray-300'
                             }`}
                             onClick={() => handleUploadedImageSelect(imageUrl)}
@@ -329,9 +330,9 @@ export default function MemeGenerator() {
                             <img
                               src={imageUrl}
                               alt={`업로드된 이미지 ${index + 1}`}
-                              className="w-full h-24 object-cover rounded mb-2"
+                              className="w-full h-20 object-cover rounded mb-2"
                             />
-                            <p className="text-sm font-medium text-700">
+                            <p className="text-xs font-medium text-700 text-center">
                               내 이미지 {index + 1}
                             </p>
                           </div>
@@ -341,7 +342,7 @@ export default function MemeGenerator() {
                   )}
 
                   {uploadedImages.length === 0 && (
-                    <div className="text-center py-8 text-500">
+                    <div className="text-center py-12 text-500 border-2 border-dashed border-gray-300 rounded-lg">
                       <p className="text-sm">이미지를 업로드하면</p>
                       <p className="text-sm">밈 템플릿으로 사용할 수 있습니다</p>
                     </div>
@@ -349,153 +350,198 @@ export default function MemeGenerator() {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* 텍스트 편집 */}
-          <div className="lg:col-span-1">
+            {/* 2단계: 텍스트 편집 및 스타일링 */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold text-800 mb-4">
-                텍스트 편집
+                ✏️ 2단계: 텍스트 편집 및 스타일링
               </h2>
+              
               {selectedTemplate ? (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {/* 텍스트 박스 선택 탭 */}
-                  <TabGroup
-                    items={selectedTemplate.textBoxes.map((_, index) => ({
-                      key: index.toString(),
-                      label: `텍스트 ${index + 1}`
-                    }))}
-                    activeKey={selectedTextIndex.toString()}
-                    onChange={(key) => setSelectedTextIndex(parseInt(key))}
-                    variant="pills"
-                    className="mb-4"
-                  />
+                  <div>
+                    <label className="text-sm font-medium text-700 mb-2 block">편집할 텍스트 선택</label>
+                    <TabGroup
+                      items={selectedTemplate.textBoxes.map((_, index) => ({
+                        key: index.toString(),
+                        label: `텍스트 ${index + 1}`
+                      }))}
+                      activeKey={selectedTextIndex.toString()}
+                      onChange={(key) => setSelectedTextIndex(parseInt(key))}
+                      variant="pills"
+                    />
+                  </div>
 
                   {/* 선택된 텍스트 입력 */}
                   <Input
-                    label={`텍스트 ${selectedTextIndex + 1}`}
+                    label={`텍스트 ${selectedTextIndex + 1} 내용`}
                     value={textInputs[selectedTextIndex] || ''}
                     onChange={(e) => handleTextChange(selectedTextIndex, e.target.value)}
                     placeholder={selectedTemplate.textBoxes[selectedTextIndex]?.defaultText}
                   />
 
+                  {/* 텍스트 스타일링 */}
+                  {textStyles.length > 0 && (
+                    <div>
+                      <TextStyleControls
+                        style={textStyles[selectedTextIndex] || defaultTextStyle}
+                        onChange={handleStyleChange}
+                        onReset={handleStyleReset}
+                      />
+                    </div>
+                  )}
+
                   {/* 모든 텍스트 미리보기 */}
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-700">전체 텍스트</label>
+                    <label className="text-sm font-medium text-700">전체 텍스트 미리보기</label>
                     {selectedTemplate.textBoxes.map((box, index) => (
                       <div
                         key={index}
-                        className={`p-2 text-sm rounded border ${
+                        className={`p-3 text-sm rounded-lg border cursor-pointer transition-all ${
                           selectedTextIndex === index
                             ? 'border-primary bg-primary-50'
-                            : 'border-gray-200 bg-gray-50'
+                            : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
                         }`}
+                        onClick={() => setSelectedTextIndex(index)}
                       >
-                        <span className="font-medium">텍스트 {index + 1}:</span>{' '}
-                        {textInputs[index] || box.defaultText}
+                        <span className="font-medium text-primary">텍스트 {index + 1}:</span>{' '}
+                        <span className={selectedTextIndex === index ? 'font-medium' : ''}>
+                          {textInputs[index] || box.defaultText}
+                        </span>
                       </div>
                     ))}
                   </div>
-
-                  <div className="space-y-3 pt-4">
-                    <Button
-                      onClick={generateMeme}
-                      isLoading={isGenerating}
-                      className="w-full"
-                    >
-                      밈 생성하기
-                    </Button>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        onClick={downloadMeme}
-                        variant="outline"
-                        disabled={!selectedTemplate || isGenerating}
-                      >
-                        다운로드
-                      </Button>
-                      <Button
-                        onClick={shareMeme}
-                        variant="secondary"
-                        disabled={!selectedTemplate || isGenerating}
-                      >
-                        공유하기
-                      </Button>
-                    </div>
-                  </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-500">
-                  템플릿을 선택해주세요
+                <div className="text-center py-16 text-500 border-2 border-dashed border-gray-300 rounded-lg">
+                  <div className="text-3xl mb-4">👈</div>
+                  <p className="font-medium">먼저 템플릿을 선택해주세요</p>
+                  <p className="text-sm mt-2">좌측에서 템플릿을 선택하면<br/>텍스트 편집이 가능합니다</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* 텍스트 스타일링 */}
-          <div className="lg:col-span-1">
-            {selectedTemplate && textStyles.length > 0 ? (
-              <TextStyleControls
-                style={textStyles[selectedTextIndex] || defaultTextStyle}
-                onChange={handleStyleChange}
-                onReset={handleStyleReset}
-              />
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-800 mb-4">
-                  텍스트 스타일
-                </h3>
-                <div className="text-center py-8 text-500">
-                  템플릿을 선택하면 스타일 설정이 가능합니다
+          {/* 하단: 3단계 미리보기 및 생성 */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-800 mb-6">
+              🎨 3단계: 미리보기 및 밈 생성
+            </h2>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* 미리보기 영역 */}
+              <div className="lg:col-span-2">
+                <div className="text-center">
+                  {selectedTemplate ? (
+                    <div className="space-y-4">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50">
+                        <canvas
+                          ref={canvasRef}
+                          className="max-w-full h-auto rounded-lg shadow-sm mx-auto"
+                          style={{ maxHeight: '400px', backgroundColor: 'white' }}
+                        />
+                      </div>
+                      
+                      <p className="text-sm text-600">
+                        💡 텍스트를 수정하면 실시간으로 미리보기가 업데이트됩니다. 
+                        &quot;밈 생성하기&quot;를 클릭하여 최종 결과를 확인하세요.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="py-24 text-500 border-2 border-dashed border-gray-300 rounded-lg">
+                      <div className="text-6xl mb-6">🎭</div>
+                      <p className="text-xl font-medium mb-2">밈 미리보기</p>
+                      <p className="text-sm">템플릿을 선택하고 텍스트를 입력하면<br/>여기에 밈 미리보기가 표시됩니다</p>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* 미리보기 */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-800 mb-4">
-                미리보기
-              </h2>
-              <div className="text-center">
-                {selectedTemplate ? (
-                  <div className="space-y-4">
-                    <canvas
-                      ref={canvasRef}
-                      className="max-w-full h-auto border rounded-lg"
-                      style={{ maxHeight: '400px' }}
-                    />
-                    <p className="text-sm text-500">
-                      텍스트를 입력하고 "밈 생성하기"를 클릭하세요
-                    </p>
+              {/* 액션 버튼 및 가이드 */}
+              <div className="space-y-6">
+                {/* 생성 및 액션 버튼 */}
+                <div className="space-y-3">
+                  <Button
+                    onClick={generateMeme}
+                    isLoading={isGenerating}
+                    className="w-full text-lg py-4"
+                    size="lg"
+                    disabled={!selectedTemplate}
+                  >
+                    {isGenerating ? '🎨 밈 생성 중...' : '🎨 밈 생성하기'}
+                  </Button>
+                  
+                  <div className="grid grid-cols-1 gap-3">
+                    <Button
+                      onClick={downloadMeme}
+                      variant="outline"
+                      disabled={!selectedTemplate || isGenerating}
+                      className="w-full py-3"
+                    >
+                      📥 다운로드
+                    </Button>
+                    <Button
+                      onClick={shareMeme}
+                      variant="secondary"
+                      disabled={!selectedTemplate || isGenerating}
+                      className="w-full py-3"
+                    >
+                      🔗 공유하기
+                    </Button>
                   </div>
-                ) : (
-                  <div className="py-16 text-500">
-                    템플릿을 선택하면 미리보기가 표시됩니다
+                </div>
+
+                {/* 빠른 가이드 */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                  <h4 className="font-semibold text-800 mb-3 flex items-center text-sm">
+                    💡 사용 팁
+                  </h4>
+                  <div className="space-y-2 text-xs text-600">
+                    <div className="flex items-start space-x-2">
+                      <span className="font-bold text-blue-600">1</span>
+                      <span>템플릿 선택 후 바로 텍스트 편집 가능</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="font-bold text-blue-600">2</span>
+                      <span>텍스트별로 다른 스타일 적용 가능</span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="font-bold text-blue-600">3</span>
+                      <span>생성 후 바로 다운로드/공유</span>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 사용법 안내 */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-800 mb-3">
-            사용법
+        {/* 고급 기능 안내 */}
+        <div className="mt-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-8 border border-purple-200">
+          <h3 className="text-2xl font-bold text-800 mb-6 text-center">
+            🚀 고급 기능으로 더 멋진 밈을 만들어보세요!
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-600">
-            <div className="flex items-start space-x-2">
-              <span className="font-bold text-primary">1.</span>
-              <span>좌측에서 원하는 밈 템플릿을 선택하세요</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-purple-100">
+              <div className="text-3xl mb-3">🎭</div>
+              <h4 className="font-semibold text-700 mb-2">다양한 템플릿</h4>
+              <p className="text-sm text-600">인기 밈부터 내 이미지까지 자유롭게 사용</p>
             </div>
-            <div className="flex items-start space-x-2">
-              <span className="font-bold text-primary">2.</span>
-              <span>중앙에서 각 텍스트 박스에 원하는 문구를 입력하세요</span>
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-purple-100">
+              <div className="text-3xl mb-3">🎨</div>
+              <h4 className="font-semibold text-700 mb-2">스타일 커스터마이징</h4>
+              <p className="text-sm text-600">폰트, 색상, 크기, 외곽선 자유자재로 조절</p>
             </div>
-            <div className="flex items-start space-x-2">
-              <span className="font-bold text-primary">3.</span>
-              <span>"밈 생성하기"를 클릭하고 다운로드하세요</span>
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-purple-100">
+              <div className="text-3xl mb-3">📱</div>
+              <h4 className="font-semibold text-700 mb-2">간편한 공유</h4>
+              <p className="text-sm text-600">다운로드나 직접 공유로 친구들과 나누기</p>
+            </div>
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-purple-100">
+              <div className="text-3xl mb-3">⚡</div>
+              <h4 className="font-semibold text-700 mb-2">실시간 미리보기</h4>
+              <p className="text-sm text-600">편집하는 동안 바로바로 결과 확인</p>
             </div>
           </div>
         </div>
