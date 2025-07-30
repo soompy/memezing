@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowRight, Clock, Users, Star, Zap, Shield, Gift, Sparkles } from 'lucide-react';
+import { ArrowRight, Clock, Users, Star, Shield, Gift, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui';
 
 export default function SignUpIncentive() {
@@ -284,7 +284,7 @@ export default function SignUpIncentive() {
                     <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed">"{review.comment}"</p>
+                <p className="text-gray-700 text-sm leading-relaxed">&ldquo;{review.comment}&rdquo;</p>
               </div>
             ))}
           </div>

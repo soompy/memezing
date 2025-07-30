@@ -74,13 +74,15 @@ export default function MemeGenerator() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [templateType, setTemplateType] = useState<'popular' | 'upload'>('popular');
   const [textBoxPositions, setTextBoxPositions] = useState<TextBox[]>([]);
-  const [showPositionEditor, setShowPositionEditor] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const [renderTimeout, setRenderTimeout] = useState<NodeJS.Timeout | null>(null);
   const [quickEditMode, setQuickEditMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedTextIndex, setDraggedTextIndex] = useState<number | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // 토스트 메시지 표시 함수
@@ -251,6 +253,109 @@ export default function MemeGenerator() {
     }
   };
 
+  // 드래그 앤 드롭 관련 함수들
+  const getCanvasMousePosition = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  };
+
+  const getTextBoxAtPosition = (x: number, y: number): number | null => {
+    const currentTextBoxes = textBoxPositions.length > 0 ? textBoxPositions : (selectedTemplate?.textBoxes || []);
+    
+    // 역순으로 검사 (위에 있는 텍스트 박스가 우선)
+    for (let i = currentTextBoxes.length - 1; i >= 0; i--) {
+      const box = currentTextBoxes[i];
+      if (x >= box.x && x <= box.x + box.width && 
+          y >= box.y && y <= box.y + box.height) {
+        return i;
+      }
+    }
+    return null;
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!selectedTemplate) return;
+
+    const mousePos = getCanvasMousePosition(e);
+    const textBoxIndex = getTextBoxAtPosition(mousePos.x, mousePos.y);
+
+    if (textBoxIndex !== null) {
+      const currentTextBoxes = textBoxPositions.length > 0 ? textBoxPositions : selectedTemplate.textBoxes;
+      const box = currentTextBoxes[textBoxIndex];
+      
+      setIsDragging(true);
+      setDraggedTextIndex(textBoxIndex);
+      setDragOffset({
+        x: mousePos.x - box.x,
+        y: mousePos.y - box.y
+      });
+      setSelectedTextIndex(textBoxIndex);
+      
+      // 커서 스타일 변경
+      if (canvasRef.current) {
+        canvasRef.current.style.cursor = 'grabbing';
+      }
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!selectedTemplate) return;
+
+    const mousePos = getCanvasMousePosition(e);
+
+    if (isDragging && draggedTextIndex !== null) {
+      // 드래그 중일 때 텍스트 박스 위치 업데이트
+      const newX = mousePos.x - dragOffset.x;
+      const newY = mousePos.y - dragOffset.y;
+      
+      // 캔버스 경계 제한
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const currentTextBoxes = textBoxPositions.length > 0 ? textBoxPositions : selectedTemplate.textBoxes;
+        const box = currentTextBoxes[draggedTextIndex];
+        
+        const constrainedX = Math.max(0, Math.min(newX, canvas.width - box.width));
+        const constrainedY = Math.max(0, Math.min(newY, canvas.height - box.height));
+        
+        handleTextBoxPositionChange(draggedTextIndex, { 
+          x: constrainedX, 
+          y: constrainedY 
+        });
+      }
+    } else {
+      // 드래그 중이 아닐 때 커서 스타일 업데이트
+      const textBoxIndex = getTextBoxAtPosition(mousePos.x, mousePos.y);
+      if (canvasRef.current) {
+        canvasRef.current.style.cursor = textBoxIndex !== null ? 'grab' : 'default';
+      }
+    }
+  };
+
+  const handleCanvasMouseUp = () => {
+    setIsDragging(false);
+    setDraggedTextIndex(null);
+    setDragOffset({ x: 0, y: 0 });
+    
+    // 커서 스타일 초기화
+    if (canvasRef.current) {
+      canvasRef.current.style.cursor = 'default';
+    }
+  };
+
+  const handleCanvasMouseLeave = () => {
+    // 캔버스를 벗어나면 드래그 종료
+    handleCanvasMouseUp();
+  };
+
   // 미리보기 생성 함수 (매개변수로 받아서 처리)
   const generateMemePreview = async (template: MemeTemplate, texts: string[], styles: TextStyle[]) => {
     if (!template || !canvasRef.current) return;
@@ -290,15 +395,16 @@ export default function MemeGenerator() {
       canvas.style.width = `${displayWidth}px`;
       canvas.style.height = `${displayHeight}px`;
       
-      // 성능 최적화: 이미지 스무딩 비활성화 (픽셀 아트 등에 유용)
-      optimizedCtx.imageSmoothingEnabled = true;
-      optimizedCtx.imageSmoothingQuality = 'high';
+      // 성능 최적화: 이미지 스무딩 활성화 (고품질 렌더링)
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
       
       // 원본 크기로 이미지 그리기
-      optimizedCtx.drawImage(img, 0, 0, originalWidth, originalHeight);
+      ctx.drawImage(img, 0, 0, originalWidth, originalHeight);
       
-      // 배치 처리로 텍스트 렌더링 최적화
-      template.textBoxes.forEach((box, index) => {
+      // 배치 처리로 텍스트 렌더링 최적화 (현재 위치 상태 사용)
+      const currentTextBoxes = textBoxPositions.length > 0 ? textBoxPositions : template.textBoxes;
+      currentTextBoxes.forEach((box, index) => {
         const text = texts[index] || '';
         const style = styles[index] || defaultTextStyle;
         
@@ -313,12 +419,12 @@ export default function MemeGenerator() {
         };
         
         // 폰트 설정 최적화: 한 번에 설정
-        optimizedCtx.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize}px ${style.fontFamily}`;
-        optimizedCtx.fillStyle = style.color;
-        optimizedCtx.strokeStyle = style.strokeColor;
-        optimizedCtx.lineWidth = style.strokeWidth;
-        optimizedCtx.textAlign = style.textAlign;
-        optimizedCtx.textBaseline = 'middle';
+        ctx.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize}px ${style.fontFamily}`;
+        ctx.fillStyle = style.color;
+        ctx.strokeStyle = style.strokeColor;
+        ctx.lineWidth = style.strokeWidth;
+        ctx.textAlign = style.textAlign;
+        ctx.textBaseline = 'middle';
         
         // 텍스트 위치 계산
         let x: number;
@@ -334,9 +440,9 @@ export default function MemeGenerator() {
         }
         const y = textBox.y + textBox.height / 2;
         
-        // 텍스트 래핑 처리 (캐시된 컨텍스트 사용)
+        // 텍스트 래핑 처리
         const maxWidth = textBox.width - 20;
-        const lines = wrapText(optimizedCtx, text, maxWidth);
+        const lines = wrapText(ctx, text, maxWidth);
         const lineHeight = style.fontSize * 1.2;
         const totalHeight = lines.length * lineHeight;
         const startY = y - totalHeight / 2 + style.fontSize / 2;
@@ -347,11 +453,23 @@ export default function MemeGenerator() {
           
           // 스트로크와 필 순서 최적화
           if (style.strokeWidth > 0) {
-            optimizedCtx.strokeText(line, x, lineY);
+            ctx.strokeText(line, x, lineY);
           }
-          optimizedCtx.fillText(line, x, lineY);
+          ctx.fillText(line, x, lineY);
         });
       });
+
+      // 드래그 모드일 때 텍스트 박스 경계 표시
+      if (isDragging || draggedTextIndex !== null) {
+        ctx.save();
+        currentTextBoxes.forEach((box, index) => {
+          ctx.strokeStyle = index === draggedTextIndex ? '#3b82f6' : '#e5e7eb';
+          ctx.lineWidth = index === draggedTextIndex ? 3 : 1;
+          ctx.setLineDash(index === draggedTextIndex ? [5, 5] : [2, 2]);
+          ctx.strokeRect(box.x, box.y, box.width, box.height);
+        });
+        ctx.restore();
+      }
 
       setIsImageLoading(false);
       
@@ -777,9 +895,14 @@ export default function MemeGenerator() {
                         </div>
                       </div>
                       
-                      <p className="text-xs text-gray-500 mt-2 text-center">
-                        슬라이더를 조정하면 실시간으로 미리보기가 업데이트됩니다
-                      </p>
+                      <div className="mt-3 space-y-1">
+                        <p className="text-xs text-gray-500 text-center">
+                          슬라이더를 조정하면 실시간으로 미리보기가 업데이트됩니다
+                        </p>
+                        <p className="text-xs text-blue-600 text-center font-medium">
+                          💡 또는 미리보기에서 텍스트를 직접 드래그하세요!
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -839,12 +962,21 @@ export default function MemeGenerator() {
                           ref={canvasRef}
                           className="max-w-full max-h-[400px] md:max-h-[500px] rounded-lg shadow-sm"
                           style={{ backgroundColor: 'white' }}
+                          onMouseDown={handleCanvasMouseDown}
+                          onMouseMove={handleCanvasMouseMove}
+                          onMouseUp={handleCanvasMouseUp}
+                          onMouseLeave={handleCanvasMouseLeave}
                         />
                       </div>
                       
-                      <p className="text-sm text-gray-600">
-                        💡 템플릿 선택, 텍스트 수정, 스타일 변경, 위치 조정 시 실시간으로 미리보기가 업데이트됩니다.
-                      </p>
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600">
+                          💡 템플릿 선택, 텍스트 수정, 스타일 변경, 위치 조정 시 실시간으로 미리보기가 업데이트됩니다.
+                        </p>
+                        <p className="text-xs text-blue-600 font-medium">
+                          🖱️ 텍스트를 직접 클릭하고 드래그하여 위치를 조정할 수 있습니다!
+                        </p>
+                      </div>
                     </div>
                   ) : (
                     <div className="py-24 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
