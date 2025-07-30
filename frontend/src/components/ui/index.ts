@@ -8,5 +8,9 @@ export { default as TabGroup } from './TabGroup';
 export { default as Header } from './Header';
 export { default as Footer } from './Footer';
 
+// Modal & Popup Components
+export { default as Modal } from './Modal';
+export { default as BottomPopup } from './BottomPopup';
+
 // Utility Components
 export { default as ImageUpload } from './ImageUpload';
