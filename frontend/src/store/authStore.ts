@@ -7,6 +7,7 @@ interface AuthStore extends AuthState {
   register: (data: RegisterRequest) => Promise<boolean>;
   logout: () => void;
   setUser: (user: User) => void;
+  setToken: (token: string) => void;
   clearError: () => void;
 }
 
@@ -106,6 +107,10 @@ export const useAuthStore = create<AuthStore>()(
 
       setUser: (user: User) => {
         set({ user });
+      },
+
+      setToken: (token: string) => {
+        set({ token });
       },
 
       clearError: () => {

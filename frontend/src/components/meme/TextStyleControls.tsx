@@ -82,7 +82,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
     label: string;
   }) => (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-700">{label}</label>
+      <label className="text-sm font-medium text-gray-700">{label}</label>
       <div className="grid grid-cols-6 gap-2">
         {colors.map((color) => (
           <button
@@ -120,13 +120,13 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Type className="w-5 h-5 text-primary" />
-          <h3 className="font-semibold text-900">텍스트 스타일</h3>
+          <h3 className="font-semibold text-gray-900">텍스트 스타일</h3>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={onReset}
-          className="text-500 hover:text-700"
+          className="text-gray-500 hover:text-gray-700"
         >
           <RotateCcw className="w-4 h-4 mr-1" />
           초기화
@@ -158,7 +158,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
 
           {/* 폰트 크기 */}
           <div>
-            <label className="block text-sm font-medium text-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               크기: {style.fontSize}px
             </label>
             <div className="flex items-center space-x-2">
@@ -192,7 +192,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
 
           {/* 폰트 스타일 */}
           <div>
-            <label className="block text-sm font-medium text-700 mb-2">스타일</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">스타일</label>
             <div className="flex space-x-2">
               <Button
                 variant={style.fontWeight === 'bold' ? 'primary' : 'outline'}
@@ -237,7 +237,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
           />
 
           <div>
-            <label className="block text-sm font-medium text-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               테두리 두께: {style.strokeWidth}px
             </label>
             <input
@@ -257,7 +257,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
       {activeTab === 'align' && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-700 mb-2">텍스트 정렬</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">텍스트 정렬</label>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { value: 'left', icon: AlignLeft, label: '왼쪽' },
@@ -268,7 +268,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
                   key={value}
                   variant={style.textAlign === value ? 'primary' : 'outline'}
                   size="sm"
-                  onClick={() => updateStyle({ textAlign: value as any })}
+                  onClick={() => updateStyle({ textAlign: value as 'left' | 'center' | 'right' })}
                   className="flex flex-col items-center space-y-1 py-3"
                 >
                   <Icon className="w-4 h-4" />
@@ -282,7 +282,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
 
       {/* 미리보기 */}
       <div className="border-t border-gray-200 pt-4">
-        <label className="block text-sm font-medium text-700 mb-2">미리보기</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">미리보기</label>
         <div className="bg-gray-100 rounded-lg p-4 text-center">
           <span
             style={{

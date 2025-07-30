@@ -145,7 +145,7 @@ export default function FeedPage() {
             ].map((tab) => (
               <button
                 key={tab.key}
-                onClick={() => setFilter(tab.key as any)}
+                onClick={() => setFilter(tab.key as 'all' | 'following' | 'trending')}
                 className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                   filter === tab.key
                     ? 'bg-white text-primary shadow-sm'

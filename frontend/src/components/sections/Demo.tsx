@@ -319,8 +319,10 @@ export default function Demo() {
                   <div className="w-16 rounded-full h-2" style={{ backgroundColor: '#E5E7EB' }}>
                     <div 
                       className="h-2 rounded-full transition-all duration-300"
-                      style={{ background: 'linear-gradient(to right, #FF6B47, #4ECDC4)' }}
-                      style={{ width: template.usage }}
+                      style={{ 
+                        background: 'linear-gradient(to right, #FF6B47, #4ECDC4)',
+                        width: template.usage
+                      }}
                     ></div>
                   </div>
                   <span className="text-xs font-medium" style={{ color: '#6B7280' }}>

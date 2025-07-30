@@ -11,13 +11,16 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  password  String?
-  provider  String   @default("email") // email, google, kakao
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  email       String   @unique
+  username    String   @unique
+  password    String?
+  provider    String   @default("email") // email, google, kakao
+  providerId  String?  // OAuth provider ID
+  avatar      String?  // Profile image URL
+  displayName String?  // Full name from OAuth
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   memes Meme[]
 
