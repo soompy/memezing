@@ -71,14 +71,14 @@ export default function InterestSelectionPopup({
       onClose={onClose}
       size="lg"
       showCloseButton={false}
-      closeOnOverlayClick={false}
-      closeOnEscape={false}
+      closeOnOverlayClick={true}
+      closeOnEscape={true}
       className="max-h-[90vh] overflow-hidden"
     >
       <div className="text-center mb-8">
         {/* 아이콘과 제목 */}
         <div className="mb-6">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full mb-4">
             <Sparkles className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900 mb-3">
@@ -86,7 +86,7 @@ export default function InterestSelectionPopup({
           </h2>
           <p className="text-gray-600 text-lg">
             관심사를 선택하면 더욱 재미있고 <br/>
-            개인화된 밈 템플릿을 추천해드려요! 🎯
+            개인화된 밈 템플릿을 추천해드려요!
           </p>
         </div>
 
@@ -136,26 +136,27 @@ export default function InterestSelectionPopup({
         )}
 
         {/* 버튼 영역 */}
-        <div className="space-y-4">
-          {/* 확인 버튼 */}
-          {/* 건너뛰기와 1주일간 보지 않기 */}
-          <div className="flex gap-3">
-            <Button
-              onClick={handleConfirm}
-              disabled={selectedInterests.length === 0}
-              className="py-4 text-lg font-bold"
-              size="lg"
-            >
-              {selectedInterests.length > 0 
-                ? `선택 완료 (${selectedInterests.length}개)` 
-                : '관심사를 선택해주세요'
-              }
-            </Button>
+        <div className="space-y-3">
+          {/* 메인 확인 버튼 */}
+          <Button
+            onClick={handleConfirm}
+            disabled={selectedInterests.length === 0}
+            className="w-full py-2 text-sm font-semibold"
+            size="sm"
+          >
+            {selectedInterests.length > 0 
+              ? `선택 완료 (${selectedInterests.length}개)` 
+              : '관심사를 선택해주세요'
+            }
+          </Button>
 
+          {/* 부가 옵션 버튼들 */}
+          <div className="flex gap-2">
             <Button
               onClick={handleSkip}
               variant="outline"
-              className="flex-1 py-3"
+              className="flex-1 py-2 text-sm"
+              size="sm"
             >
               건너뛰기
             </Button>
@@ -163,7 +164,8 @@ export default function InterestSelectionPopup({
             <Button
               onClick={handleDontShowAgain}
               variant="secondary"
-              className="flex-1 py-3 text-gray-500"
+              className="flex-1 py-2 text-sm"
+              size="sm"
             >
               1주일간 보지 않기
             </Button>
