@@ -26,7 +26,7 @@ export default function DashboardPage() {
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <Image className="h-8 w-8 text-primary" />
+                  <Image className="h-8 w-8 text-primary" aria-label="내 밈" />
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-500">내 밈</p>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="p-6">
                   <div className="text-center py-12">
-                    <Image className="mx-auto h-12 w-12 text-gray-400" />
+                    <Image className="mx-auto h-12 w-12 text-gray-400" aria-label="밈 없음" />
                     <h3 className="mt-2 text-sm font-medium text-900">아직 만든 밈이 없습니다</h3>
                     <p className="mt-1 text-sm text-500">
                       첫 번째 밈을 만들어보세요!
