@@ -5,6 +5,7 @@ import { Type, Bold, Italic, AlignLeft, AlignCenter, AlignRight, Palette, Minus,
 import Button from '@/components/ui/Button';
 import Select, { SelectGroup } from '@/components/ui/Select';
 import TabGroup from '@/components/ui/TabGroup';
+import RangeSlider from '@/components/ui/RangeSlider';
 
 export interface TextStyle {
   fontSize: number;
@@ -157,37 +158,36 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
           />
 
           {/* 폰트 크기 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              크기: {style.fontSize}px
-            </label>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => updateStyle({ fontSize: Math.max(12, style.fontSize - 2) })}
-                disabled={style.fontSize <= 12}
-              >
-                <Minus className="w-4 h-4" />
-              </Button>
-              <input
-                type="range"
-                min="12"
-                max="72"
-                step="2"
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updateStyle({ fontSize: Math.max(12, style.fontSize - 2) })}
+              disabled={style.fontSize <= 12}
+            >
+              <Minus className="w-4 h-4" />
+            </Button>
+            <div className="flex-1">
+              <RangeSlider
+                min={12}
+                max={72}
+                step={2}
                 value={style.fontSize}
-                onChange={(e) => updateStyle({ fontSize: parseInt(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                onChange={(value) => updateStyle({ fontSize: value })}
+                label="크기"
+                unit="px"
+                variant="primary"
+                showValueOnHover
               />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => updateStyle({ fontSize: Math.min(72, style.fontSize + 2) })}
-                disabled={style.fontSize >= 72}
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updateStyle({ fontSize: Math.min(72, style.fontSize + 2) })}
+              disabled={style.fontSize >= 72}
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
           </div>
 
           {/* 폰트 스타일 */}
@@ -236,20 +236,17 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
             label="테두리 색상"
           />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              테두리 두께: {style.strokeWidth}px
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="8"
-              step="1"
-              value={style.strokeWidth}
-              onChange={(e) => updateStyle({ strokeWidth: parseInt(e.target.value) })}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-            />
-          </div>
+          <RangeSlider
+            min={0}
+            max={8}
+            step={1}
+            value={style.strokeWidth}
+            onChange={(value) => updateStyle({ strokeWidth: value })}
+            label="테두리 두께"
+            unit="px"
+            variant="secondary"
+            showValueOnHover
+          />
         </div>
       )}
 
