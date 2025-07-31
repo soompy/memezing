@@ -15,7 +15,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       isLoading: false,
@@ -50,7 +50,7 @@ export const useAuthStore = create<AuthStore>()(
             });
             return false;
           }
-        } catch (error) {
+        } catch {
           set({
             isLoading: false,
             error: '네트워크 오류가 발생했습니다.',
@@ -88,7 +88,7 @@ export const useAuthStore = create<AuthStore>()(
             });
             return false;
           }
-        } catch (error) {
+        } catch {
           set({
             isLoading: false,
             error: '네트워크 오류가 발생했습니다.',
