@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Input, Select, TabGroup } from '@/components/ui';
+import { Button, Input, Select, TabGroup, RangeSlider } from '@/components/ui';
 
 const fontOptions = [
   { value: 'Arial', label: 'Arial' },
@@ -21,6 +21,9 @@ export default function ComponentsPage() {
   const [errorInput, setErrorInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('tab1');
+  const [rangeValue1, setRangeValue1] = useState(50);
+  const [rangeValue2, setRangeValue2] = useState(75);
+  const [rangeValue3, setRangeValue3] = useState(25);
 
   const handleLoadingTest = () => {
     setIsLoading(true);
@@ -312,6 +315,180 @@ export default function ComponentsPage() {
   items={tabItems}
   activeKey={activeTab}
   onChange={setActiveTab}
+/>`}
+                                      </pre>
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+
+                      {/* RangeSlider Components */}
+                      <section>
+                          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                              RangeSlider 컴포넌트
+                          </h2>
+
+                          <div className="space-y-8">
+                              {/* Variants */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      변형 (Variants)
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">Primary</h4>
+                                          <RangeSlider
+                                              min={0}
+                                              max={100}
+                                              step={5}
+                                              value={rangeValue1}
+                                              onChange={setRangeValue1}
+                                              label="볼륨"
+                                              unit="%"
+                                              variant="primary"
+                                              showValueOnHover
+                                          />
+                                      </div>
+                                      
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">Secondary</h4>
+                                          <RangeSlider
+                                              min={0}
+                                              max={100}
+                                              step={5}
+                                              value={rangeValue2}
+                                              onChange={setRangeValue2}
+                                              label="밝기"
+                                              unit="%"
+                                              variant="secondary"
+                                              showValueOnHover
+                                          />
+                                      </div>
+                                      
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">Accent</h4>
+                                          <RangeSlider
+                                              min={0}
+                                              max={100}
+                                              step={5}
+                                              value={rangeValue3}
+                                              onChange={setRangeValue3}
+                                              label="대비"
+                                              unit="%"
+                                              variant="accent"
+                                              showValueOnHover
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+
+                              {/* Sizes */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      크기 (Sizes)
+                                  </h3>
+                                  <div className="space-y-4">
+                                      <div>
+                                          <h4 className="font-medium text-gray-600 mb-2">Small</h4>
+                                          <RangeSlider
+                                              min={0}
+                                              max={100}
+                                              step={1}
+                                              value={30}
+                                              onChange={() => {}}
+                                              label="작은 크기"
+                                              size="small"
+                                              variant="primary"
+                                          />
+                                      </div>
+                                      
+                                      <div>
+                                          <h4 className="font-medium text-gray-600 mb-2">Medium (기본)</h4>
+                                          <RangeSlider
+                                              min={0}
+                                              max={100}
+                                              step={1}
+                                              value={50}
+                                              onChange={() => {}}
+                                              label="보통 크기"
+                                              size="medium"
+                                              variant="primary"
+                                          />
+                                      </div>
+                                      
+                                      <div>
+                                          <h4 className="font-medium text-gray-600 mb-2">Large</h4>
+                                          <RangeSlider
+                                              min={0}
+                                              max={100}
+                                              step={1}
+                                              value={80}
+                                              onChange={() => {}}
+                                              label="큰 크기"
+                                              size="large"
+                                              variant="primary"
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+
+                              {/* Features */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      기능 (Features)
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">값 표시</h4>
+                                          <RangeSlider
+                                              min={0}
+                                              max={360}
+                                              step={15}
+                                              value={180}
+                                              onChange={() => {}}
+                                              label="회전"
+                                              unit="°"
+                                              variant="secondary"
+                                              showValue
+                                          />
+                                      </div>
+                                      
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">커스텀 포맷</h4>
+                                          <RangeSlider
+                                              min={1}
+                                              max={5}
+                                              step={0.1}
+                                              value={2.5}
+                                              onChange={() => {}}
+                                              label="배율"
+                                              variant="accent"
+                                              formatValue={(val) => `${val.toFixed(1)}x`}
+                                              showValueOnHover
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+
+                              {/* Usage Example */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      사용 방법
+                                  </h3>
+                                  <div className="bg-gray-100 p-4 rounded-lg">
+                                      <pre className="text-sm text-gray-800 overflow-x-auto">
+{`const [value, setValue] = useState(50);
+
+<RangeSlider
+  min={0}
+  max={100}
+  step={5}
+  value={value}
+  onChange={setValue}
+  label="볼륨"
+  unit="%"
+  variant="primary"
+  showValueOnHover
 />`}
                                       </pre>
                                   </div>
