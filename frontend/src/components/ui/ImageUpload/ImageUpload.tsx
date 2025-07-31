@@ -122,7 +122,7 @@ export default function ImageUpload({
         <div className="relative">
           <img
             src={previewUrl}
-            alt="Preview"
+            alt="업로드된 이미지 미리보기"
             className="w-full h-64 object-cover rounded-lg border border-gray-200"
           />
           <button
