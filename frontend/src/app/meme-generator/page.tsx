@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import ImageUpload from '@/components/ui/ImageUpload';
@@ -72,7 +73,9 @@ export default function MemeGenerator() {
   const [selectedTextIndex, setSelectedTextIndex] = useState<number>(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [templateType, setTemplateType] = useState<'popular' | 'upload'>('popular');
+  const [templateType, setTemplateType] = useState<'popular' | 'upload' | 'online'>('popular');
+  const [onlineTemplates, setOnlineTemplates] = useState<MemeTemplate[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [textBoxPositions, setTextBoxPositions] = useState<TextBox[]>([]);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
@@ -83,27 +86,48 @@ export default function MemeGenerator() {
   const [isDragging, setIsDragging] = useState(false);
   const [draggedTextIndex, setDraggedTextIndex] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [, setFocusedTextIndex] = useState<number>(0);
+  const [imageScale, setImageScale] = useState(1);
+  const [imageRotation, setImageRotation] = useState(0);
+  const [imageFilter, setImageFilter] = useState('none');
+  const [imageBrightness, setImageBrightness] = useState(100);
+  const [imageContrast, setImageContrast] = useState(100);
+  const [savedProjects, setSavedProjects] = useState<{
+    id: string;
+    name: string;
+    template: MemeTemplate;
+    templateType: string;
+    textInputs: string[];
+    textStyles: TextStyle[];
+    textBoxPositions: TextBox[];
+    imageScale: number;
+    imageRotation: number;
+    imageFilter: string;
+    imageBrightness: number;
+    imageContrast: number;
+    savedAt: string;
+  }[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // 토스트 메시지 표시 함수
-  const showErrorToast = (message: string) => {
+  const showErrorToast = useCallback((message: string) => {
     setError(message);
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);
       setTimeout(() => setError(null), 300); // 애니메이션 후 제거
     }, 4000);
-  };
+  }, []);
 
   // 이미지 프리로딩 및 캐싱 함수
-  const preloadImage = async (imageUrl: string): Promise<HTMLImageElement> => {
+  const preloadImage = useCallback(async (imageUrl: string): Promise<HTMLImageElement> => {
     // 캐시에서 확인
     if (imageCache.has(imageUrl)) {
       return imageCache.get(imageUrl)!;
     }
 
     return new Promise((resolve, reject) => {
-      const img = new Image();
+      const img = new window.Image();
       img.crossOrigin = 'anonymous';
       
       img.onload = () => {
@@ -121,7 +145,50 @@ export default function MemeGenerator() {
       
       img.src = imageUrl;
     });
-  };
+  }, [imageCache, setImageCache, showErrorToast]);
+
+  // 온라인 템플릿 로드 함수
+  const loadOnlineTemplates = useCallback(async () => {
+    if (onlineTemplates.length > 0) return; // 이미 로드됨
+    
+    setIsLoadingTemplates(true);
+    try {
+      const response = await fetch('https://api.memegen.link/templates/');
+      const templates: { id: string; name: string; blank: string; lines?: number }[] = await response.json();
+      
+      // 인기 있는 템플릿 선별 (25개로 제한)
+      const popularTemplateIds = [
+        '10guy', 'buzz', 'captain', 'drake', 'fry', 'success', 'ants', 
+        'doge', 'gears', 'disastergirl', 'fine', 'keanu', 'kombucha',
+        'matrix', 'money', 'older', 'pepe', 'sad-pablo', 'tenguy',
+        'twobuttons', 'waiting', 'woman-cat', 'x-everywhere', 'yallgot',
+        'yodawg'
+      ];
+      
+      const filteredTemplates = templates
+        .filter((template) => popularTemplateIds.includes(template.id))
+        .slice(0, 25)
+        .map((template) => ({
+          id: template.id,
+          name: template.name,
+          url: template.blank,
+          textBoxes: Array.from({ length: template.lines || 2 }, (_, i) => ({
+            x: 10,
+            y: i * 150 + 30,
+            width: 300,
+            height: 60,
+            defaultText: `텍스트 ${i + 1}`
+          }))
+        }));
+        
+      setOnlineTemplates(filteredTemplates);
+    } catch (error) {
+      console.error('온라인 템플릿 로드 실패:', error);
+      showErrorToast('온라인 템플릿을 불러올 수 없습니다.');
+    } finally {
+      setIsLoadingTemplates(false);
+    }
+  }, [onlineTemplates.length, showErrorToast]);
 
   // 인기 템플릿 이미지들을 미리 로딩
   useEffect(() => {
@@ -144,6 +211,147 @@ export default function MemeGenerator() {
     };
 
     preloadTemplateImages();
+  }, [preloadImage]);
+
+  // 키보드 단축키 핸들러
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!selectedTemplate) return;
+    
+    // Ctrl/Cmd + S: 밈 다운로드 (나중에 정의될 함수)
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      // generateMeme(); // 나중에 구현
+      return;
+    }
+    
+    // Tab: 텍스트 박스 간 이동
+    if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      setSelectedTextIndex((prev) => 
+        (prev + 1) % (selectedTemplate.textBoxes.length || 1)
+      );
+      setFocusedTextIndex((prev) => 
+        (prev + 1) % (selectedTemplate.textBoxes.length || 1)
+      );
+      return;
+    }
+    
+    // Shift + Tab: 역방향 텍스트 박스 이동
+    if (e.key === 'Tab' && e.shiftKey) {
+      e.preventDefault();
+      setSelectedTextIndex((prev) => 
+        prev === 0 ? (selectedTemplate.textBoxes.length - 1) : prev - 1
+      );
+      setFocusedTextIndex((prev) => 
+        prev === 0 ? (selectedTemplate.textBoxes.length - 1) : prev - 1
+      );
+      return;
+    }
+    
+    // 화살표 키: 텍스트 박스 미세 조정
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      const moveDistance = e.shiftKey ? 10 : 1;
+      
+      setTextBoxPositions(prev => {
+        const newPositions = [...prev];
+        if (newPositions.length === 0) return selectedTemplate.textBoxes;
+        
+        const currentBox = { ...newPositions[selectedTextIndex] };
+        
+        switch (e.key) {
+          case 'ArrowUp':
+            currentBox.y = Math.max(0, currentBox.y - moveDistance);
+            break;
+          case 'ArrowDown':
+            currentBox.y = currentBox.y + moveDistance;
+            break;
+          case 'ArrowLeft':
+            currentBox.x = Math.max(0, currentBox.x - moveDistance);
+            break;
+          case 'ArrowRight':
+            currentBox.x = currentBox.x + moveDistance;
+            break;
+        }
+        
+        newPositions[selectedTextIndex] = currentBox;
+        return newPositions;
+      });
+    }
+  }, [selectedTemplate, selectedTextIndex]);
+
+  // 키보드 이벤트 리스너 등록
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // 프로젝트 저장 함수
+  const saveProject = useCallback(() => {
+    if (!selectedTemplate) {
+      showErrorToast('저장할 템플릿이 없습니다.');
+      return;
+    }
+
+    const projectData = {
+      id: Date.now().toString(),
+      name: `밈 프로젝트 ${new Date().toLocaleString()}`,
+      template: selectedTemplate,
+      templateType,
+      textInputs,
+      textStyles,
+      textBoxPositions: textBoxPositions.length > 0 ? textBoxPositions : selectedTemplate.textBoxes,
+      imageScale,
+      imageRotation,
+      imageFilter,
+      imageBrightness,
+      imageContrast,
+      savedAt: new Date().toISOString()
+    };
+
+    try {
+      const existingProjects = JSON.parse(localStorage.getItem('memeProjects') || '[]');
+      const updatedProjects = [...existingProjects, projectData];
+      localStorage.setItem('memeProjects', JSON.stringify(updatedProjects));
+      setSavedProjects(updatedProjects);
+      showErrorToast('프로젝트가 저장되었습니다!');
+    } catch (error) {
+      console.error('프로젝트 저장 실패:', error);
+      showErrorToast('프로젝트 저장에 실패했습니다.');
+    }
+  }, [selectedTemplate, templateType, textInputs, textStyles, textBoxPositions, 
+      imageScale, imageRotation, imageFilter, imageBrightness, imageContrast, showErrorToast]);
+
+  // 프로젝트 불러오기 함수
+  const loadProject = useCallback((projectData: typeof savedProjects[0]) => {
+    try {
+      setSelectedTemplate(projectData.template);
+      setTemplateType((projectData.templateType as 'popular' | 'upload' | 'online') || 'popular');
+      setTextInputs(projectData.textInputs || []);
+      setTextStyles(projectData.textStyles || []);
+      setTextBoxPositions(projectData.textBoxPositions || []);
+      setImageScale(projectData.imageScale || 1);
+      setImageRotation(projectData.imageRotation || 0);
+      setImageFilter(projectData.imageFilter || 'none');
+      setImageBrightness(projectData.imageBrightness || 100);
+      setImageContrast(projectData.imageContrast || 100);
+      showErrorToast('프로젝트가 로드되었습니다!');
+    } catch (error) {
+      console.error('프로젝트 로드 실패:', error);
+      showErrorToast('프로젝트 로드에 실패했습니다.');
+    }
+  }, [showErrorToast]);
+
+  // 저장된 프로젝트 로드
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('memeProjects') || '[]');
+      setSavedProjects(saved);
+    } catch (error) {
+      console.error('저장된 프로젝트 로드 실패:', error);
+    }
   }, []);
 
   // 컴포넌트 언마운트 시 타임아웃 정리
@@ -399,8 +607,55 @@ export default function MemeGenerator() {
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       
-      // 원본 크기로 이미지 그리기
-      ctx.drawImage(img, 0, 0, originalWidth, originalHeight);
+      // 이미지 변형 적용
+      ctx.save();
+      
+      // 스케일링
+      const scaledWidth = originalWidth * imageScale;
+      const scaledHeight = originalHeight * imageScale;
+      const offsetX = (originalWidth - scaledWidth) / 2;
+      const offsetY = (originalHeight - scaledHeight) / 2;
+      
+      // 회전 적용
+      if (imageRotation !== 0) {
+        ctx.translate(originalWidth / 2, originalHeight / 2);
+        ctx.rotate((imageRotation * Math.PI) / 180);
+        ctx.translate(-originalWidth / 2, -originalHeight / 2);
+      }
+      
+      // 필터 적용
+      let filterString = '';
+      if (imageBrightness !== 100) {
+        filterString += `brightness(${imageBrightness}%) `;
+      }
+      if (imageContrast !== 100) {
+        filterString += `contrast(${imageContrast}%) `;
+      }
+      if (imageFilter !== 'none') {
+        switch (imageFilter) {
+          case 'grayscale':
+            filterString += 'grayscale(100%) ';
+            break;
+          case 'sepia':
+            filterString += 'sepia(100%) ';
+            break;
+          case 'blur':
+            filterString += 'blur(2px) ';
+            break;
+          case 'invert':
+            filterString += 'invert(100%) ';
+            break;
+        }
+      }
+      
+      if (filterString) {
+        ctx.filter = filterString.trim();
+      }
+      
+      // 변형된 이미지 그리기
+      ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+      
+      ctx.restore();
       
       // 배치 처리로 텍스트 렌더링 최적화 (현재 위치 상태 사용)
       const currentTextBoxes = textBoxPositions.length > 0 ? textBoxPositions : template.textBoxes;
@@ -597,7 +852,7 @@ export default function MemeGenerator() {
             try {
               await navigator.clipboard.writeText(window.location.href);
               showErrorToast('페이지 링크가 클립보드에 복사되었습니다!');
-            } catch (clipboardError) {
+            } catch {
               // 클립보드 접근 실패 시 대체 방법
               const textArea = document.createElement('textarea');
               textArea.value = window.location.href;
@@ -646,10 +901,16 @@ export default function MemeGenerator() {
               <TabGroup
                 items={[
                   { key: 'popular', label: '인기 템플릿' },
+                  { key: 'online', label: '온라인 템플릿' },
                   { key: 'upload', label: '내 이미지' }
                 ]}
                 activeKey={templateType}
-                onChange={(key) => setTemplateType(key as 'popular' | 'upload')}
+                onChange={(key) => {
+                  setTemplateType(key as 'popular' | 'upload' | 'online');
+                  if (key === 'online') {
+                    loadOnlineTemplates();
+                  }
+                }}
                 className="mb-4"
               />
 
@@ -666,10 +927,13 @@ export default function MemeGenerator() {
                       }`}
                       onClick={() => handleTemplateSelect(template)}
                     >
-                      <img
+                      <Image
                         src={template.url}
                         alt={template.name}
+                        width={80}
+                        height={80}
                         className="w-full h-16 md:h-20 object-cover rounded mb-2"
+                        unoptimized
                       />
                       <p className="text-xs font-medium text-gray-700 text-center truncate">
                         {template.name}
@@ -704,10 +968,13 @@ export default function MemeGenerator() {
                             }`}
                             onClick={() => handleUploadedImageSelect(imageUrl)}
                           >
-                            <img
+                            <Image
                               src={imageUrl}
                               alt={`업로드된 이미지 ${index + 1}`}
+                              width={80}
+                              height={80}
                               className="w-full h-16 md:h-20 object-cover rounded mb-2"
+                              unoptimized
                             />
                             <p className="text-xs font-medium text-gray-700 text-center truncate">
                               내 이미지 {index + 1}
@@ -722,6 +989,51 @@ export default function MemeGenerator() {
                     <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
                       <p className="text-sm">이미지를 업로드하면</p>
                       <p className="text-sm">밈 템플릿으로 사용할 수 있습니다</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 온라인 템플릿 */}
+              {templateType === 'online' && (
+                <div>
+                  {isLoadingTemplates ? (
+                    <div className="text-center py-12">
+                      <div className="inline-block animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+                      <p className="mt-4 text-gray-600">온라인 템플릿을 불러오는 중...</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                      {onlineTemplates.map((template, index) => (
+                        <div
+                          key={`${template.id}-${index}`}
+                          className={`cursor-pointer rounded-lg border-2 p-2 md:p-3 transition-all hover:shadow-md ${
+                            selectedTemplate?.id === template.id && templateType === 'online'
+                              ? 'border-primary bg-primary-50 shadow-md'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => handleTemplateSelect(template)}
+                        >
+                          <Image
+                            src={template.url}
+                            alt={template.name}
+                            width={80}
+                            height={80}
+                            className="w-full h-16 md:h-20 object-cover rounded mb-2"
+                            unoptimized
+                          />
+                          <p className="text-xs font-medium text-gray-700 text-center truncate">
+                            {template.name}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {onlineTemplates.length === 0 && !isLoadingTemplates && (
+                    <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                      <p className="text-sm">온라인 템플릿을 불러올 수 없습니다</p>
+                      <p className="text-sm">인터넷 연결을 확인해주세요</p>
                     </div>
                   )}
                 </div>
@@ -990,6 +1302,152 @@ export default function MemeGenerator() {
 
               {/* 액션 버튼 및 가이드 */}
               <div className="space-y-4 md:space-y-6">
+                {/* 이미지 편집 컨트롤 */}
+                {selectedTemplate && (
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">🎨 이미지 편집</h3>
+                    
+                    {/* 크기 조정 */}
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-2 block">
+                        크기: {Math.round(imageScale * 100)}%
+                      </label>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="2"
+                        step="0.1"
+                        value={imageScale}
+                        onChange={(e) => setImageScale(parseFloat(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    {/* 회전 */}
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-2 block">
+                        회전: {imageRotation}°
+                      </label>
+                      <input
+                        type="range"
+                        min="-180"
+                        max="180"
+                        step="15"
+                        value={imageRotation}
+                        onChange={(e) => setImageRotation(parseInt(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    {/* 밝기 */}
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-2 block">
+                        밝기: {imageBrightness}%
+                      </label>
+                      <input
+                        type="range"
+                        min="50"
+                        max="150"
+                        step="5"
+                        value={imageBrightness}
+                        onChange={(e) => setImageBrightness(parseInt(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    {/* 대비 */}
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-2 block">
+                        대비: {imageContrast}%
+                      </label>
+                      <input
+                        type="range"
+                        min="50"
+                        max="150"
+                        step="5"
+                        value={imageContrast}
+                        onChange={(e) => setImageContrast(parseInt(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    {/* 필터 */}
+                    <div>
+                      <label className="text-xs font-medium text-gray-600 mb-2 block">필터</label>
+                      <select
+                        value={imageFilter}
+                        onChange={(e) => setImageFilter(e.target.value)}
+                        className="w-full p-2 text-xs border border-gray-300 rounded-md"
+                      >
+                        <option value="none">없음</option>
+                        <option value="grayscale">흑백</option>
+                        <option value="sepia">세피아</option>
+                        <option value="blur">블러</option>
+                        <option value="invert">반전</option>
+                      </select>
+                    </div>
+                    
+                    {/* 리셋 버튼 */}
+                    <Button
+                      onClick={() => {
+                        setImageScale(1);
+                        setImageRotation(0);
+                        setImageFilter('none');
+                        setImageBrightness(100);
+                        setImageContrast(100);
+                      }}
+                      variant="outline"
+                      className="w-full text-xs py-2"
+                    >
+                      🔄 초기화
+                    </Button>
+                  </div>
+                )}
+
+                {/* 저장/불러오기 */}
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <h3 className="text-sm font-semibold text-gray-700">💾 프로젝트 관리</h3>
+                  
+                  {/* 저장 버튼 */}
+                  <Button
+                    onClick={saveProject}
+                    variant="outline"
+                    disabled={!selectedTemplate}
+                    className="w-full text-xs py-2"
+                  >
+                    💾 현재 작업 저장
+                  </Button>
+                  
+                  {/* 저장된 프로젝트 목록 */}
+                  {savedProjects.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-gray-600 block">저장된 프로젝트</label>
+                      <div className="max-h-32 overflow-y-auto space-y-1">
+                        {savedProjects.slice(-5).reverse().map((project) => (
+                          <div
+                            key={project.id}
+                            className="flex items-center justify-between p-2 bg-white rounded border text-xs"
+                          >
+                            <div className="flex-1 truncate">
+                              <div className="font-medium truncate">{project.name}</div>
+                              <div className="text-gray-500 text-xs">
+                                {new Date(project.savedAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <Button
+                              onClick={() => loadProject(project)}
+                              variant="ghost"
+                              className="text-xs px-2 py-1 h-auto"
+                            >
+                              불러오기
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
                 {/* 생성 및 액션 버튼 */}
                 <div className="space-y-3">
                   <Button
