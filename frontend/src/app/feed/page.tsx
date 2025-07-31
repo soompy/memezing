@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Share2, Download, MoreHorizontal, Bookmark, Flag } from 'lucide-react';
 import Button from '@/components/ui/Button';
@@ -72,7 +72,7 @@ const mockMemes: MemePost[] = [
 
 export default function FeedPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { } = useAuthStore();
   const [memes, setMemes] = useState<MemePost[]>(mockMemes);
   const [filter, setFilter] = useState<'all' | 'following' | 'trending'>('all');
   const [showMenu, setShowMenu] = useState<string | null>(null);
@@ -105,7 +105,7 @@ export default function FeedPage() {
           text: `${meme.title} - 밈징어에서 확인하세요!`,
           url: `${window.location.origin}/meme/${meme.id}`
         });
-      } catch (error) {
+      } catch {
         console.log('공유 취소됨');
       }
     } else {
