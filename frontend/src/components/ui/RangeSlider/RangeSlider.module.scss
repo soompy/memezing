@@ -1,0 +1,284 @@
+@use '../../../styles/variables' as *;
+
+.rangeContainer {
+  position: relative;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.rangeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 50px;
+  background: linear-gradient(
+    to right, 
+    $primary-500 0%, 
+    $primary-500 var(--range-progress, 50%), 
+    $gray-200 var(--range-progress, 50%), 
+    $gray-200 100%
+  );
+  outline: none;
+  transition: all $transition-base;
+  cursor: pointer;
+  
+  &:hover {
+    background: linear-gradient(
+      to right, 
+      $primary-600 0%, 
+      $primary-600 var(--range-progress, 50%), 
+      $gray-300 var(--range-progress, 50%), 
+      $gray-300 100%
+    );
+  }
+  
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.2);
+  }
+  
+  // Webkit (Chrome, Safari)
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $primary-500, $primary-600);
+    border: 3px solid $white;
+    box-shadow: 
+      0 2px 8px rgba($primary-500, 0.3),
+      0 0 0 1px rgba($primary-500, 0.1);
+    cursor: pointer;
+    transition: all $transition-base;
+    
+    &:hover {
+      background: linear-gradient(135deg, $primary-400, $primary-500);
+      transform: scale(1.1);
+      box-shadow: 
+        0 4px 12px rgba($primary-500, 0.4),
+        0 0 0 1px rgba($primary-500, 0.2);
+    }
+    
+    &:active {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, $primary-600, $primary-700);
+    }
+  }
+  
+  // Firefox
+  &::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $primary-500, $primary-600);
+    border: 3px solid $white;
+    box-shadow: 
+      0 2px 8px rgba($primary-500, 0.3),
+      0 0 0 1px rgba($primary-500, 0.1);
+    cursor: pointer;
+    transition: all $transition-base;
+    
+    &:hover {
+      background: linear-gradient(135deg, $primary-400, $primary-500);
+      transform: scale(1.1);
+      box-shadow: 
+        0 4px 12px rgba($primary-500, 0.4),
+        0 0 0 1px rgba($primary-500, 0.2);
+    }
+    
+    &:active {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, $primary-600, $primary-700);
+    }
+  }
+  
+  &::-moz-range-track {
+    height: 8px;
+    border-radius: 50px;
+    background: transparent;
+    border: none;
+  }
+  
+  // Edge/IE
+  &::-ms-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $primary-500, $primary-600);
+    border: 3px solid $white;
+    box-shadow: 
+      0 2px 8px rgba($primary-500, 0.3),
+      0 0 0 1px rgba($primary-500, 0.1);
+    cursor: pointer;
+    
+    &:hover {
+      background: linear-gradient(135deg, $primary-400, $primary-500);
+    }
+  }
+  
+  &::-ms-track {
+    height: 8px;
+    border-radius: 50px;
+    background: transparent;
+    border: none;
+    color: transparent;
+  }
+  
+  &::-ms-fill-lower {
+    height: 8px;
+    border-radius: 50px;
+    background: $primary-500;
+  }
+  
+  &::-ms-fill-upper {
+    height: 8px;
+    border-radius: 50px;
+    background: $gray-200;
+  }
+}
+
+// 특별한 변형들
+.secondary {
+  background: linear-gradient(
+    to right, 
+    $secondary-500 0%, 
+    $secondary-500 var(--range-progress, 50%), 
+    $gray-200 var(--range-progress, 50%), 
+    $gray-200 100%
+  );
+  
+  &:hover {
+    background: linear-gradient(
+      to right, 
+      $secondary-600 0%, 
+      $secondary-600 var(--range-progress, 50%), 
+      $gray-300 var(--range-progress, 50%), 
+      $gray-300 100%
+    );
+  }
+  
+  &::-webkit-slider-thumb {
+    background: linear-gradient(135deg, $secondary-500, $secondary-600);
+    box-shadow: 
+      0 2px 8px rgba($secondary-500, 0.3),
+      0 0 0 1px rgba($secondary-500, 0.1);
+    
+    &:hover {
+      background: linear-gradient(135deg, $secondary-400, $secondary-500);
+      box-shadow: 
+        0 4px 12px rgba($secondary-500, 0.4),
+        0 0 0 1px rgba($secondary-500, 0.2);
+    }
+  }
+  
+  &::-moz-range-thumb {  
+    background: linear-gradient(135deg, $secondary-500, $secondary-600);
+    box-shadow: 
+      0 2px 8px rgba($secondary-500, 0.3),
+      0 0 0 1px rgba($secondary-500, 0.1);
+  }
+}
+
+.accent {
+  background: linear-gradient(
+    to right, 
+    $accent-400 0%, 
+    $accent-400 var(--range-progress, 50%), 
+    $gray-200 var(--range-progress, 50%), 
+    $gray-200 100%
+  );
+  
+  &:hover {
+    background: linear-gradient(
+      to right, 
+      $accent-500 0%, 
+      $accent-500 var(--range-progress, 50%), 
+      $gray-300 var(--range-progress, 50%), 
+      $gray-300 100%
+    );
+  }
+  
+  &::-webkit-slider-thumb {
+    background: linear-gradient(135deg, $accent-400, $accent-500);
+    box-shadow: 
+      0 2px 8px rgba($accent-400, 0.3),
+      0 0 0 1px rgba($accent-400, 0.1);
+    
+    &:hover {
+      background: linear-gradient(135deg, $accent-300, $accent-400);
+      box-shadow: 
+        0 4px 12px rgba($accent-400, 0.4),
+        0 0 0 1px rgba($accent-400, 0.2);
+    }
+  }
+}
+
+// 값 표시
+.valueDisplay {
+  position: absolute;
+  top: -35px;
+  left: var(--thumb-position, 50%);
+  transform: translateX(-50%);
+  background: $primary-500;
+  color: $white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  white-space: nowrap;
+  opacity: 0;
+  transition: all $transition-fast;
+  pointer-events: none;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid $primary-500;
+  }
+  
+  &.show {
+    opacity: 1;
+  }
+}
+
+// 접근성 개선
+.rangeSlider:focus + .valueDisplay {
+  opacity: 1;
+}
+
+// 크기 변형
+.small {
+  height: 6px;
+  
+  &::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.large {
+  height: 12px;
+  
+  &::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+}

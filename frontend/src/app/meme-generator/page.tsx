@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import ImageUpload from '@/components/ui/ImageUpload';
 import TabGroup from '@/components/ui/TabGroup';
+import RangeSlider from '@/components/ui/RangeSlider';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
 
 interface TextBox {
@@ -1308,68 +1309,57 @@ export default function MemeGenerator() {
                     <h3 className="text-sm font-semibold text-gray-700 mb-3">🎨 이미지 편집</h3>
                     
                     {/* 크기 조정 */}
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 mb-2 block">
-                        크기: {Math.round(imageScale * 100)}%
-                      </label>
-                      <input
-                        type="range"
-                        min="0.5"
-                        max="2"
-                        step="0.1"
-                        value={imageScale}
-                        onChange={(e) => setImageScale(parseFloat(e.target.value))}
-                        className="w-full"
-                      />
-                    </div>
+                    <RangeSlider
+                      min={0.5}
+                      max={2}
+                      step={0.1}
+                      value={imageScale}
+                      onChange={setImageScale}
+                      label="크기"
+                      unit="%"
+                      formatValue={(val) => `${Math.round(val * 100)}%`}
+                      variant="primary"
+                      showValueOnHover
+                    />
                     
                     {/* 회전 */}
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 mb-2 block">
-                        회전: {imageRotation}°
-                      </label>
-                      <input
-                        type="range"
-                        min="-180"
-                        max="180"
-                        step="15"
-                        value={imageRotation}
-                        onChange={(e) => setImageRotation(parseInt(e.target.value))}
-                        className="w-full"
-                      />
-                    </div>
+                    <RangeSlider
+                      min={-180}
+                      max={180}
+                      step={15}
+                      value={imageRotation}
+                      onChange={setImageRotation}
+                      label="회전"
+                      unit="°"
+                      variant="secondary"
+                      showValueOnHover
+                    />
                     
                     {/* 밝기 */}
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 mb-2 block">
-                        밝기: {imageBrightness}%
-                      </label>
-                      <input
-                        type="range"
-                        min="50"
-                        max="150"
-                        step="5"
-                        value={imageBrightness}
-                        onChange={(e) => setImageBrightness(parseInt(e.target.value))}
-                        className="w-full"
-                      />
-                    </div>
+                    <RangeSlider
+                      min={50}
+                      max={150}
+                      step={5}
+                      value={imageBrightness}
+                      onChange={setImageBrightness}
+                      label="밝기"
+                      unit="%"
+                      variant="accent"
+                      showValueOnHover
+                    />
                     
                     {/* 대비 */}
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 mb-2 block">
-                        대비: {imageContrast}%
-                      </label>
-                      <input
-                        type="range"
-                        min="50"
-                        max="150"
-                        step="5"
-                        value={imageContrast}
-                        onChange={(e) => setImageContrast(parseInt(e.target.value))}
-                        className="w-full"
-                      />
-                    </div>
+                    <RangeSlider
+                      min={50}
+                      max={150}
+                      step={5}
+                      value={imageContrast}
+                      onChange={setImageContrast}
+                      label="대비"
+                      unit="%"
+                      variant="primary"
+                      showValueOnHover
+                    />
                     
                     {/* 필터 */}
                     <div>
