@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input';
 import ImageUpload from '@/components/ui/ImageUpload';
 import TabGroup from '@/components/ui/TabGroup';
 import RangeSlider from '@/components/ui/RangeSlider';
+import Select from '@/components/ui/Select';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
 
 interface TextBox {
@@ -68,6 +69,7 @@ const defaultTextStyle: TextStyle = {
 };
 
 export default function MemeGenerator() {
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [selectedTemplate, setSelectedTemplate] = useState<MemeTemplate | null>(null);
   const [textInputs, setTextInputs] = useState<string[]>([]);
   const [textStyles, setTextStyles] = useState<TextStyle[]>([]);
@@ -389,6 +391,8 @@ export default function MemeGenerator() {
     setTemplateType('popular');
     // 템플릿 선택 후 자동으로 미리보기 생성 (즉시 실행)
     debouncedRender(template, template.textBoxes.map(box => box.defaultText), template.textBoxes.map(() => ({ ...defaultTextStyle })), 100);
+    // 다음 단계로 자동 이동
+    setCurrentStep(2);
   };
 
   const handleImageUpload = (imageUrl: string) => {
@@ -414,6 +418,8 @@ export default function MemeGenerator() {
     setTemplateType('upload');
     // 업로드된 이미지 선택 후 자동으로 미리보기 생성
     debouncedRender(customTemplate, ['상단 텍스트', '하단 텍스트'], [{ ...defaultTextStyle }, { ...defaultTextStyle }], 100);
+    // 다음 단계로 자동 이동
+    setCurrentStep(2);
   };
 
   const handleTextChange = (index: number, value: string) => {
@@ -877,6 +883,11 @@ export default function MemeGenerator() {
     }
   };
 
+  // 템플릿 재선택 함수
+  const handleBackToTemplateSelection = () => {
+    setCurrentStep(1);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 relative">
       <div className="max-w-6xl mx-auto px-4">
@@ -889,14 +900,38 @@ export default function MemeGenerator() {
           </p>
         </header>
 
-        <div className="space-y-6 md:space-y-8">
-          {/* 상단: 1단계와 2단계 */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
-            {/* 1단계: 템플릿 선택 */}
-            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-              <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
-                📋 1단계: 템플릿 선택
-              </h2>
+        {/* 단계 표시기 */}
+        <div className="mb-8 bg-white rounded-lg shadow-sm p-4">
+          <div className="flex items-center justify-center space-x-8">
+            <div className={`flex items-center space-x-2 ${currentStep >= 1 ? 'text-primary' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-200'}`}>
+                1
+              </div>
+              <span className="font-medium">템플릿 선택</span>
+            </div>
+            <div className={`w-12 h-1 ${currentStep >= 2 ? 'bg-primary' : 'bg-gray-200'} rounded`}></div>
+            <div className={`flex items-center space-x-2 ${currentStep >= 2 ? 'text-primary' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-200'}`}>
+                2
+              </div>
+              <span className="font-medium">텍스트 편집</span>
+            </div>
+            <div className={`w-12 h-1 ${currentStep >= 3 ? 'bg-primary' : 'bg-gray-200'} rounded`}></div>
+            <div className={`flex items-center space-x-2 ${currentStep >= 3 ? 'text-primary' : 'text-gray-400'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 3 ? 'bg-primary text-white' : 'bg-gray-200'}`}>
+                3
+              </div>
+              <span className="font-medium">미리보기 & 생성</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 1단계: 템플릿 선택만 표시 */}
+        {currentStep === 1 && (
+          <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
+              📋 1단계: 템플릿 선택
+            </h2>
               
               {/* 탭 선택 */}
               <TabGroup
@@ -1039,9 +1074,25 @@ export default function MemeGenerator() {
                   )}
                 </div>
               )}
+          </div>
+        )}
+
+        {/* 2단계와 3단계: 나란히 배치 */}
+        {currentStep >= 2 && (
+          <>
+            {/* 템플릿 재선택 버튼 */}
+            <div className="mb-4 flex justify-center">
+              <Button
+                onClick={handleBackToTemplateSelection}
+                variant="outline"
+                size="sm"
+              >
+                템플릿 재선택
+              </Button>
             </div>
 
-            {/* 2단계: 텍스트 편집 및 스타일링 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              {/* 2단계: 텍스트 편집 및 스타일링 */}
             <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
               <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
                 ✏️ 2단계: 텍스트 편집 및 스타일링
@@ -1151,61 +1202,53 @@ export default function MemeGenerator() {
                       </div>
                       
                       <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">X 위치</label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="500"
-                            step="5"
-                            value={textBoxPositions[selectedTextIndex]?.x || 0}
-                            onChange={(e) => handleTextBoxPositionChange(selectedTextIndex, { x: parseInt(e.target.value) })}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                          />
-                          <span className="text-xs text-gray-500">{textBoxPositions[selectedTextIndex]?.x || 0}px</span>
-                        </div>
+                        <RangeSlider
+                          min={0}
+                          max={500}
+                          step={5}
+                          value={textBoxPositions[selectedTextIndex]?.x || 0}
+                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { x: value })}
+                          label="X 위치"
+                          unit="px"
+                          variant="accent"
+                          showValueOnHover
+                        />
                         
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Y 위치</label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="400"
-                            step="5"
-                            value={textBoxPositions[selectedTextIndex]?.y || 0}
-                            onChange={(e) => handleTextBoxPositionChange(selectedTextIndex, { y: parseInt(e.target.value) })}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                          />
-                          <span className="text-xs text-gray-500">{textBoxPositions[selectedTextIndex]?.y || 0}px</span>
-                        </div>
+                        <RangeSlider
+                          min={0}
+                          max={400}
+                          step={5}
+                          value={textBoxPositions[selectedTextIndex]?.y || 0}
+                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { y: value })}
+                          label="Y 위치"
+                          unit="px"
+                          variant="accent"
+                          showValueOnHover
+                        />
                         
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">너비</label>
-                          <input
-                            type="range"
-                            min="100"
-                            max="500"
-                            step="10"
-                            value={textBoxPositions[selectedTextIndex]?.width || 200}
-                            onChange={(e) => handleTextBoxPositionChange(selectedTextIndex, { width: parseInt(e.target.value) })}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                          />
-                          <span className="text-xs text-gray-500">{textBoxPositions[selectedTextIndex]?.width || 200}px</span>
-                        </div>
+                        <RangeSlider
+                          min={100}
+                          max={500}
+                          step={10}
+                          value={textBoxPositions[selectedTextIndex]?.width || 200}
+                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { width: value })}
+                          label="너비"
+                          unit="px"
+                          variant="secondary"
+                          showValueOnHover
+                        />
                         
-                        <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">높이</label>
-                          <input
-                            type="range"
-                            min="30"
-                            max="150"
-                            step="5"
-                            value={textBoxPositions[selectedTextIndex]?.height || 60}
-                            onChange={(e) => handleTextBoxPositionChange(selectedTextIndex, { height: parseInt(e.target.value) })}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                          />
-                          <span className="text-xs text-gray-500">{textBoxPositions[selectedTextIndex]?.height || 60}px</span>
-                        </div>
+                        <RangeSlider
+                          min={30}
+                          max={150}
+                          step={5}
+                          value={textBoxPositions[selectedTextIndex]?.height || 60}
+                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { height: value })}
+                          label="높이"
+                          unit="px"
+                          variant="secondary"
+                          showValueOnHover
+                        />
                       </div>
                       
                       <div className="mt-3 space-y-1">
@@ -1248,17 +1291,16 @@ export default function MemeGenerator() {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* 하단: 3단계 미리보기 및 생성 */}
-          <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 md:mb-6">
+            {/* 3단계: 미리보기 및 밈 생성 (오른쪽 컬럼) */}
+            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
               🎨 3단계: 미리보기 및 밈 생성
             </h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="space-y-4">
               {/* 미리보기 영역 */}
-              <div className="lg:col-span-2">
+              <div>
                 <div className="text-center">
                   {selectedTemplate ? (
                     <div className="space-y-4">
@@ -1273,7 +1315,7 @@ export default function MemeGenerator() {
                         )}
                         <canvas
                           ref={canvasRef}
-                          className="max-w-full max-h-[400px] md:max-h-[500px] rounded-lg shadow-sm"
+                          className="max-w-full max-h-[300px] rounded-lg shadow-sm"
                           style={{ backgroundColor: 'white' }}
                           onMouseDown={handleCanvasMouseDown}
                           onMouseMove={handleCanvasMouseMove}
@@ -1362,20 +1404,19 @@ export default function MemeGenerator() {
                     />
                     
                     {/* 필터 */}
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 mb-2 block">필터</label>
-                      <select
-                        value={imageFilter}
-                        onChange={(e) => setImageFilter(e.target.value)}
-                        className="w-full p-2 text-xs border border-gray-300 rounded-md"
-                      >
-                        <option value="none">없음</option>
-                        <option value="grayscale">흑백</option>
-                        <option value="sepia">세피아</option>
-                        <option value="blur">블러</option>
-                        <option value="invert">반전</option>
-                      </select>
-                    </div>
+                    <Select
+                      label="필터"
+                      value={imageFilter}
+                      onChange={setImageFilter}
+                      options={[
+                        { value: 'none', label: '없음' },
+                        { value: 'grayscale', label: '흑백' },
+                        { value: 'sepia', label: '세피아' },
+                        { value: 'blur', label: '블러' },
+                        { value: 'invert', label: '반전' }
+                      ]}
+                      placeholder="필터 선택"
+                    />
                     
                     {/* 리셋 버튼 */}
                     <Button
@@ -1389,7 +1430,7 @@ export default function MemeGenerator() {
                       variant="outline"
                       className="w-full text-xs py-2"
                     >
-                      🔄 초기화
+                      초기화
                     </Button>
                   </div>
                 )}
@@ -1405,7 +1446,7 @@ export default function MemeGenerator() {
                     disabled={!selectedTemplate}
                     className="w-full text-xs py-2"
                   >
-                    💾 현재 작업 저장
+                    현재 작업 저장
                   </Button>
                   
                   {/* 저장된 프로젝트 목록 */}
@@ -1447,7 +1488,7 @@ export default function MemeGenerator() {
                     size="lg"
                     disabled={!selectedTemplate}
                   >
-                    {isGenerating ? '🎨 밈 생성 중...' : '🎨 밈 생성하기'}
+                    {isGenerating ? '밈 생성 중...' : '밈 생성하기'}
                   </Button>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
@@ -1457,7 +1498,7 @@ export default function MemeGenerator() {
                       disabled={!selectedTemplate || isGenerating}
                       className="w-full py-2 md:py-3 text-sm md:text-base"
                     >
-                      📥 다운로드
+                      다운로드
                     </Button>
                     <Button
                       onClick={shareMeme}
@@ -1465,7 +1506,7 @@ export default function MemeGenerator() {
                       disabled={!selectedTemplate || isGenerating}
                       className="w-full py-2 md:py-3 text-sm md:text-base"
                     >
-                      🔗 공유하기
+                      공유하기
                     </Button>
                   </div>
                 </div>
@@ -1492,10 +1533,13 @@ export default function MemeGenerator() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+            </div>
+            </div>
+          </>
+        )}
 
         {/* 고급 기능 안내 */}
+        {currentStep >= 2 && (
         <div className="mt-8 md:mt-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 md:p-8 border border-purple-200">
           <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 text-center">
             🚀 고급 기능으로 더 멋진 밈을 만들어보세요!
@@ -1523,6 +1567,7 @@ export default function MemeGenerator() {
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {/* 토스트 알림 */}
