@@ -1375,7 +1375,12 @@ export default function MemeGenerator() {
                         max={2}
                         step={0.1}
                         value={imageScale}
-                        onChange={setImageScale}
+                        onChange={(value) => {
+                          setImageScale(value);
+                          if (selectedTemplate) {
+                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
+                          }
+                        }}
                         label="크기"
                         unit="%"
                         formatValue={(val) => `${Math.round(val * 100)}%`}
@@ -1392,7 +1397,12 @@ export default function MemeGenerator() {
                         max={180}
                         step={15}
                         value={imageRotation}
-                        onChange={setImageRotation}
+                        onChange={(value) => {
+                          setImageRotation(value);
+                          if (selectedTemplate) {
+                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
+                          }
+                        }}
                         label="회전"
                         unit="°"
                         variant="secondary"
@@ -1408,7 +1418,12 @@ export default function MemeGenerator() {
                         max={150}
                         step={5}
                         value={imageBrightness}
-                        onChange={setImageBrightness}
+                        onChange={(value) => {
+                          setImageBrightness(value);
+                          if (selectedTemplate) {
+                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
+                          }
+                        }}
                         label="밝기"
                         unit="%"
                         variant="accent"
@@ -1424,7 +1439,12 @@ export default function MemeGenerator() {
                         max={150}
                         step={5}
                         value={imageContrast}
-                        onChange={setImageContrast}
+                        onChange={(value) => {
+                          setImageContrast(value);
+                          if (selectedTemplate) {
+                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
+                          }
+                        }}
                         label="대비"
                         unit="%"
                         variant="primary"
@@ -1438,7 +1458,12 @@ export default function MemeGenerator() {
                       <Select
                         label="필터"
                         value={imageFilter}
-                        onChange={setImageFilter}
+                        onChange={(value) => {
+                          setImageFilter(value);
+                          if (selectedTemplate) {
+                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
+                          }
+                        }}
                         options={[
                           { value: 'none', label: '없음' },
                           { value: 'grayscale', label: '흑백' },
@@ -1459,6 +1484,9 @@ export default function MemeGenerator() {
                         setImageFilter('none');
                         setImageBrightness(100);
                         setImageContrast(100);
+                        if (selectedTemplate) {
+                          debouncedRender(selectedTemplate, textInputs, textStyles, 100);
+                        }
                       }}
                       variant="outline"
                       className="w-full text-xs py-2"
