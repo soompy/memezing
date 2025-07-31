@@ -367,7 +367,7 @@ export default function MemeGenerator() {
   }, [renderTimeout]);
 
   // 디바운싱된 렌더링 함수
-  const debouncedRender = (template: MemeTemplate, texts: string[], styles: TextStyle[], delay: number = 200) => {
+  const debouncedRender = useCallback((template: MemeTemplate, texts: string[], styles: TextStyle[], delay: number = 200) => {
     // 기존 타임아웃 클리어
     if (renderTimeout) {
       clearTimeout(renderTimeout);
@@ -379,7 +379,14 @@ export default function MemeGenerator() {
     }, delay);
     
     setRenderTimeout(newTimeout);
-  };
+  }, [renderTimeout]);
+
+  // 이미지 편집 설정 변경 시 실시간 미리보기 업데이트
+  useEffect(() => {
+    if (selectedTemplate) {
+      debouncedRender(selectedTemplate, textInputs, textStyles, 200);
+    }
+  }, [selectedTemplate, textInputs, textStyles, imageScale, imageRotation, imageFilter, imageBrightness, imageContrast, debouncedRender]);
 
   const handleTemplateSelect = (template: MemeTemplate) => {
     setSelectedTemplate(template);
@@ -1324,13 +1331,19 @@ export default function MemeGenerator() {
                         />
                       </div>
                       
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-600">
-                          💡 템플릿 선택, 텍스트 수정, 스타일 변경, 위치 조정 시 실시간으로 미리보기가 업데이트됩니다.
-                        </p>
-                        <p className="text-xs text-blue-600 font-medium">
-                          🖱️ 텍스트를 직접 클릭하고 드래그하여 위치를 조정할 수 있습니다!
-                        </p>
+                      <div className="space-y-3">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <p className="text-sm text-blue-800 font-medium flex items-center">
+                            <span className="text-blue-500 mr-2">💡</span>
+                            템플릿 선택, 텍스트 수정, 스타일 변경, 위치 조정 시 실시간으로 미리보기가 업데이트됩니다.
+                          </p>
+                        </div>
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <p className="text-sm text-green-800 font-medium flex items-center">
+                            <span className="text-green-500 mr-2">🖱️</span>
+                            텍스트를 직접 클릭하고 드래그하여 위치를 조정할 수 있습니다!
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -1348,75 +1361,95 @@ export default function MemeGenerator() {
                 {/* 이미지 편집 컨트롤 */}
                 {selectedTemplate && (
                   <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">🎨 이미지 편집</h3>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-gray-700">🎨 이미지 편집</h3>
+                      <div className="bg-yellow-100 border border-yellow-300 rounded-full px-2 py-1">
+                        <span className="text-xs text-yellow-800 font-medium">실시간 미리보기</span>
+                      </div>
+                    </div>
                     
                     {/* 크기 조정 */}
-                    <RangeSlider
-                      min={0.5}
-                      max={2}
-                      step={0.1}
-                      value={imageScale}
-                      onChange={setImageScale}
-                      label="크기"
-                      unit="%"
-                      formatValue={(val) => `${Math.round(val * 100)}%`}
-                      variant="primary"
-                      showValueOnHover
-                    />
+                    <div className="space-y-1">
+                      <RangeSlider
+                        min={0.5}
+                        max={2}
+                        step={0.1}
+                        value={imageScale}
+                        onChange={setImageScale}
+                        label="크기"
+                        unit="%"
+                        formatValue={(val) => `${Math.round(val * 100)}%`}
+                        variant="primary"
+                        showValueOnHover
+                      />
+                      <p className="text-xs text-gray-500 text-center">이미지 크기를 확대/축소합니다</p>
+                    </div>
                     
                     {/* 회전 */}
-                    <RangeSlider
-                      min={-180}
-                      max={180}
-                      step={15}
-                      value={imageRotation}
-                      onChange={setImageRotation}
-                      label="회전"
-                      unit="°"
-                      variant="secondary"
-                      showValueOnHover
-                    />
+                    <div className="space-y-1">
+                      <RangeSlider
+                        min={-180}
+                        max={180}
+                        step={15}
+                        value={imageRotation}
+                        onChange={setImageRotation}
+                        label="회전"
+                        unit="°"
+                        variant="secondary"
+                        showValueOnHover
+                      />
+                      <p className="text-xs text-gray-500 text-center">이미지를 시계방향/반시계방향으로 회전합니다</p>
+                    </div>
                     
                     {/* 밝기 */}
-                    <RangeSlider
-                      min={50}
-                      max={150}
-                      step={5}
-                      value={imageBrightness}
-                      onChange={setImageBrightness}
-                      label="밝기"
-                      unit="%"
-                      variant="accent"
-                      showValueOnHover
-                    />
+                    <div className="space-y-1">
+                      <RangeSlider
+                        min={50}
+                        max={150}
+                        step={5}
+                        value={imageBrightness}
+                        onChange={setImageBrightness}
+                        label="밝기"
+                        unit="%"
+                        variant="accent"
+                        showValueOnHover
+                      />
+                      <p className="text-xs text-gray-500 text-center">이미지의 밝기를 조절합니다</p>
+                    </div>
                     
                     {/* 대비 */}
-                    <RangeSlider
-                      min={50}
-                      max={150}
-                      step={5}
-                      value={imageContrast}
-                      onChange={setImageContrast}
-                      label="대비"
-                      unit="%"
-                      variant="primary"
-                      showValueOnHover
-                    />
+                    <div className="space-y-1">
+                      <RangeSlider
+                        min={50}
+                        max={150}
+                        step={5}
+                        value={imageContrast}
+                        onChange={setImageContrast}
+                        label="대비"
+                        unit="%"
+                        variant="primary"
+                        showValueOnHover
+                      />
+                      <p className="text-xs text-gray-500 text-center">이미지의 대비를 조절합니다</p>
+                    </div>
                     
                     {/* 필터 */}
-                    <Select
-                      label="필터"
-                      value={imageFilter}
-                      onChange={setImageFilter}
-                      options={[
-                        { value: 'none', label: '없음' },
-                        { value: 'grayscale', label: '흑백' },
-                        { value: 'sepia', label: '세피아' },
-                        { value: 'blur', label: '블러' },
-                        { value: 'invert', label: '반전' }
-                      ]}
-                      placeholder="필터 선택"
-                    />
+                    <div className="space-y-1">
+                      <Select
+                        label="필터"
+                        value={imageFilter}
+                        onChange={setImageFilter}
+                        options={[
+                          { value: 'none', label: '없음' },
+                          { value: 'grayscale', label: '흑백' },
+                          { value: 'sepia', label: '세피아' },
+                          { value: 'blur', label: '블러' },
+                          { value: 'invert', label: '반전' }
+                        ]}
+                        placeholder="필터 선택"
+                      />
+                      <p className="text-xs text-gray-500 text-center">이미지에 특수 효과를 적용합니다</p>
+                    </div>
                     
                     {/* 리셋 버튼 */}
                     <Button
