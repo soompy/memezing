@@ -967,14 +967,32 @@ export default function MemeGenerator() {
                   { step: 1, label: '템플릿 선택' },
                   { step: 2, label: '텍스트 편집' },
                   { step: 3, label: '완성 & 공유' }
-                ].map(({ step, label }) => (
-                  <div key={step} className={`flex items-center space-x-2 ${currentStep >= step ? 'text-primary' : 'text-gray-400'}`}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                      currentStep >= step ? 'bg-primary text-white' : 'bg-gray-200'
-                    }`}>
-                      {step}
+                ].map(({ step, label }) => ( 
+                  <div key={step} className={`flex items-center space-x-2 step-transition`}>
+                    <div 
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium step-number ${
+                        currentStep === step ? 'active animate-pulse' : ''
+                      } ${currentStep > step ? 'completed' : ''} ${
+                        currentStep >= step ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
+                      }`}
+                      style={currentStep === step ? {
+                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        boxShadow: '0 0 0 4px rgba(255, 107, 71, 0.3)'
+                      } : {}}
+                    >
+                      {currentStep > step ? (
+                        <svg className="w-3 h-3 checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        step
+                      )}
                     </div>
-                    <span className="text-sm font-medium hidden xl:block">{label}</span>
+                    <span className={`text-sm font-medium hidden xl:block step-label ${
+                      currentStep === step ? 'active' : ''
+                    } ${currentStep >= step ? 'text-primary' : 'text-gray-400'}`}>
+                      {label}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -1002,15 +1020,29 @@ export default function MemeGenerator() {
           <div className="flex items-center space-x-2">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center flex-1">
-                <div className={`w-full h-1.5 rounded-full ${currentStep >= step ? 'bg-primary' : 'bg-gray-200'}`} />
+                <div className={`w-full h-1.5 rounded-full progress-bar ${
+                  currentStep >= step ? 'bg-primary animating' : 'bg-gray-200'
+                }`} />
                 {step < 3 && <div className="w-2" />}
               </div>
             ))}
           </div>
           <div className="flex justify-between mt-2">
-            <span className={`text-xs font-medium ${currentStep >= 1 ? 'text-primary' : 'text-gray-400'}`}>템플릿</span>
-            <span className={`text-xs font-medium ${currentStep >= 2 ? 'text-primary' : 'text-gray-400'}`}>편집</span>
-            <span className={`text-xs font-medium ${currentStep >= 3 ? 'text-primary' : 'text-gray-400'}`}>완성</span>
+            <span className={`text-xs font-medium step-label ${
+              currentStep === 1 ? 'active' : ''
+            } ${currentStep >= 1 ? 'text-primary' : 'text-gray-400'}`}>
+              템플릿
+            </span>
+            <span className={`text-xs font-medium step-label ${
+              currentStep === 2 ? 'active' : ''
+            } ${currentStep >= 2 ? 'text-primary' : 'text-gray-400'}`}>
+              편집
+            </span>
+            <span className={`text-xs font-medium step-label ${
+              currentStep === 3 ? 'active' : ''
+            } ${currentStep >= 3 ? 'text-primary' : 'text-gray-400'}`}>
+              완성
+            </span>
           </div>
         </div>
       </div>
