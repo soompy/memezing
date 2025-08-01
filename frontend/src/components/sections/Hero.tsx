@@ -5,8 +5,8 @@ import { Button } from '@/components/ui';
 
 export default function Hero() {
   const handleGetStarted = () => {
-    // 회원가입 페이지로 이동
-    window.location.href = '/register';
+    // 밈 생성기 페이지로 이동
+    window.location.href = '/meme-generator';
   };
 
   const handleDemo = () => {
@@ -95,22 +95,6 @@ export default function Hero() {
                 <Zap className="mr-2 w-5 h-5" />
                 데모 보기
               </Button>
-            </div>
-
-            {/* 통계 */}
-            <div className="flex flex-col sm:flex-row gap-8 mt-12 justify-center lg:justify-start">
-              <div className="text-center lg:text-left">
-                <div className="text-2xl font-bold" style={{ color: '#2C3E50' }}>1,000+</div>
-                <div className="text-sm" style={{ color: '#495057' }}>밈 템플릿</div>
-              </div>
-              <div className="text-center lg:text-left">
-                <div className="text-2xl font-bold" style={{ color: '#2C3E50' }}>50,000+</div>
-                <div className="text-sm" style={{ color: '#495057' }}>생성된 밈</div>
-              </div>
-              <div className="text-center lg:text-left">
-                <div className="text-2xl font-bold" style={{ color: '#2C3E50' }}>5분</div>
-                <div className="text-sm" style={{ color: '#495057' }}>평균 제작 시간</div>
-              </div>
             </div>
           </div>
 

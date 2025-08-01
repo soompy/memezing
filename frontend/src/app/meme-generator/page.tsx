@@ -59,57 +59,57 @@ const popularTemplates: MemeTemplate[] = [
 
 const koreanDramaTemplates: MemeTemplate[] = [
   {
-    id: 'goblin-sad',
-    name: '도깨비 - 슬픈 공유',
-    url: 'https://i.pinimg.com/474x/e8/9d/7c/e89d7c8b8c6b9a1b2c3d4e5f6a7b8c9d.jpg',
+    id: 'thinking-face',
+    name: '생각하는 표정',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 250, width: 380, height: 60, defaultText: '내 마음이 이렇게 아픈데' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '왜 아무도 모르지?' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '음...' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '이거 어떻게 하지?' }
     ]
   },
   {
-    id: 'crash-landing-surprised',
-    name: '사랑의 불시착 - 놀란 현빈',
-    url: 'https://i.pinimg.com/474x/f1/a2/b3/f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d.jpg',
+    id: 'surprised-face',
+    name: '놀란 표정',
+    url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 20, width: 380, height: 60, defaultText: '어?' },
-      { x: 10, y: 300, width: 380, height: 60, defaultText: '이게 뭐지?' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '어?!' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '이게 뭐야?' }
     ]
   },
   {
-    id: 'sky-castle-angry',
-    name: 'SKY 캐슬 - 화난 염정아',
-    url: 'https://i.pinimg.com/474x/a1/b2/c3/a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6.jpg',
+    id: 'angry-face',
+    name: '화난 표정',
+    url: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 250, width: 380, height: 60, defaultText: '이건 말이 안 돼!' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '완전히 이상해!' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '이건 말이 안 돼!' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '정말 화나!' }
     ]
   },
   {
-    id: 'parasite-shocked',
-    name: '기생충 - 놀란 기택',
-    url: 'https://i.pinimg.com/474x/d7/e8/f9/d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2.jpg',
+    id: 'confused-face',
+    name: '당황한 표정',
+    url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '헐...' },
-      { x: 10, y: 300, width: 380, height: 60, defaultText: '이런 일이?' }
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '이런 일이?' }
     ]
   },
   {
-    id: 'squid-game-think',
-    name: '오징어 게임 - 생각하는 성기훈',
-    url: 'https://i.pinimg.com/474x/b5/c6/d7/b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0.jpg',
+    id: 'serious-face',
+    name: '진지한 표정',
+    url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 250, width: 380, height: 60, defaultText: '이거 진짜 맞나?' },
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '이거 진짜 맞나?' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: '뭔가 이상한데...' }
     ]
   },
   {
-    id: 'reply1988-smile',
-    name: '응답하라 1988 - 미소 짓는 덕선',
-    url: 'https://i.pinimg.com/474x/c3/d4/e5/c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8.jpg',
+    id: 'happy-face',
+    name: '행복한 표정',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '이게 바로 행복이지~' },
-      { x: 10, y: 300, width: 380, height: 60, defaultText: '진짜 좋다!' }
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '진짜 좋다!' }
     ]
   }
 ];
