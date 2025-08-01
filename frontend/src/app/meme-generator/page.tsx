@@ -9,6 +9,7 @@ import TabGroup from '@/components/ui/TabGroup';
 import RangeSlider from '@/components/ui/RangeSlider';
 import Select from '@/components/ui/Select';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
+import { Drama, Palette, Clipboard, ArrowLeft, Lightbulb, Mouse, Save, Rocket, Image as ImageIcon, Smartphone } from 'lucide-react';
 
 interface TextBox {
   x: number;
@@ -56,6 +57,63 @@ const popularTemplates: MemeTemplate[] = [
   }
 ];
 
+const koreanDramaTemplates: MemeTemplate[] = [
+  {
+    id: 'goblin-sad',
+    name: '도깨비 - 슬픈 공유',
+    url: 'https://i.pinimg.com/474x/e8/9d/7c/e89d7c8b8c6b9a1b2c3d4e5f6a7b8c9d.jpg',
+    textBoxes: [
+      { x: 10, y: 250, width: 380, height: 60, defaultText: '내 마음이 이렇게 아픈데' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '왜 아무도 모르지?' }
+    ]
+  },
+  {
+    id: 'crash-landing-surprised',
+    name: '사랑의 불시착 - 놀란 현빈',
+    url: 'https://i.pinimg.com/474x/f1/a2/b3/f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d.jpg',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '어?' },
+      { x: 10, y: 300, width: 380, height: 60, defaultText: '이게 뭐지?' }
+    ]
+  },
+  {
+    id: 'sky-castle-angry',
+    name: 'SKY 캐슬 - 화난 염정아',
+    url: 'https://i.pinimg.com/474x/a1/b2/c3/a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6.jpg',
+    textBoxes: [
+      { x: 10, y: 250, width: 380, height: 60, defaultText: '이건 말이 안 돼!' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '완전히 이상해!' }
+    ]
+  },
+  {
+    id: 'parasite-shocked',
+    name: '기생충 - 놀란 기택',
+    url: 'https://i.pinimg.com/474x/d7/e8/f9/d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2.jpg',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '헐...' },
+      { x: 10, y: 300, width: 380, height: 60, defaultText: '이런 일이?' }
+    ]
+  },
+  {
+    id: 'squid-game-think',
+    name: '오징어 게임 - 생각하는 성기훈',
+    url: 'https://i.pinimg.com/474x/b5/c6/d7/b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0.jpg',
+    textBoxes: [
+      { x: 10, y: 250, width: 380, height: 60, defaultText: '이거 진짜 맞나?' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '뭔가 이상한데...' }
+    ]
+  },
+  {
+    id: 'reply1988-smile',
+    name: '응답하라 1988 - 미소 짓는 덕선',
+    url: 'https://i.pinimg.com/474x/c3/d4/e5/c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8.jpg',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '이게 바로 행복이지~' },
+      { x: 10, y: 300, width: 380, height: 60, defaultText: '진짜 좋다!' }
+    ]
+  }
+];
+
 // 기본 텍스트 스타일
 const defaultTextStyle: TextStyle = {
   fontSize: 30,
@@ -76,13 +134,12 @@ export default function MemeGenerator() {
   const [selectedTextIndex, setSelectedTextIndex] = useState<number>(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [templateType, setTemplateType] = useState<'popular' | 'upload' | 'online'>('popular');
+  const [templateType, setTemplateType] = useState<'popular' | 'korean-drama' | 'upload' | 'online'>('popular');
   const [onlineTemplates, setOnlineTemplates] = useState<MemeTemplate[]>([]);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [textBoxPositions, setTextBoxPositions] = useState<TextBox[]>([]);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
-  const [renderTimeout, setRenderTimeout] = useState<NodeJS.Timeout | null>(null);
   const [quickEditMode, setQuickEditMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -111,6 +168,7 @@ export default function MemeGenerator() {
     savedAt: string;
   }[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const debouncedRenderRef = useRef<NodeJS.Timeout | null>(null);
 
   // 토스트 메시지 표시 함수
   const showErrorToast = useCallback((message: string) => {
@@ -193,12 +251,13 @@ export default function MemeGenerator() {
     }
   }, [onlineTemplates.length, showErrorToast]);
 
-  // 인기 템플릿 이미지들을 미리 로딩
+  // 인기 템플릿과 한국 드라마 템플릿 이미지들을 미리 로딩
   useEffect(() => {
     const preloadTemplateImages = async () => {
       try {
         // 개별적으로 로딩하여 일부 실패가 전체에 영향을 주지 않도록 함
-        const loadPromises = popularTemplates.map(async (template) => {
+        const allTemplates = [...popularTemplates, ...koreanDramaTemplates];
+        const loadPromises = allTemplates.map(async (template) => {
           try {
             await preloadImage(template.url);
           } catch (error) {
@@ -360,26 +419,25 @@ export default function MemeGenerator() {
   // 컴포넌트 언마운트 시 타임아웃 정리
   useEffect(() => {
     return () => {
-      if (renderTimeout) {
-        clearTimeout(renderTimeout);
+      if (debouncedRenderRef.current) {
+        clearTimeout(debouncedRenderRef.current);
       }
     };
-  }, [renderTimeout]);
+  }, []);
 
-  // 디바운싱된 렌더링 함수
+  // 디바운싱된 렌더링 함수 - ref를 사용해서 의존성 문제 해결
   const debouncedRender = useCallback((template: MemeTemplate, texts: string[], styles: TextStyle[], delay: number = 200) => {
     // 기존 타임아웃 클리어
-    if (renderTimeout) {
-      clearTimeout(renderTimeout);
+    if (debouncedRenderRef.current) {
+      clearTimeout(debouncedRenderRef.current);
     }
-
+    
     // 새로운 타임아웃 설정
-    const newTimeout = setTimeout(() => {
+    debouncedRenderRef.current = setTimeout(() => {
       generateMemePreview(template, texts, styles);
     }, delay);
-    
-    setRenderTimeout(newTimeout);
-  }, [renderTimeout]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 이미지 편집 설정 변경 시 실시간 미리보기 업데이트
   useEffect(() => {
@@ -395,7 +453,6 @@ export default function MemeGenerator() {
     setTextStyles(template.textBoxes.map(() => ({ ...defaultTextStyle })));
     setTextBoxPositions([...template.textBoxes]); // 텍스트 박스 위치 초기화
     setSelectedTextIndex(0);
-    setTemplateType('popular');
     // 템플릿 선택 후 자동으로 미리보기 생성 (즉시 실행)
     debouncedRender(template, template.textBoxes.map(box => box.defaultText), template.textBoxes.map(() => ({ ...defaultTextStyle })), 100);
     // 다음 단계로 자동 이동
@@ -896,295 +953,522 @@ export default function MemeGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 relative">
-      <div className="max-w-6xl mx-auto px-4">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            🎭 밈 생성기
-          </h1>
-          <p className="text-lg text-gray-600">
-            인기 템플릿으로 나만의 밈을 만들어보세요
-          </p>
-        </header>
-
-        {/* 단계 표시기 */}
-        <div className="mb-8 bg-white rounded-lg shadow-sm p-4">
-          <div className="flex items-center justify-center space-x-8">
-            <div className={`flex items-center space-x-2 ${currentStep >= 1 ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-200'}`}>
-                1
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
+      {/* 적응형 헤더 - PC에서는 더 간소화, 모바일에서는 기존 유지 */}
+      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between py-3 lg:py-4">
+            <div className="flex items-center space-x-3">
+              <Drama className="text-primary" size={28} />
+              <h1 className="text-xl lg:text-2xl font-bold text-gray-900">밈 생성기</h1>
+              {/* PC에서만 현재 단계 표시 */}
+              <div className="hidden lg:flex items-center ml-8 space-x-6">
+                {[
+                  { step: 1, label: '템플릿 선택' },
+                  { step: 2, label: '텍스트 편집' },
+                  { step: 3, label: '완성 & 공유' }
+                ].map(({ step, label }) => (
+                  <div key={step} className={`flex items-center space-x-2 ${currentStep >= step ? 'text-primary' : 'text-gray-400'}`}>
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                      currentStep >= step ? 'bg-primary text-white' : 'bg-gray-200'
+                    }`}>
+                      {step}
+                    </div>
+                    <span className="text-sm font-medium hidden xl:block">{label}</span>
+                  </div>
+                ))}
               </div>
-              <span className="font-medium">템플릿 선택</span>
             </div>
-            <div className={`w-12 h-1 ${currentStep >= 2 ? 'bg-primary' : 'bg-gray-200'} rounded`}></div>
-            <div className={`flex items-center space-x-2 ${currentStep >= 2 ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-200'}`}>
-                2
-              </div>
-              <span className="font-medium">텍스트 편집</span>
-            </div>
-            <div className={`w-12 h-1 ${currentStep >= 3 ? 'bg-primary' : 'bg-gray-200'} rounded`}></div>
-            <div className={`flex items-center space-x-2 ${currentStep >= 3 ? 'text-primary' : 'text-gray-400'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= 3 ? 'bg-primary text-white' : 'bg-gray-200'}`}>
-                3
-              </div>
-              <span className="font-medium">미리보기 & 생성</span>
+            <div className="flex items-center space-x-2 lg:space-x-4">
+              {savedProjects.length > 0 && (
+                <button className="p-2 text-gray-500 hover:text-primary transition-colors">
+                  <Save size={20} />
+                </button>
+              )}
+              <Button
+                onClick={saveProject}
+                disabled={!selectedTemplate}
+                variant="primary"
+                size="sm"
+              >
+                저장
+              </Button>
             </div>
           </div>
         </div>
+        
+        {/* 모바일 전용 진행 표시기 */}
+        <div className="lg:hidden px-4 pb-3">
+          <div className="flex items-center space-x-2">
+            {[1, 2, 3].map((step) => (
+              <div key={step} className="flex items-center flex-1">
+                <div className={`w-full h-1.5 rounded-full ${currentStep >= step ? 'bg-primary' : 'bg-gray-200'}`} />
+                {step < 3 && <div className="w-2" />}
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between mt-2">
+            <span className={`text-xs font-medium ${currentStep >= 1 ? 'text-primary' : 'text-gray-400'}`}>템플릿</span>
+            <span className={`text-xs font-medium ${currentStep >= 2 ? 'text-primary' : 'text-gray-400'}`}>편집</span>
+            <span className={`text-xs font-medium ${currentStep >= 3 ? 'text-primary' : 'text-gray-400'}`}>완성</span>
+          </div>
+        </div>
+      </div>
 
-        {/* 1단계: 템플릿 선택만 표시 */}
+      {/* 메인 컨텐츠 - 적응형 컨테이너 */}
+      <div className="flex-1">
+        {/* 1단계: 템플릿 선택 */}
         {currentStep === 1 && (
-          <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
-              📋 1단계: 템플릿 선택
-            </h2>
-              
-              {/* 탭 선택 */}
-              <TabGroup
-                items={[
-                  { key: 'popular', label: '인기 템플릿' },
-                  { key: 'online', label: '온라인 템플릿' },
-                  { key: 'upload', label: '내 이미지' }
-                ]}
-                activeKey={templateType}
-                onChange={(key) => {
-                  setTemplateType(key as 'popular' | 'upload' | 'online');
-                  if (key === 'online') {
-                    loadOnlineTemplates();
-                  }
-                }}
-                className="mb-4"
-              />
-
-              {/* 인기 템플릿 */}
-              {templateType === 'popular' && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 md:gap-3">
-                  {popularTemplates.map((template) => (
-                    <div
-                      key={template.id}
-                      className={`cursor-pointer rounded-lg border-2 p-2 md:p-3 transition-all hover:shadow-md ${
-                        selectedTemplate?.id === template.id && templateType === 'popular'
-                          ? 'border-primary bg-primary-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => handleTemplateSelect(template)}
+          <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
+            <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+              <div className="lg:col-span-3 mb-6 lg:mb-0">
+                <div className="lg:sticky lg:top-24">
+                  <div className="hidden lg:block mb-6">
+                    <h2 className="text-xl font-bold text-text-900 mb-2">템플릿 선택</h2>
+                    <p className="text-sm text-text-500">원하는 밈 템플릿을 선택하세요</p>
+                  </div>
+                  <div className="flex lg:flex-col items-center lg:items-stretch space-x-3 lg:space-x-0 lg:space-y-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+                    <Button
+                      onClick={() => setTemplateType('popular')}
+                      variant={templateType === 'popular' ? 'secondary' : 'primary'}
+                      className="group relative px-4 py-3 lg:px-5 lg:py-4 lg:w-full rounded-xl lg:rounded-2xl whitespace-nowrap flex items-center justify-center lg:justify-start"
                     >
-                      <Image
-                        src={template.url}
-                        alt={template.name}
-                        width={80}
-                        height={80}
-                        className="w-full h-16 md:h-20 object-cover rounded mb-2"
-                        unoptimized
-                      />
-                      <p className="text-xs font-medium text-gray-700 text-center truncate">
-                        {template.name}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 이미지 업로드 */}
-              {templateType === 'upload' && (
-                <div className="space-y-4">
-                  <ImageUpload
-                    onUpload={handleImageUpload}
-                    maxSizeInMB={5}
-                    className="mb-4"
-                  />
-                  
-                  {uploadedImages.length > 0 && (
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-700 mb-3">
-                        업로드된 이미지
-                      </h3>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2 md:gap-3">
-                        {uploadedImages.map((imageUrl, index) => (
-                          <div
-                            key={index}
-                            className={`cursor-pointer rounded-lg border-2 p-2 md:p-3 transition-all hover:shadow-md ${
-                              selectedTemplate?.url === imageUrl && templateType === 'upload'
-                                ? 'border-primary bg-primary-50 shadow-md'
-                                : 'border-gray-200 hover:border-gray-300'
-                            }`}
-                            onClick={() => handleUploadedImageSelect(imageUrl)}
-                          >
-                            <Image
-                              src={imageUrl}
-                              alt={`업로드된 이미지 ${index + 1}`}
-                              width={80}
-                              height={80}
-                              className="w-full h-16 md:h-20 object-cover rounded mb-2"
-                              unoptimized
-                            />
-                            <p className="text-xs font-medium text-gray-700 text-center truncate">
-                              내 이미지 {index + 1}
-                            </p>
-                          </div>
-                        ))}
+                      <div className="w-10 h-10 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center mr-0 lg:mr-3 bg-white/20">
+                        <svg className="w-5 h-5 lg:w-4 lg:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
+                        </svg>
                       </div>
-                    </div>
-                  )}
-
-                  {uploadedImages.length === 0 && (
-                    <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                      <p className="text-sm">이미지를 업로드하면</p>
-                      <p className="text-sm">밈 템플릿으로 사용할 수 있습니다</p>
-                    </div>
-                  )}
+                      <span className="hidden lg:block">인기 템플릿</span>
+                    </Button>
+                    <Button
+                      onClick={() => setTemplateType('korean-drama')}
+                      variant={templateType === 'korean-drama' ? 'secondary' : 'primary'}
+                      className="group relative px-4 py-3 lg:px-5 lg:py-4 lg:w-full rounded-xl lg:rounded-2xl whitespace-nowrap flex items-center justify-center lg:justify-start"
+                    >
+                      <div className="w-10 h-10 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center mr-0 lg:mr-3 bg-white/20">
+                        <Drama className="w-5 h-5 lg:w-4 lg:h-4 text-white" />
+                      </div>
+                      <span className="hidden lg:block">K-드라마</span>
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setTemplateType('online');
+                        loadOnlineTemplates();
+                      }}
+                      variant={templateType === 'online' ? 'secondary' : 'primary'}
+                      className="group relative px-4 py-3 lg:px-5 lg:py-4 lg:w-full rounded-xl lg:rounded-2xl whitespace-nowrap flex items-center justify-center lg:justify-start"
+                    >
+                      <div className={`w-10 h-10 lg:w-8 lg:h-8 rounded-lg lg:rounded-lg flex items-center justify-center mr-0 lg:mr-3 bg-white/20`}>
+                        <svg className={`w-5 h-5 lg:w-4 lg:h-4 text-white`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                      </div>
+                      <span className="hidden lg:block">온라인 템플릿</span>
+                    </Button>
+                    <Button
+                      onClick={() => setTemplateType('upload')}
+                      variant={templateType === 'upload' ? 'secondary' : 'primary'}
+                      className="group relative px-4 py-3 lg:px-5 lg:py-4 lg:w-full rounded-xl lg:rounded-2xl whitespace-nowrap flex items-center justify-center lg:justify-start"
+                    >
+                      <div className="w-10 h-10 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center mr-0 lg:mr-3 bg-white/20">
+                        <svg className="w-5 h-5 lg:w-4 lg:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <span className="hidden lg:block">내 이미지</span>
+                    </Button>
+                  </div>
+                  
+                  {/* PC 전용 선택된 카테고리 설명 */}
+                  <div className="hidden lg:block mt-6 p-4 bg-gray-50 rounded-xl">
+                    {templateType === 'popular' && (
+                      <div className="text-center">
+                        <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                          <svg className="w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                        <h3 className="font-semibold text-text-800 text-sm">인기 템플릿</h3>
+                        <p className="text-xs text-text-500 mt-1">가장 많이 사용되는<br />검증된 밈 템플릿</p>
+                      </div>
+                    )}
+                    {templateType === 'korean-drama' && (
+                      <div className="text-center">
+                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                          <Drama className="w-4 h-4 text-red-600" />
+                        </div>
+                        <h3 className="font-semibold text-text-800 text-sm">K-드라마 템플릿</h3>
+                        <p className="text-xs text-text-500 mt-1">인기 한국 드라마의<br />명장면으로 밈 제작</p>
+                      </div>
+                    )}
+                    {templateType === 'online' && (
+                      <div className="text-center">
+                        <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                          <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 919-9" />
+                          </svg>
+                        </div>
+                        <h3 className="font-semibold text-text-800 text-sm">온라인 템플릿</h3>
+                        <p className="text-xs text-text-500 mt-1">전 세계에서 인기 있는<br />다양한 밈 템플릿</p>
+                      </div>
+                    )}
+                    {templateType === 'upload' && (
+                      <div className="text-center">
+                        <div className="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                          <svg className="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <h3 className="font-semibold text-text-800 text-sm">내 이미지</h3>
+                        <p className="text-xs text-text-500 mt-1">개인 이미지로<br />특별한 밈 제작</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
 
-              {/* 온라인 템플릿 */}
-              {templateType === 'online' && (
-                <div>
-                  {isLoadingTemplates ? (
-                    <div className="text-center py-12">
-                      <div className="inline-block animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-                      <p className="mt-4 text-gray-600">온라인 템플릿을 불러오는 중...</p>
+              <div className="lg:col-span-9">
+                {templateType === 'popular' && (
+                  <div className="space-y-4 lg:space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg lg:text-xl font-bold text-gray-900">🔥 인기 템플릿</h2>
+                      <span className="text-sm text-gray-500 hidden lg:block">{popularTemplates.length}개 템플릿</span>
                     </div>
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                      {onlineTemplates.map((template, index) => (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+                      {popularTemplates.map((template) => (
                         <div
-                          key={`${template.id}-${index}`}
-                          className={`cursor-pointer rounded-lg border-2 p-2 md:p-3 transition-all hover:shadow-md ${
-                            selectedTemplate?.id === template.id && templateType === 'online'
-                              ? 'border-primary bg-primary-50 shadow-md'
-                              : 'border-gray-200 hover:border-gray-300'
+                          key={template.id}
+                          className={`relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-300 ${
+                            selectedTemplate?.id === template.id && templateType === 'popular'
+                              ? 'ring-4 ring-primary shadow-2xl scale-105'
+                              : 'shadow-lg hover:shadow-xl hover:scale-102'
                           }`}
                           onClick={() => handleTemplateSelect(template)}
                         >
-                          <Image
-                            src={template.url}
-                            alt={template.name}
-                            width={80}
-                            height={80}
-                            className="w-full h-16 md:h-20 object-cover rounded mb-2"
-                            unoptimized
-                          />
-                          <p className="text-xs font-medium text-gray-700 text-center truncate">
-                            {template.name}
-                          </p>
+                          <div className="aspect-square relative">
+                            <Image
+                              src={template.url}
+                              alt={template.name}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 p-3">
+                              <p className="text-white font-semibold text-sm drop-shadow-lg">
+                                {template.name}
+                              </p>
+                            </div>
+                            {selectedTemplate?.id === template.id && templateType === 'popular' && (
+                              <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {onlineTemplates.length === 0 && !isLoadingTemplates && (
-                    <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                      <p className="text-sm">온라인 템플릿을 불러올 수 없습니다</p>
-                      <p className="text-sm">인터넷 연결을 확인해주세요</p>
+                {templateType === 'korean-drama' && (
+                  <div className="space-y-4 lg:space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg lg:text-xl font-bold text-gray-900">🎭 K-드라마 템플릿</h2>
+                      <span className="text-sm text-gray-500 hidden lg:block">{koreanDramaTemplates.length}개 템플릿</span>
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+                      {koreanDramaTemplates.map((template) => (
+                        <div
+                          key={template.id}
+                          className={`relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-300 ${
+                            selectedTemplate?.id === template.id && templateType === 'korean-drama'
+                              ? 'ring-4 ring-primary shadow-2xl scale-105'
+                              : 'shadow-lg hover:shadow-xl hover:scale-102'
+                          }`}
+                          onClick={() => handleTemplateSelect(template)}
+                        >
+                          <div className="aspect-square relative">
+                            <Image
+                              src={template.url}
+                              alt={template.name}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 p-3">
+                              <p className="text-white font-semibold text-sm drop-shadow-lg">
+                                {template.name}
+                              </p>
+                            </div>
+                            {selectedTemplate?.id === template.id && templateType === 'korean-drama' && (
+                              <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {templateType === 'upload' && (
+                  <div className="space-y-4 lg:space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg lg:text-xl font-bold text-gray-900">📷 내 이미지로 만들기</h2>
+                      {uploadedImages.length > 0 && (
+                        <span className="text-sm text-gray-500 hidden lg:block">{uploadedImages.length}개 이미지</span>
+                      )}
+                    </div>
+                    
+                    <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-lg border-2 border-dashed border-gray-300 hover:border-primary transition-colors">
+                      <ImageUpload
+                        onUpload={handleImageUpload}
+                        maxSizeInMB={5}
+                        className="text-center"
+                      />
+                    </div>
+                    
+                    {uploadedImages.length > 0 && (
+                      <div className="space-y-4">
+                        <h3 className="text-base lg:text-lg font-semibold text-gray-800">업로드된 이미지</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+                          {uploadedImages.map((imageUrl, index) => (
+                            <div
+                              key={index}
+                              className={`relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-300 ${
+                                selectedTemplate?.url === imageUrl && templateType === 'upload'
+                                  ? 'ring-4 ring-primary shadow-2xl scale-105'
+                                  : 'shadow-lg hover:shadow-xl hover:scale-102'
+                              }`}
+                              onClick={() => handleUploadedImageSelect(imageUrl)}
+                            >
+                              <div className="aspect-square relative">
+                                <Image
+                                  src={imageUrl}
+                                  alt={`업로드된 이미지 ${index + 1}`}
+                                  fill
+                                  className="object-cover"
+                                  unoptimized
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                <div className="absolute bottom-0 left-0 right-0 p-3">
+                                  <p className="text-white font-semibold text-sm drop-shadow-lg">
+                                    내 이미지 {index + 1}
+                                  </p>
+                                </div>
+                                {selectedTemplate?.url === imageUrl && templateType === 'upload' && (
+                                  <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
+                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {uploadedImages.length === 0 && (
+                      <div className="text-center py-16 lg:py-24 bg-white rounded-2xl shadow-lg">
+                        <ImageIcon className="mx-auto text-gray-400 mb-4" size={64} />
+                        <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-2">이미지를 업로드하세요</h3>
+                        <p className="text-gray-600 text-sm lg:text-base">나만의 이미지로 특별한 밈을 만들어보세요</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {templateType === 'online' && (
+                  <div className="space-y-4 lg:space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg lg:text-xl font-bold text-gray-900">🌐 온라인 템플릿</h2>
+                      {onlineTemplates.length > 0 && (
+                        <span className="text-sm text-gray-500 hidden lg:block">{onlineTemplates.length}개 템플릿</span>
+                      )}
+                    </div>
+                    
+                    {isLoadingTemplates ? (
+                      <div className="text-center py-16 lg:py-24 bg-white rounded-2xl shadow-lg">
+                        <div className="inline-block animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
+                        <p className="text-gray-600 font-medium">온라인 템플릿을 불러오는 중...</p>
+                        <p className="text-gray-500 text-sm mt-2">잠시만 기다려주세요</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+                        {onlineTemplates.map((template, index) => (
+                          <div
+                            key={`${template.id}-${index}`}
+                            className={`relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-300 ${
+                              selectedTemplate?.id === template.id && templateType === 'online'
+                                ? 'ring-4 ring-primary shadow-2xl scale-105'
+                                : 'shadow-lg hover:shadow-xl hover:scale-102'
+                            }`}
+                            onClick={() => handleTemplateSelect(template)}
+                          >
+                            <div className="aspect-square relative">
+                              <Image
+                                src={template.url}
+                                alt={template.name}
+                                fill
+                                className="object-cover"
+                                unoptimized
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                              <div className="absolute bottom-0 left-0 right-0 p-3">
+                                <p className="text-white font-semibold text-sm drop-shadow-lg">
+                                  {template.name}
+                                </p>
+                              </div>
+                              {selectedTemplate?.id === template.id && templateType === 'online' && (
+                                <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
+                                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {onlineTemplates.length === 0 && !isLoadingTemplates && (
+                      <div className="text-center py-16 lg:py-24 bg-white rounded-2xl shadow-lg">
+                        <div className="text-6xl mb-4">🌐</div>
+                        <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-2">연결 오류</h3>
+                        <p className="text-gray-600 text-sm lg:text-base">온라인 템플릿을 불러올 수 없습니다</p>
+                        <p className="text-gray-500 text-sm">인터넷 연결을 확인해주세요</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* 2단계와 3단계: 나란히 배치 */}
-        {currentStep >= 2 && (
-          <>
-            {/* 템플릿 재선택 버튼 */}
-            <div className="mb-4 flex justify-center">
-              <Button
-                onClick={handleBackToTemplateSelection}
-                variant="outline"
-                size="sm"
-              >
-                템플릿 재선택
-              </Button>
-            </div>
+        {/* 2단계: 편집 모드 */}
+        {currentStep === 2 && selectedTemplate && (
+          <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
+            <button
+              onClick={handleBackToTemplateSelection}
+              className="flex items-center text-gray-600 hover:text-primary transition-colors mb-6"
+            >
+              <ArrowLeft size={20} className="mr-2" />
+              다른 템플릿 선택
+            </button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-              {/* 2단계: 텍스트 편집 및 스타일링 */}
-            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-              <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
-                ✏️ 2단계: 텍스트 편집 및 스타일링
-              </h2>
-              
-              {selectedTemplate ? (
-                <div className="space-y-4 md:space-y-6">
-                  {/* 편집 모드 토글 */}
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-700">편집 모드</label>
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setQuickEditMode(false)}
-                        className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                          !quickEditMode 
-                            ? 'bg-primary text-white' 
-                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
-                        개별 편집
-                      </button>
-                      <button
-                        onClick={() => setQuickEditMode(true)}
-                        className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                          quickEditMode 
-                            ? 'bg-primary text-white' 
-                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                        }`}
-                      >
-                        빠른 편집
-                      </button>
+            <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+              <div className="lg:col-span-7 mb-6 lg:mb-0">
+                <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6 lg:sticky lg:top-24">
+                  <h3 className="font-semibold text-gray-800 mb-4 hidden lg:block">미리보기</h3>
+                  <div className="relative">
+                    {isImageLoading && (
+                      <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-10 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                          <span className="text-sm text-gray-600">처리중...</span>
+                        </div>
+                      </div>
+                    )}
+                    <canvas
+                      ref={canvasRef}
+                      className="w-full max-h-80 lg:max-h-96 rounded-lg shadow-sm mx-auto block"
+                      style={{ backgroundColor: 'white' }}
+                      onMouseDown={handleCanvasMouseDown}
+                      onMouseMove={handleCanvasMouseMove}
+                      onMouseUp={handleCanvasMouseUp}
+                      onMouseLeave={handleCanvasMouseLeave}
+                    />
+                  </div>
+                  
+                  <div className="hidden lg:flex items-center justify-center mt-4 text-xs text-gray-500 space-x-4">
+                    <div className="flex items-center space-x-1">
+                      <Mouse size={14} />
+                      <span>드래그로 텍스트 이동</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <span>⌨️</span>
+                      <span>Tab으로 텍스트 선택</span>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {!quickEditMode ? (
-                    <>
-                      {/* 개별 편집 모드 - 텍스트 박스 선택 탭 */}
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">편집할 텍스트 선택</label>
+              <div className="lg:col-span-5">
+                <div className="space-y-6">
+                  <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-800">편집 모드</h3>
+                      <div className="flex bg-gray-100 rounded-full p-1">
+                        <button
+                          onClick={() => setQuickEditMode(false)}
+                          className={`px-3 py-1.5 lg:px-4 lg:py-2 text-sm rounded-full transition-all ${
+                            !quickEditMode 
+                              ? 'bg-primary text-white shadow-sm' 
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        >
+                          개별
+                        </button>
+                        <button
+                          onClick={() => setQuickEditMode(true)}
+                          className={`px-3 py-1.5 lg:px-4 lg:py-2 text-sm rounded-full transition-all ${
+                            quickEditMode 
+                              ? 'bg-primary text-white shadow-sm' 
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        >
+                          전체
+                        </button>
+                      </div>
+                    </div>
+
+                    {!quickEditMode ? (
+                      <div className="space-y-4">
                         <TabGroup
                           items={selectedTemplate.textBoxes.map((_, index) => ({
                             key: index.toString(),
-                            label: `텍스트 ${index + 1}`
+                            label: `${index + 1}`
                           }))}
                           activeKey={selectedTextIndex.toString()}
                           onChange={(key) => setSelectedTextIndex(parseInt(key))}
                           variant="pills"
                         />
-                      </div>
 
-                      {/* 선택된 텍스트 입력 */}
-                      <Input
-                        label={`텍스트 ${selectedTextIndex + 1} 내용`}
-                        value={textInputs[selectedTextIndex] || ''}
-                        onChange={(e) => handleTextChange(selectedTextIndex, e.target.value)}
-                        placeholder={selectedTemplate.textBoxes[selectedTextIndex]?.defaultText}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      {/* 빠른 편집 모드 - 모든 텍스트 한 번에 편집 */}
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-3 block">모든 텍스트 빠른 편집</label>
-                        <div className="space-y-3">
-                          {selectedTemplate.textBoxes.map((box, index) => (
-                            <div key={index} className="flex items-center space-x-3">
-                              <div className="flex-shrink-0 w-16 text-xs font-medium text-gray-500 text-center">
-                                텍스트 {index + 1}
-                              </div>
-                              <Input
-                                value={textInputs[index] || ''}
-                                onChange={(e) => handleTextChange(index, e.target.value)}
-                                placeholder={box.defaultText}
-                                className="flex-1"
-                              />
-                            </div>
-                          ))}
-                        </div>
+                        <Input
+                          label={`텍스트 ${selectedTextIndex + 1}`}
+                          value={textInputs[selectedTextIndex] || ''}
+                          onChange={(e) => handleTextChange(selectedTextIndex, e.target.value)}
+                          placeholder={selectedTemplate.textBoxes[selectedTextIndex]?.defaultText}
+                        />
                       </div>
-                    </>
-                  )}
+                    ) : (
+                      <div className="space-y-3">
+                        {selectedTemplate.textBoxes.map((box, index) => (
+                          <Input
+                            key={index}
+                            label={`텍스트 ${index + 1}`}
+                            value={textInputs[index] || ''}
+                            onChange={(e) => handleTextChange(index, e.target.value)}
+                            placeholder={box.defaultText}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                  {/* 텍스트 스타일링 (개별 편집 모드에서만 표시) */}
                   {!quickEditMode && textStyles.length > 0 && (
-                    <div>
+                    <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
                       <TextStyleControls
                         style={textStyles[selectedTextIndex] || defaultTextStyle}
                         onChange={handleStyleChange}
@@ -1193,441 +1477,158 @@ export default function MemeGenerator() {
                     </div>
                   )}
 
-                  {/* 텍스트 박스 위치 조정 (개별 편집 모드에서만 표시) */}
-                  {!quickEditMode && textBoxPositions.length > 0 && (
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-semibold text-gray-800 text-sm">📍 텍스트 위치 조정</h4>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={resetTextBoxPositions}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          초기화
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        <RangeSlider
-                          min={0}
-                          max={500}
-                          step={5}
-                          value={textBoxPositions[selectedTextIndex]?.x || 0}
-                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { x: value })}
-                          label="X 위치"
-                          unit="px"
-                          variant="accent"
-                          showValueOnHover
-                        />
-                        
-                        <RangeSlider
-                          min={0}
-                          max={400}
-                          step={5}
-                          value={textBoxPositions[selectedTextIndex]?.y || 0}
-                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { y: value })}
-                          label="Y 위치"
-                          unit="px"
-                          variant="accent"
-                          showValueOnHover
-                        />
-                        
-                        <RangeSlider
-                          min={100}
-                          max={500}
-                          step={10}
-                          value={textBoxPositions[selectedTextIndex]?.width || 200}
-                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { width: value })}
-                          label="너비"
-                          unit="px"
-                          variant="secondary"
-                          showValueOnHover
-                        />
-                        
-                        <RangeSlider
-                          min={30}
-                          max={150}
-                          step={5}
-                          value={textBoxPositions[selectedTextIndex]?.height || 60}
-                          onChange={(value) => handleTextBoxPositionChange(selectedTextIndex, { height: value })}
-                          label="높이"
-                          unit="px"
-                          variant="secondary"
-                          showValueOnHover
-                        />
-                      </div>
-                      
-                      <div className="mt-3 space-y-1">
-                        <p className="text-xs text-gray-500 text-center">
-                          슬라이더를 조정하면 실시간으로 미리보기가 업데이트됩니다
-                        </p>
-                        <p className="text-xs text-blue-600 text-center font-medium">
-                          💡 또는 미리보기에서 텍스트를 직접 드래그하세요!
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 모든 텍스트 미리보기 */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">전체 텍스트 미리보기</label>
-                    {selectedTemplate.textBoxes.map((box, index) => (
-                      <div
-                        key={index}
-                        className={`p-3 text-sm rounded-lg border cursor-pointer transition-all ${
-                          selectedTextIndex === index
-                            ? 'border-primary bg-primary-50'
-                            : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
-                        }`}
-                        onClick={() => setSelectedTextIndex(index)}
-                      >
-                        <span className="font-medium text-primary">텍스트 {index + 1}:</span>{' '}
-                        <span className={selectedTextIndex === index ? 'font-medium' : ''}>
-                          {textInputs[index] || box.defaultText}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-16 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                  <div className="text-3xl mb-4">👈</div>
-                  <p className="font-medium">먼저 템플릿을 선택해주세요</p>
-                  <p className="text-sm mt-2">좌측에서 템플릿을 선택하면<br/>텍스트 편집이 가능합니다</p>
-                </div>
-              )}
-            </div>
-
-            {/* 3단계: 미리보기 및 밈 생성 (오른쪽 컬럼) */}
-            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
-            <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4">
-              🎨 3단계: 미리보기 및 밈 생성
-            </h2>
-            
-            <div className="space-y-4">
-              {/* 미리보기 영역 */}
-              <div>
-                <div className="text-center">
-                  {selectedTemplate ? (
-                    <div className="space-y-4">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 md:p-6 bg-gray-50 flex items-center justify-center relative">
-                        {isImageLoading && (
-                          <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-lg">
-                            <div className="flex items-center space-x-2">
-                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                              <span className="text-sm text-gray-600">이미지 처리 중...</span>
-                            </div>
-                          </div>
-                        )}
-                        <canvas
-                          ref={canvasRef}
-                          className="max-w-full max-h-[300px] rounded-lg shadow-sm"
-                          style={{ backgroundColor: 'white' }}
-                          onMouseDown={handleCanvasMouseDown}
-                          onMouseMove={handleCanvasMouseMove}
-                          onMouseUp={handleCanvasMouseUp}
-                          onMouseLeave={handleCanvasMouseLeave}
-                        />
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                          <p className="text-sm text-blue-800 font-medium flex items-center">
-                            <span className="text-blue-500 mr-2">💡</span>
-                            템플릿 선택, 텍스트 수정, 스타일 변경, 위치 조정 시 실시간으로 미리보기가 업데이트됩니다.
-                          </p>
-                        </div>
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <p className="text-sm text-green-800 font-medium flex items-center">
-                            <span className="text-green-500 mr-2">🖱️</span>
-                            텍스트를 직접 클릭하고 드래그하여 위치를 조정할 수 있습니다!
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="py-24 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                      <div className="text-6xl mb-6">🎭</div>
-                      <p className="text-xl font-medium mb-2">밈 미리보기</p>
-                      <p className="text-sm">템플릿을 선택하고 텍스트를 입력하면<br/>여기에 밈 미리보기가 표시됩니다</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 액션 버튼 및 가이드 */}
-              <div className="space-y-4 md:space-y-6">
-                {/* 이미지 편집 컨트롤 */}
-                {selectedTemplate && (
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-semibold text-gray-700">🎨 이미지 편집</h3>
-                      <div className="bg-yellow-100 border border-yellow-300 rounded-full px-2 py-1">
-                        <span className="text-xs text-yellow-800 font-medium">실시간 미리보기</span>
-                      </div>
-                    </div>
-                    
-                    {/* 크기 조정 */}
-                    <div className="space-y-1">
-                      <RangeSlider
-                        min={0.5}
-                        max={2}
-                        step={0.1}
-                        value={imageScale}
-                        onChange={(value) => {
-                          setImageScale(value);
-                          if (selectedTemplate) {
-                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
-                          }
-                        }}
-                        label="크기"
-                        unit="%"
-                        formatValue={(val) => `${Math.round(val * 100)}%`}
-                        variant="primary"
-                        showValueOnHover
-                      />
-                      <p className="text-xs text-gray-500 text-center">이미지 크기를 확대/축소합니다</p>
-                    </div>
-                    
-                    {/* 회전 */}
-                    <div className="space-y-1">
-                      <RangeSlider
-                        min={-180}
-                        max={180}
-                        step={15}
-                        value={imageRotation}
-                        onChange={(value) => {
-                          setImageRotation(value);
-                          if (selectedTemplate) {
-                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
-                          }
-                        }}
-                        label="회전"
-                        unit="°"
-                        variant="secondary"
-                        showValueOnHover
-                      />
-                      <p className="text-xs text-gray-500 text-center">이미지를 시계방향/반시계방향으로 회전합니다</p>
-                    </div>
-                    
-                    {/* 밝기 */}
-                    <div className="space-y-1">
-                      <RangeSlider
-                        min={50}
-                        max={150}
-                        step={5}
-                        value={imageBrightness}
-                        onChange={(value) => {
-                          setImageBrightness(value);
-                          if (selectedTemplate) {
-                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
-                          }
-                        }}
-                        label="밝기"
-                        unit="%"
-                        variant="accent"
-                        showValueOnHover
-                      />
-                      <p className="text-xs text-gray-500 text-center">이미지의 밝기를 조절합니다</p>
-                    </div>
-                    
-                    {/* 대비 */}
-                    <div className="space-y-1">
-                      <RangeSlider
-                        min={50}
-                        max={150}
-                        step={5}
-                        value={imageContrast}
-                        onChange={(value) => {
-                          setImageContrast(value);
-                          if (selectedTemplate) {
-                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
-                          }
-                        }}
-                        label="대비"
-                        unit="%"
-                        variant="primary"
-                        showValueOnHover
-                      />
-                      <p className="text-xs text-gray-500 text-center">이미지의 대비를 조절합니다</p>
-                    </div>
-                    
-                    {/* 필터 */}
-                    <div className="space-y-1">
-                      <Select
-                        label="필터"
-                        value={imageFilter}
-                        onChange={(value) => {
-                          setImageFilter(value);
-                          if (selectedTemplate) {
-                            debouncedRender(selectedTemplate, textInputs, textStyles, 100);
-                          }
-                        }}
-                        options={[
-                          { value: 'none', label: '없음' },
-                          { value: 'grayscale', label: '흑백' },
-                          { value: 'sepia', label: '세피아' },
-                          { value: 'blur', label: '블러' },
-                          { value: 'invert', label: '반전' }
-                        ]}
-                        placeholder="필터 선택"
-                      />
-                      <p className="text-xs text-gray-500 text-center">이미지에 특수 효과를 적용합니다</p>
-                    </div>
-                    
-                    {/* 리셋 버튼 */}
+                  <div className="lg:static sticky bottom-4 bg-white rounded-2xl shadow-lg p-4 lg:p-6 border lg:border-0">
                     <Button
-                      onClick={() => {
-                        setImageScale(1);
-                        setImageRotation(0);
-                        setImageFilter('none');
-                        setImageBrightness(100);
-                        setImageContrast(100);
-                        if (selectedTemplate) {
-                          debouncedRender(selectedTemplate, textInputs, textStyles, 100);
-                        }
-                      }}
-                      variant="outline"
-                      className="w-full text-xs py-2"
+                      onClick={() => setCurrentStep(3)}
+                      variant="primary"
+                      size="lg"
+                      className="w-full"
                     >
-                      초기화
+                      완성하기 →
                     </Button>
-                  </div>
-                )}
-
-                {/* 저장/불러오기 */}
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <h3 className="text-sm font-semibold text-gray-700">💾 프로젝트 관리</h3>
-                  
-                  {/* 저장 버튼 */}
-                  <Button
-                    onClick={saveProject}
-                    variant="outline"
-                    disabled={!selectedTemplate}
-                    className="w-full text-xs py-2"
-                  >
-                    현재 작업 저장
-                  </Button>
-                  
-                  {/* 저장된 프로젝트 목록 */}
-                  {savedProjects.length > 0 && (
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-gray-600 block">저장된 프로젝트</label>
-                      <div className="max-h-32 overflow-y-auto space-y-1">
-                        {savedProjects.slice(-5).reverse().map((project) => (
-                          <div
-                            key={project.id}
-                            className="flex items-center justify-between p-2 bg-white rounded border text-xs"
-                          >
-                            <div className="flex-1 truncate">
-                              <div className="font-medium truncate">{project.name}</div>
-                              <div className="text-gray-500 text-xs">
-                                {new Date(project.savedAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <Button
-                              onClick={() => loadProject(project)}
-                              variant="ghost"
-                              className="text-xs px-2 py-1 h-auto"
-                            >
-                              불러오기
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                {/* 생성 및 액션 버튼 */}
-                <div className="space-y-3">
-                  <Button
-                    onClick={generateMeme}
-                    isLoading={isGenerating}
-                    className="w-full text-base md:text-lg py-3 md:py-4"
-                    size="lg"
-                    disabled={!selectedTemplate}
-                  >
-                    {isGenerating ? '밈 생성 중...' : '밈 생성하기'}
-                  </Button>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                    <Button
-                      onClick={downloadMeme}
-                      variant="outline"
-                      disabled={!selectedTemplate || isGenerating}
-                      className="w-full py-2 md:py-3 text-sm md:text-base"
-                    >
-                      다운로드
-                    </Button>
-                    <Button
-                      onClick={shareMeme}
-                      variant="secondary"
-                      disabled={!selectedTemplate || isGenerating}
-                      className="w-full py-2 md:py-3 text-sm md:text-base"
-                    >
-                      공유하기
-                    </Button>
-                  </div>
-                </div>
-
-                {/* 빠른 가이드 */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center text-sm">
-                    💡 사용 팁
-                  </h4>
-                  <div className="space-y-2 text-xs text-gray-600">
-                    <div className="flex items-start space-x-2">
-                      <span className="font-bold text-blue-600">1</span>
-                      <span>템플릿 선택 후 바로 텍스트 편집 가능</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="font-bold text-blue-600">2</span>
-                      <span>텍스트별로 다른 스타일 적용 가능</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <span className="font-bold text-blue-600">3</span>
-                      <span>생성 후 바로 다운로드/공유</span>
-                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            </div>
-            </div>
-          </>
-        )}
-
-        {/* 고급 기능 안내 */}
-        {currentStep >= 2 && (
-        <div className="mt-8 md:mt-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 md:p-8 border border-purple-200">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 text-center">
-            🚀 고급 기능으로 더 멋진 밈을 만들어보세요!
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            <div className="bg-white rounded-lg p-4 md:p-6 shadow-sm border border-purple-100">
-              <div className="text-2xl md:text-3xl mb-2 md:mb-3">🎭</div>
-              <h4 className="font-semibold text-gray-700 mb-2 text-sm md:text-base">다양한 템플릿</h4>
-              <p className="text-xs md:text-sm text-gray-600">인기 밈부터 내 이미지까지 자유롭게 사용</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 md:p-6 shadow-sm border border-purple-100">
-              <div className="text-2xl md:text-3xl mb-2 md:mb-3">🎨</div>
-              <h4 className="font-semibold text-gray-700 mb-2 text-sm md:text-base">스타일 커스터마이징</h4>
-              <p className="text-xs md:text-sm text-gray-600">폰트, 색상, 크기, 외곽선 자유자재로 조절</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 md:p-6 shadow-sm border border-purple-100">
-              <div className="text-2xl md:text-3xl mb-2 md:mb-3">📱</div>
-              <h4 className="font-semibold text-gray-700 mb-2 text-sm md:text-base">간편한 공유</h4>
-              <p className="text-xs md:text-sm text-gray-600">다운로드나 직접 공유로 친구들과 나누기</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 md:p-6 shadow-sm border border-purple-100">
-              <div className="text-2xl md:text-3xl mb-2 md:mb-3">⚡</div>
-              <h4 className="font-semibold text-gray-700 mb-2 text-sm md:text-base">실시간 미리보기</h4>
-              <p className="text-xs md:text-sm text-gray-600">편집하는 동안 바로바로 결과 확인</p>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* 3단계: 완성 */}
+        {currentStep === 3 && selectedTemplate && (
+          <div className="max-w-5xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
+            <button
+              onClick={() => setCurrentStep(2)}
+              className="flex items-center text-gray-600 hover:text-primary transition-colors mb-6"
+            >
+              <ArrowLeft size={20} className="mr-2" />
+              편집으로 돌아가기
+            </button>
+
+            <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+              <div className="lg:col-span-7 mb-6 lg:mb-0">
+                <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
+                  <div className="flex items-center justify-center mb-4 lg:mb-6">
+                    <div className="flex items-center space-x-2">
+                      <Rocket className="text-primary" size={24} />
+                      <h3 className="font-bold text-gray-800 text-lg lg:text-xl">완성된 밈</h3>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    {isImageLoading && (
+                      <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-10 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                          <span className="text-sm text-gray-600">처리중...</span>
+                        </div>
+                      </div>
+                    )}
+                    <canvas
+                      ref={canvasRef}
+                      className="w-full max-h-80 lg:max-h-[500px] rounded-lg shadow-sm mx-auto block"
+                      style={{ backgroundColor: 'white' }}
+                    />
+                  </div>
+                  
+                  <div className="hidden lg:block mt-6 pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span>템플릿: {selectedTemplate.name}</span>
+                      <span>생성일: {new Date().toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5">
+                <div className="space-y-4 lg:space-y-6">
+                  <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
+                    <h4 className="font-semibold text-gray-800 mb-4 lg:mb-6">액션</h4>
+                    <div className="space-y-3 lg:space-y-4">
+                      <Button
+                        onClick={downloadMeme}
+                        disabled={isGenerating}
+                        variant="secondary"
+                        size="lg"
+                        className="w-full"
+                      >
+                        다운로드
+                      </Button>
+                      
+                      <Button
+                        onClick={shareMeme}
+                        disabled={isGenerating}
+                        variant="primary"
+                        size="lg"
+                        className="w-full"
+                      >
+                        공유하기
+                      </Button>
+
+                      <Button
+                        onClick={saveProject}
+                        disabled={!selectedTemplate}
+                        variant="outline"
+                        size="lg"
+                        className="w-full"
+                      >
+                        프로젝트 저장
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6">
+                    <h4 className="font-semibold text-gray-800 mb-4">다음 단계</h4>
+                    <div className="space-y-3">
+                      <Button
+                        onClick={() => {
+                          setCurrentStep(1);
+                          setSelectedTemplate(null);
+                          setTextInputs([]);
+                          setTextStyles([]);
+                        }}
+                        variant="outline"
+                        size="md"
+                        className="w-full"
+                      >
+                        새 밈 만들기
+                      </Button>
+                      
+                      <Button
+                        onClick={() => window.location.href = '/feed'}
+                        variant="secondary"
+                        size="md"
+                        className="w-full"
+                      >
+                        피드에서 다른 밈 보기
+                      </Button>
+                      
+                      <Button
+                        onClick={() => setCurrentStep(2)}
+                        variant="ghost"
+                        size="md"
+                        className="w-full"
+                      >
+                        계속 편집하기
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="lg:hidden bg-white rounded-2xl shadow-lg p-4">
+                    <h4 className="font-semibold text-gray-800 mb-3">밈 정보</h4>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex justify-between">
+                        <span>템플릿:</span>
+                        <span>{selectedTemplate.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>생성일:</span>
+                        <span>{new Date().toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
