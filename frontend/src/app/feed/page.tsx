@@ -1,10 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Heart, MessageCircle, Share2, Download, MoreHorizontal, Bookmark, Flag } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
+
+interface Comment {
+  id: string;
+  author: {
+    id: string;
+    username: string;
+    avatar?: string;
+  };
+  content: string;
+  createdAt: string;
+}
 
 interface MemePost {
   id: string;
@@ -23,6 +34,7 @@ interface MemePost {
   isBookmarked: boolean;
   tags: string[];
   template: string;
+  commentsList?: Comment[];
 }
 
 const mockMemes: MemePost[] = [
@@ -72,10 +84,15 @@ const mockMemes: MemePost[] = [
 
 export default function FeedPage() {
   const router = useRouter();
-  const { } = useAuthStore();
+  const { user } = useAuthStore();
   const [memes, setMemes] = useState<MemePost[]>(mockMemes);
   const [filter, setFilter] = useState<'all' | 'following' | 'trending'>('all');
   const [showMenu, setShowMenu] = useState<string | null>(null);
+  const [showComments, setShowComments] = useState<string | null>(null);
+  const [newComment, setNewComment] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
 
   const handleLike = (memeId: string) => {
     setMemes(prev => prev.map(meme => 
@@ -87,6 +104,15 @@ export default function FeedPage() {
           }
         : meme
     ));
+    
+    // 좋아요 피드백 애니메이션
+    const likeButton = document.querySelector(`[data-meme-id="${memeId}"] .like-button`);
+    if (likeButton) {
+      likeButton.classList.add('animate-bounce');
+      setTimeout(() => {
+        likeButton.classList.remove('animate-bounce');
+      }, 300);
+    }
   };
 
   const handleBookmark = (memeId: string) => {
@@ -121,6 +147,97 @@ export default function FeedPage() {
     link.download = `${meme.title}.jpg`;
     link.click();
   };
+
+  const handleAddComment = (memeId: string) => {
+    if (!newComment.trim() || !user) return;
+
+    const comment: Comment = {
+      id: Date.now().toString(),
+      author: {
+        id: user.id,
+        username: user.username,
+      },
+      content: newComment.trim(),
+      createdAt: '방금 전'
+    };
+
+    setMemes(prev => prev.map(meme => 
+      meme.id === memeId 
+        ? { 
+            ...meme, 
+            comments: meme.comments + 1,
+            commentsList: [...(meme.commentsList || []), comment]
+          }
+        : meme
+    ));
+    
+    setNewComment('');
+  };
+
+  const toggleComments = (memeId: string) => {
+    setShowComments(showComments === memeId ? null : memeId);
+  };
+
+  const loadMoreMemes = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    
+    setIsLoading(true);
+    
+    // 실제 API 호출 시뮬레이션
+    setTimeout(() => {
+      const newMemes: MemePost[] = [
+        {
+          id: `${Date.now()}-1`,
+          title: `새로운 밈 ${page + 1}-1`,
+          imageUrl: 'https://i.imgflip.com/30b1gx.jpg',
+          author: { id: `user-${page + 1}-1`, username: `유저${page + 1}-1` },
+          createdAt: `${page + 1}시간 전`,
+          likes: Math.floor(Math.random() * 200),
+          comments: Math.floor(Math.random() * 50),
+          shares: Math.floor(Math.random() * 20),
+          isLiked: false,
+          isBookmarked: false,
+          tags: ['새로운', '밈', `페이지${page + 1}`],
+          template: '드레이크 밈'
+        },
+        {
+          id: `${Date.now()}-2`,
+          title: `새로운 밈 ${page + 1}-2`,
+          imageUrl: 'https://i.imgflip.com/1ur9b0.jpg',
+          author: { id: `user-${page + 1}-2`, username: `유저${page + 1}-2` },
+          createdAt: `${page + 1}시간 전`,
+          likes: Math.floor(Math.random() * 200),
+          comments: Math.floor(Math.random() * 50),
+          shares: Math.floor(Math.random() * 20),
+          isLiked: false,
+          isBookmarked: false,
+          tags: ['새로운', '밈', `페이지${page + 1}`],
+          template: '한눈파는 남친'
+        }
+      ];
+      
+      setMemes(prev => [...prev, ...newMemes]);
+      setPage(prev => prev + 1);
+      setIsLoading(false);
+      
+      // 5페이지 후 더 이상 로드하지 않음
+      if (page >= 5) {
+        setHasMore(false);
+      }
+    }, 1000);
+  }, [isLoading, hasMore, page]);
+
+  // 무한스크롤 감지
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1000) {
+        loadMoreMemes();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadMoreMemes]);
 
   const formatNumber = (num: number) => {
     if (num >= 1000) {
@@ -172,7 +289,7 @@ export default function FeedPage() {
         {/* 밈 목록 */}
         <div className="space-y-6">
           {memes.map((meme) => (
-            <div key={meme.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div key={meme.id} data-meme-id={meme.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               {/* 작성자 정보 */}
               <div className="p-4 pb-3">
                 <div className="flex items-center justify-between">
@@ -241,19 +358,21 @@ export default function FeedPage() {
                   <div className="flex items-center space-x-6">
                     <button
                       onClick={() => handleLike(meme.id)}
-                      className={`flex items-center space-x-2 ${
+                      className={`like-button flex items-center space-x-2 transition-all duration-200 ${
                         meme.isLiked ? 'text-red-500' : 'text-600 hover:text-red-500'
                       }`}
                     >
                       <Heart
-                        className={`w-6 h-6 ${meme.isLiked ? 'fill-current' : ''}`}
+                        className={`w-6 h-6 transition-all duration-300 ${meme.isLiked ? 'fill-current scale-110' : ''}`}
                       />
                       <span className="font-medium">{formatNumber(meme.likes)}</span>
                     </button>
                     
                     <button
-                      onClick={() => router.push(`/meme/${meme.id}#comments`)}
-                      className="flex items-center space-x-2 text-600 hover:text-primary"
+                      onClick={() => toggleComments(meme.id)}
+                      className={`flex items-center space-x-2 transition-colors ${
+                        showComments === meme.id ? 'text-primary' : 'text-600 hover:text-primary'
+                      }`}
                     >
                       <MessageCircle className="w-6 h-6" />
                       <span className="font-medium">{formatNumber(meme.comments)}</span>
@@ -289,16 +408,110 @@ export default function FeedPage() {
                   </p>
                 </div>
               </div>
+
+              {/* 댓글 섹션 */}
+              {showComments === meme.id && (
+                <div className="border-t border-gray-100">
+                  <div className="p-4">
+                    {/* 댓글 목록 */}
+                    {meme.commentsList && meme.commentsList.length > 0 && (
+                      <div className="space-y-3 mb-4">
+                        {meme.commentsList.map((comment) => (
+                          <div key={comment.id} className="flex space-x-3">
+                            <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-semibold text-xs">
+                                {comment.author.username.charAt(0)}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="bg-gray-50 rounded-lg px-3 py-2">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <span className="font-semibold text-sm text-900">{comment.author.username}</span>
+                                  <span className="text-xs text-500">{comment.createdAt}</span>
+                                </div>
+                                <p className="text-sm text-800">{comment.content}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* 댓글 작성 */}
+                    {user ? (
+                      <div className="flex space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-white font-semibold text-xs">
+                            {user.username.charAt(0)}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex space-x-2">
+                            <input
+                              type="text"
+                              value={newComment}
+                              onChange={(e) => setNewComment(e.target.value)}
+                              placeholder="댓글을 작성하세요..."
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleAddComment(meme.id);
+                                }
+                              }}
+                            />
+                            <Button
+                              onClick={() => handleAddComment(meme.id)}
+                              disabled={!newComment.trim()}
+                              variant="primary"
+                              size="sm"
+                            >
+                              작성
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-gray-500 text-sm mb-2">댓글을 작성하려면 로그인하세요</p>
+                        <Button
+                          onClick={() => router.push('/login')}
+                          variant="outline"
+                          size="sm"
+                        >
+                          로그인
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
 
-        {/* 로딩 더 보기 */}
-        <div className="mt-8 text-center">
-          <Button variant="outline" className="px-8">
-            더 보기
-          </Button>
-        </div>
+        {/* 로딩 인디케이터 */}
+        {isLoading && (
+          <div className="mt-8 text-center">
+            <div className="inline-flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <span className="text-gray-600">더 많은 밈을 불러오는 중...</span>
+            </div>
+          </div>
+        )}
+        
+        {/* 더 이상 로드할 콘텐츠가 없을 때 */}
+        {!hasMore && !isLoading && (
+          <div className="mt-8 text-center">
+            <p className="text-gray-500">모든 밈을 확인했습니다! 🎉</p>
+            <Button
+              onClick={() => router.push('/meme-generator')}
+              variant="primary"
+              className="mt-4"
+            >
+              새 밈 만들기
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* 클릭 외부 영역에서 메뉴 닫기 */}
