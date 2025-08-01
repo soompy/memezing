@@ -95,3 +95,174 @@ body {
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+/* 밈징어 디자인 시스템 - 배경색 클래스 */
+.bg-primary {
+  background-color: #FF6B47 !important;
+}
+
+.bg-primary-50 {
+  background-color: #FFF5F3 !important;
+}
+
+.bg-primary-100 {
+  background-color: #FFE6E0 !important;
+}
+
+.bg-primary-500 {
+  background-color: #FF6B47 !important;
+}
+
+.bg-secondary {
+  background-color: #4ECDC4 !important;
+}
+
+.bg-secondary-50 {
+  background-color: #F0FDFC !important;
+}
+
+.bg-secondary-100 {
+  background-color: #D9F9F6 !important;
+}
+
+.bg-accent {
+  background-color: #FFD93D !important;
+}
+
+/* 밈징어 디자인 시스템 - 텍스트 색상 클래스 */
+.text-primary {
+  color: #FF6B47 !important;
+}
+
+.text-primary-600 {
+  color: #FF4A1F !important;
+}
+
+.text-secondary {
+  color: #4ECDC4 !important;
+}
+
+.text-accent {
+  color: #FFD93D !important;
+}
+
+/* 호버 상태 */
+.hover\:bg-primary:hover {
+  background-color: #FF6B47 !important;
+}
+
+.hover\:text-primary:hover {
+  color: #FF6B47 !important;
+}
+
+/* 진행 상태 애니메이션 */
+.step-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-number {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: scale(1);
+}
+
+.step-number.active {
+  animation: pulse-primary 2s ease-in-out infinite;
+}
+
+.step-number.completed {
+  animation: bounce-complete 0.6s ease-out;
+}
+
+.step-number:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.step-label {
+  transition: all 0.3s ease;
+}
+
+.step-label.active {
+  font-weight: 600;
+  animation: slide-in 0.5s ease-out;
+}
+
+/* 진행 바 애니메이션 */
+.progress-bar {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.5s ease-in-out;
+}
+
+.progress-bar.animating::after {
+  animation: shimmer 1.5s ease-in-out;
+}
+
+/* 키프레임 애니메이션 */
+@keyframes pulse-primary {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(255, 107, 71, 0.4);
+    transform: scale(1.1);
+    background-color: #FF6B47;
+  }
+  50% {
+    box-shadow: 0 8px 25px rgba(255, 107, 71, 0.8);
+    transform: scale(1.2);
+    background-color: #FF4A1F;
+  }
+}
+
+@keyframes bounce-complete {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  50% { transform: scale(0.95); }
+  70% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* 체크마크 애니메이션 */
+.checkmark {
+  animation: draw-check 0.6s ease-out 0.2s both;
+}
+
+@keyframes draw-check {
+  0% {
+    stroke-dasharray: 0 20;
+    opacity: 0;
+  }
+  100% {
+    stroke-dasharray: 20 0;
+    opacity: 1;
+  }
+}
