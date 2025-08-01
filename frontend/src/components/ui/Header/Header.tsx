@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, X, ArrowRight, User, LogOut } from 'lucide-react';
+import { Menu, X, ArrowRight, User, LogOut, Drama } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
 
@@ -13,11 +13,8 @@ export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navigation = [
-    { name: '홈', href: '/', current: true },
     { name: '밈 생성기', href: '/meme-generator' },
     { name: '피드', href: '/feed' },
-    { name: '템플릿', href: '#templates' },
-    { name: '기능', href: '#features' },
     { name: '커뮤니티', href: '#community' },
   ];
 
@@ -56,8 +53,9 @@ export default function Header() {
           {/* 로고 */}
           <div className="flex-shrink-0 flex items-center">
             <div className="text-2xl font-bold">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-                🎭 밈징어
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary flex items-center gap-2">
+                <Drama size={24} className="text-blue-600" />
+                밈징어
               </span>
             </div>
           </div>
@@ -68,11 +66,7 @@ export default function Header() {
               <button
                 key={item.name}
                 onClick={() => scrollToSection(item.href)}
-                className={`transition-colors duration-200 font-medium ${
-                  item.current
-                    ? 'text-primary'
-                    : 'text-600 hover:text-primary'
-                }`}
+                className="transition-colors duration-200 font-medium text-600 hover:text-primary"
               >
                 {item.name}
               </button>
@@ -157,11 +151,7 @@ export default function Header() {
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.href)}
-                  className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                    item.current
-                      ? 'text-primary bg-primary-50'
-                      : 'text-gray-600 hover:text-primary hover:bg-gray-50'
-                  }`}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 text-gray-600 hover:text-primary hover:bg-gray-50"
                 >
                   {item.name}
                 </button>
