@@ -3,28 +3,28 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
-import { Check, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight, Drama, Palette, Star, MessageCircle, Laugh, Music, Tv, Cat, Utensils, Gamepad2, Zap, BookOpen, Heart, Briefcase, CloudRain, Newspaper } from 'lucide-react';
 
 interface Interest {
   id: string;
   name: string;
-  emoji: string;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   description: string;
 }
 
 const interests: Interest[] = [
-  { id: 'humor', name: '유머', emoji: '😂', description: '웃긴 밈과 농담' },
-  { id: 'kpop', name: 'K-POP', emoji: '🎵', description: '아이돌과 음악 밈' },
-  { id: 'drama', name: '드라마', emoji: '📺', description: 'K-드라마 밈' },
-  { id: 'animals', name: '동물', emoji: '🐱', description: '귀여운 동물 밈' },
-  { id: 'food', name: '음식', emoji: '🍜', description: '한국 음식 문화 밈' },
-  { id: 'gaming', name: '게임', emoji: '🎮', description: '게임 관련 밈' },
-  { id: 'sports', name: '스포츠', emoji: '⚽', description: '스포츠와 운동 밈' },
-  { id: 'study', name: '공부', emoji: '📚', description: '학생과 직장인 밈' },
-  { id: 'relationship', name: '연애', emoji: '💕', description: '연애와 관계 밈' },
-  { id: 'work', name: '직장', emoji: '💼', description: '직장인 공감 밈' },
-  { id: 'weather', name: '날씨', emoji: '🌦️', description: '날씨와 계절 밈' },
-  { id: 'politics', name: '시사', emoji: '📰', description: '시사와 정치 밈' },
+  { id: 'humor', name: '유머', icon: Laugh, description: '웃긴 밈과 농담' },
+  { id: 'kpop', name: 'K-POP', icon: Music, description: '아이돌과 음악 밈' },
+  { id: 'drama', name: '드라마', icon: Tv, description: 'K-드라마 밈' },
+  { id: 'animals', name: '동물', icon: Cat, description: '귀여운 동물 밈' },
+  { id: 'food', name: '음식', icon: Utensils, description: '한국 음식 문화 밈' },
+  { id: 'gaming', name: '게임', icon: Gamepad2, description: '게임 관련 밈' },
+  { id: 'sports', name: '스포츠', icon: Zap, description: '스포츠와 운동 밈' },
+  { id: 'study', name: '공부', icon: BookOpen, description: '학생과 직장인 밈' },
+  { id: 'relationship', name: '연애', icon: Heart, description: '연애와 관계 밈' },
+  { id: 'work', name: '직장', icon: Briefcase, description: '직장인 공감 밈' },
+  { id: 'weather', name: '날씨', icon: CloudRain, description: '날씨와 계절 밈' },
+  { id: 'politics', name: '시사', icon: Newspaper, description: '시사와 정치 밈' },
 ];
 
 export default function Onboarding() {
@@ -94,7 +94,7 @@ export default function Onboarding() {
 
         {currentStep === 1 && (
           <div className="text-center mb-12">
-            <div className="text-6xl mb-6">🎭</div>
+            <Drama size={64} className="mb-6 mx-auto text-blue-600" />
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
               밈징어에 오신 것을 환영합니다!
             </h1>
@@ -104,17 +104,17 @@ export default function Onboarding() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="text-3xl mb-3">🎨</div>
+                <Palette size={32} className="mb-3 mx-auto text-blue-600" />
                 <h3 className="font-semibold text-gray-900 mb-2">쉬운 밈 생성</h3>
                 <p className="text-sm text-gray-600">다양한 템플릿으로 간편하게 밈을 만들어보세요</p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="text-3xl mb-3">🌟</div>
+                <Star size={32} className="mb-3 mx-auto text-blue-600" />
                 <h3 className="font-semibold text-gray-900 mb-2">맞춤형 피드</h3>
                 <p className="text-sm text-gray-600">당신의 관심사에 맞는 밈을 추천해드려요</p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="text-3xl mb-3">💬</div>
+                <MessageCircle size={32} className="mb-3 mx-auto text-blue-600" />
                 <h3 className="font-semibold text-gray-900 mb-2">활발한 커뮤니티</h3>
                 <p className="text-sm text-gray-600">다른 사용자들과 밈을 공유하고 소통하세요</p>
               </div>
@@ -142,7 +142,7 @@ export default function Onboarding() {
                       : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                   }`}
                 >
-                  <div className="text-2xl mb-2">{interest.emoji}</div>
+                  <interest.icon size={24} className="mb-2 mx-auto text-gray-700" />
                   <div className="font-semibold text-gray-900 mb-1">{interest.name}</div>
                   <div className="text-xs text-gray-500">{interest.description}</div>
                   {selectedInterests.includes(interest.id) && (
