@@ -17,11 +17,11 @@ export default function Footer() {
             </Description>
             
             <ContactLink 
-              href="mailto:hello@memezing.com"
+              href="mailto:yzsumin@naver.com"
               aria-label="이메일 문의"
             >
               <Mail size={20} />
-              <span>hello@memezing.com</span>
+              <span>yzsumin@naver.com</span>
             </ContactLink>
           </BrandSection>
         </Content>
@@ -41,8 +41,18 @@ export default function Footer() {
 }
 
 const FooterContainer = styled.footer`
-  background: #111827;
-  color: white;
+  background: var(--surface);
+  color: var(--text-primary);
+  border-top: 1px solid var(--border-light);
+  transition: all 300ms ease;
+
+  .light & {
+    background: #f8fafc;
+  }
+
+  .dark & {
+    background: #111827;
+  }
 `;
 
 const Container = styled.div`
@@ -76,7 +86,7 @@ const BrandSection = styled.div`
 const Brand = styled.div`
   font-size: 1.5rem;
   font-weight: bold;
-  background: linear-gradient(to right, #60a5fa, #a78bfa);
+  background: linear-gradient(to right, var(--brand-primary), var(--brand-secondary));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -84,7 +94,7 @@ const Brand = styled.div`
 `;
 
 const Description = styled.p`
-  color: #d1d5db;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
   max-width: 400px;
@@ -95,20 +105,23 @@ const ContactLink = styled.a`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: #374151;
+  background: var(--surface-hover);
   border-radius: 0.5rem;
-  color: #d1d5db;
+  color: var(--text-secondary);
   text-decoration: none;
-  transition: background-color 0.2s ease;
+  border: 1px solid var(--border-light);
+  transition: all 300ms ease;
   
   &:hover {
-    background: #4b5563;
-    color: white;
+    background: var(--surface);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 `;
 
 const FooterBottom = styled.div`
-  border-top: 1px solid #374151;
+  border-top: 1px solid var(--border-light);
   padding-top: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -122,11 +135,11 @@ const FooterBottom = styled.div`
 `;
 
 const Copyright = styled.div`
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.875rem;
 `;
 
 const Location = styled.div`
-  color: #9ca3af;
+  color: var(--text-muted);
   font-size: 0.875rem;
 `;

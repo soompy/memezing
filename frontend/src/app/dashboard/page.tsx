@@ -14,7 +14,7 @@ export default function DashboardPage() {
           {/* 헤더 */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-900">
-              안녕하세요, {user?.username}님! 👋
+              안녕하세요, {user?.name || user?.email}님! 👋
             </h1>
             <p className="text-600 mt-2">
               오늘도 멋진 밈을 만들어보세요!

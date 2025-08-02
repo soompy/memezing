@@ -155,7 +155,7 @@ export default function FeedPage() {
       id: Date.now().toString(),
       author: {
         id: user.id,
-        username: user.username,
+        username: user.name || user.email || 'Anonymous',
       },
       content: newComment.trim(),
       createdAt: '방금 전'
@@ -296,11 +296,11 @@ export default function FeedPage() {
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
                       <span className="text-white font-semibold text-sm">
-                        {meme.author.username.charAt(0)}
+                        {(meme.author.username || 'A').charAt(0)}
                       </span>
                     </div>
                     <div>
-                      <p className="font-semibold text-900">{meme.author.username}</p>
+                      <p className="font-semibold text-900">{meme.author.username || 'Anonymous'}</p>
                       <p className="text-sm text-500">{meme.createdAt}</p>
                     </div>
                   </div>
@@ -420,13 +420,13 @@ export default function FeedPage() {
                           <div key={comment.id} className="flex space-x-3">
                             <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center flex-shrink-0">
                               <span className="text-white font-semibold text-xs">
-                                {comment.author.username.charAt(0)}
+                                {(comment.author.username || 'A').charAt(0)}
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="bg-gray-50 rounded-lg px-3 py-2">
                                 <div className="flex items-center space-x-2 mb-1">
-                                  <span className="font-semibold text-sm text-900">{comment.author.username}</span>
+                                  <span className="font-semibold text-sm text-900">{comment.author.username || 'Anonymous'}</span>
                                   <span className="text-xs text-500">{comment.createdAt}</span>
                                 </div>
                                 <p className="text-sm text-800">{comment.content}</p>
@@ -442,7 +442,7 @@ export default function FeedPage() {
                       <div className="flex space-x-3">
                         <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-semibold text-xs">
-                            {user.username.charAt(0)}
+                            {(user.name || user.email || 'A').charAt(0)}
                           </span>
                         </div>
                         <div className="flex-1">

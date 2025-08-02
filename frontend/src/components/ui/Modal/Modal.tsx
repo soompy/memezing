@@ -120,7 +120,7 @@ const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   transition: all 0.3s ease;
@@ -141,9 +141,10 @@ const ModalWrapper = styled.div`
 
 const ModalContent = styled.div`
   position: relative;
-  background: white;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
   border-radius: 0.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-xl);
   width: 100%;
   transform: scale(1);
   transition: all 0.3s ease;
@@ -155,31 +156,33 @@ const Header = styled.div`
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-light);
 `;
 
 const Title = styled.h2`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
   margin: 0;
 `;
 
 const CloseButton = styled.button`
   padding: 0.25rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   background: none;
   border: none;
   cursor: pointer;
   border-radius: 0.25rem;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   
   &:hover {
-    color: #4b5563;
+    color: var(--text-primary);
+    background: var(--surface-hover);
   }
 `;
 
 const Content = styled.div<{ hasHeader: boolean }>`
   padding: 1.5rem;
   padding-top: ${props => props.hasHeader ? '1.5rem' : '1.5rem'};
+  color: var(--text-primary);
 `;

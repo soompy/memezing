@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X, ArrowRight, User, LogOut, Drama } from 'lucide-react';
+import styled from '@emotion/styled';
 import Button from '@/components/ui/Button';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useAuthStore } from '@/store/authStore';
+import { mediaQuery } from '@/styles/breakpoints';
 
 export default function Header() {
   const router = useRouter();
@@ -13,7 +16,7 @@ export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navigation = [
-    { name: '밈 생성기', href: '/meme-generator' },
+    { name: '밈징어', href: '/meme-generator' },
     { name: '피드', href: '/feed' },
     { name: '커뮤니티', href: '#community' },
   ];
@@ -47,76 +50,70 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <HeaderContainer>
+      <HeaderInner>
+        <HeaderContent>
           {/* 로고 */}
-          <div className="flex-shrink-0 flex items-center">
-            <div className="text-2xl font-bold">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary flex items-center gap-2">
-                <Drama size={24} className="text-blue-600" />
-                밈징어
-              </span>
-            </div>
-          </div>
+          <LogoSection>
+            <Logo>
+              <Drama size={24} />
+              밈징어
+            </Logo>
+          </LogoSection>
 
           {/* 데스크톱 네비게이션 */}
-          <nav className="hidden md:flex space-x-8">
+          <Navigation>
             {navigation.map((item) => (
-              <button
+              <NavItem
                 key={item.name}
                 onClick={() => scrollToSection(item.href)}
-                className="transition-colors duration-200 font-medium text-600 hover:text-primary"
               >
                 {item.name}
-              </button>
+              </NavItem>
             ))}
-          </nav>
+          </Navigation>
 
           {/* 데스크톱 사용자 메뉴 */}
-          <div className="hidden md:flex items-center space-x-4">
+          <RightSection>
+            <ThemeToggle size="md" />
             {user ? (
-              <div className="relative">
-                <button
+              <UserMenuWrapper>
+                <UserButton
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                  <UserAvatar>
                     <User className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="text-sm font-medium text-700">{user.username}</span>
-                </button>
+                  </UserAvatar>
+                  <span>{user.name || user.email}</span>
+                </UserButton>
 
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
-                    <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">{user.username}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
-                    </div>
-                    <button
+                  <UserDropdown>
+                    <UserInfo>
+                      <p className="font-medium">{user.name || 'User'}</p>
+                      <p className="text-xs text-muted">{user.email}</p>
+                    </UserInfo>
+                    <DropdownItem
                       onClick={() => router.push('/profile')}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
                       프로필
-                    </button>
-                    <button
+                    </DropdownItem>
+                    <DropdownItem
                       onClick={() => router.push('/my-memes')}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
                       내 밈
-                    </button>
-                    <button
+                    </DropdownItem>
+                    <DropdownItem
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       로그아웃
-                    </button>
-                  </div>
+                    </DropdownItem>
+                  </UserDropdown>
                 )}
-              </div>
+              </UserMenuWrapper>
             ) : (
-              <>
+              <AuthButtons>
                 <Button variant="ghost" size="sm" onClick={handleLogin}>
                   로그인
                 </Button>
@@ -124,47 +121,46 @@ export default function Header() {
                   시작하기
                   <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </Button>
-              </>
+              </AuthButtons>
             )}
-          </div>
+          </RightSection>
 
           {/* 모바일 메뉴 버튼 */}
-          <div className="md:hidden">
-            <button
+          <MobileMenuSection>
+            <ThemeToggle size="sm" />
+            <MobileMenuButton
               onClick={toggleMenu}
-              className="p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 transition-colors duration-200"
             >
               {isMenuOpen ? (
                 <X className="w-6 h-6" />
               ) : (
                 <Menu className="w-6 h-6" />
               )}
-            </button>
-          </div>
-        </div>
+            </MobileMenuButton>
+          </MobileMenuSection>
+        </HeaderContent>
 
         {/* 모바일 메뉴 */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-100">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white">
+          <MobileMenu>
+            <MobileMenuContent>
               {navigation.map((item) => (
-                <button
+                <MobileNavItem
                   key={item.name}
                   onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 text-gray-600 hover:text-primary hover:bg-gray-50"
                 >
                   {item.name}
-                </button>
+                </MobileNavItem>
               ))}
               
               {/* 모바일 사용자 메뉴 */}
-              <div className="pt-4 border-t border-gray-200">
+              <MobileUserSection>
                 {user ? (
-                  <div className="space-y-2">
-                    <div className="px-3 py-2 bg-primary-50 rounded-md">
-                      <p className="text-sm font-medium text-900">{user.username}</p>
-                      <p className="text-xs text-500">{user.email}</p>
-                    </div>
+                  <MobileUserMenu>
+                    <MobileUserInfo>
+                      <p className="font-medium">{user.name || 'User'}</p>
+                      <p className="text-xs">{user.email}</p>
+                    </MobileUserInfo>
                     <Button variant="ghost" size="sm" className="w-full justify-start">
                       프로필
                     </Button>
@@ -180,9 +176,9 @@ export default function Header() {
                       <LogOut className="w-4 h-4 mr-2" />
                       로그아웃
                     </Button>
-                  </div>
+                  </MobileUserMenu>
                 ) : (
-                  <div className="space-y-2">
+                  <MobileAuthButtons>
                     <Button variant="ghost" size="sm" className="w-full" onClick={handleLogin}>
                       로그인
                     </Button>
@@ -190,13 +186,302 @@ export default function Header() {
                       시작하기
                       <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Button>
-                  </div>
+                  </MobileAuthButtons>
                 )}
-              </div>
-            </div>
-          </div>
+              </MobileUserSection>
+            </MobileMenuContent>
+          </MobileMenu>
         )}
-      </div>
-    </header>
+      </HeaderInner>
+    </HeaderContainer>
   );
 }
+
+// Styled Components
+const HeaderContainer = styled.header`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--background);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-light);
+  transition: all 300ms ease;
+
+  .light & {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .dark & {
+    background: rgba(17, 24, 39, 0.8);
+  }
+`;
+
+const HeaderInner = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+
+  ${mediaQuery.sm} {
+    padding: 0 24px;
+  }
+
+  ${mediaQuery.lg} {
+    padding: 0 32px;
+  }
+`;
+
+const HeaderContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+`;
+
+const LogoSection = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+`;
+
+const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(to right, var(--brand-primary), var(--brand-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  cursor: pointer;
+  transition: transform 300ms ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  svg {
+    color: var(--brand-primary);
+    -webkit-text-fill-color: var(--brand-primary);
+  }
+`;
+
+const Navigation = styled.nav`
+  display: none;
+  gap: 32px;
+
+  ${mediaQuery.md} {
+    display: flex;
+  }
+`;
+
+const NavItem = styled.button`
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 300ms ease;
+  padding: 8px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-primary);
+    transform: translateY(-1px);
+  }
+`;
+
+const RightSection = styled.div`
+  display: none;
+  align-items: center;
+  gap: 16px;
+
+  ${mediaQuery.md} {
+    display: flex;
+  }
+`;
+
+const AuthButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const UserMenuWrapper = styled.div`
+  position: relative;
+`;
+
+const UserButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 300ms ease;
+  color: var(--text-primary);
+
+  &:hover {
+    background: var(--surface-hover);
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+`;
+
+const UserAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(to right, var(--brand-primary), var(--brand-secondary));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const UserDropdown = styled.div`
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 192px;
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+  padding: 4px 0;
+  z-index: 60;
+`;
+
+const UserInfo = styled.div`
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+
+  p {
+    margin: 0;
+    color: var(--text-primary);
+
+    &.text-muted {
+      color: var(--text-muted);
+    }
+  }
+`;
+
+const DropdownItem = styled.button`
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 300ms ease;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+`;
+
+const MobileMenuSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  ${mediaQuery.md} {
+    display: none;
+  }
+`;
+
+const MobileMenuButton = styled.button`
+  padding: 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 300ms ease;
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover);
+  }
+`;
+
+const MobileMenu = styled.div`
+  display: block;
+  border-top: 1px solid var(--border-light);
+
+  ${mediaQuery.md} {
+    display: none;
+  }
+`;
+
+const MobileMenuContent = styled.div`
+  padding: 8px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const MobileNavItem = styled.button`
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 300ms ease;
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--surface-hover);
+  }
+`;
+
+const MobileUserSection = styled.div`
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+  margin-top: 8px;
+`;
+
+const MobileUserMenu = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const MobileUserInfo = styled.div`
+  padding: 12px;
+  background: var(--surface-hover);
+  border-radius: 6px;
+  margin-bottom: 8px;
+
+  p {
+    margin: 0;
+    color: var(--text-primary);
+
+    &.text-xs {
+      color: var(--text-muted);
+    }
+  }
+`;
+
+const MobileAuthButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;

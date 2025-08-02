@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, Sparkles, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui';
 
 export default function Hero() {
@@ -42,16 +43,25 @@ export default function Hero() {
           {/* 왼쪽: 텍스트 콘텐츠 */}
           <div className="text-center lg:text-left">
             {/* 베지 배지 */}
-            <div 
+            <motion.div 
               className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-6"
               style={{ backgroundColor: '#FFE6E0', color: '#E6330A' }}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
               <Sparkles className="w-4 h-4 mr-2" />
               한국 문화 특화 밈 플랫폼
-            </div>
+            </motion.div>
 
             {/* 메인 헤드라인 */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight" style={{ color: '#2C3E50' }}>
+            <motion.h1 
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight" 
+              style={{ color: '#2C3E50' }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
               <span 
                 className="text-transparent bg-clip-text"
                 style={{ backgroundImage: 'linear-gradient(to right, #FF6B47, #4ECDC4)', backgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
@@ -63,44 +73,77 @@ export default function Hero() {
               <br />
               <span className="relative">
                 가장 쉬운 방법
-                <div 
+                <motion.div 
                   className="absolute -bottom-2 left-0 w-full h-3 -skew-y-1"
                   style={{ backgroundColor: '#FFE888' }}
-                ></div>
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  transition={{ duration: 0.8, delay: 1.5 }}
+                />
               </span>
-            </h1>
+            </motion.h1>
 
             {/* 서브 텍스트 */}
-            <p className="text-xl mb-8 max-w-2xl" style={{ color: '#495057' }}>
+            <motion.p 
+              className="text-xl mb-8 max-w-2xl" 
+              style={{ color: '#495057' }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
               드래그 앤 드롭으로 간단하게! 한국 트렌드에 맞는 밈 템플릿으로 
               바이럴 콘텐츠를 5분 만에 완성하세요.
-            </p>
+            </motion.p>
 
             {/* CTA 버튼들 */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button 
-                size="lg" 
-                onClick={handleGetStarted}
-                className="group"
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.0 }}
+            >
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                지금 시작하기
-                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                onClick={handleDemo}
-                className="group"
+                <Button 
+                  size="lg" 
+                  onClick={handleGetStarted}
+                  className="group"
+                >
+                  지금 시작하기
+                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <Zap className="mr-2 w-5 h-5" />
-                데모 보기
-              </Button>
-            </div>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={handleDemo}
+                  className="group"
+                >
+                  <Zap className="mr-2 w-5 h-5" />
+                  데모 보기
+                </Button>
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* 오른쪽: 시각적 요소 */}
-          <div className="relative">
-            <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-8 mx-auto max-w-md">
+          <motion.div 
+            className="relative"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <motion.div 
+              className="relative z-10 bg-white rounded-2xl shadow-2xl p-8 mx-auto max-w-md"
+              whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)" }}
+              transition={{ duration: 0.3 }}
+            >
               {/* 밈 생성기 미리보기 */}
               <div className="space-y-4">
                 <div className="text-center">
@@ -110,60 +153,114 @@ export default function Hero() {
                 </div>
                 
                 {/* 가상의 이미지 영역 */}
-                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+                <motion.div 
+                  className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <div 
                     className="absolute inset-0"
                     style={{ background: 'linear-gradient(135deg, rgba(255, 107, 71, 0.2) 0%, rgba(78, 205, 196, 0.2) 100%)' }}
                   ></div>
                   <div className="relative text-center">
-                    <div className="text-4xl mb-2">🎭</div>
+                    <motion.div 
+                      className="text-4xl mb-2"
+                      animate={{ rotate: [0, 10, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                    >
+                      🎭
+                    </motion.div>
                     <div className="text-sm font-medium" style={{ color: '#495057' }}>드래그해서 업로드</div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* 가상의 텍스트 입력 */}
-                <div className="space-y-2">
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.2 }}
+                >
                   <div className="h-10 bg-gray-100 rounded-lg flex items-center px-3">
                     <span className="text-sm" style={{ color: '#6B7280' }}>상단 텍스트 입력...</span>
                   </div>
                   <div className="h-10 bg-gray-100 rounded-lg flex items-center px-3">
                     <span className="text-sm" style={{ color: '#6B7280' }}>하단 텍스트 입력...</span>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* 가상의 생성 버튼 */}
-                <div className="pt-2">
-                  <Button 
-                    variant="gradient" 
-                    size="lg" 
-                    className="w-full"
+                <motion.div 
+                  className="pt-2"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1.4 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    밈 생성하기
-                  </Button>
-                </div>
+                    <Button 
+                      variant="gradient" 
+                      size="lg" 
+                      className="w-full"
+                    >
+                      밈 생성하기
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
 
             {/* 플로팅 엘리먼트들 */}
-            <div 
-              className="absolute -top-6 -left-6 w-12 h-12 rounded-full flex items-center justify-center text-xl animate-bounce"
+            <motion.div 
+              className="absolute -top-6 -left-6 w-12 h-12 rounded-full flex items-center justify-center text-xl"
               style={{ backgroundColor: '#FFD93D' }}
+              animate={{ 
+                y: [0, -10, 0],
+                rotate: [0, 10, -10, 0]
+              }}
+              transition={{ 
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             >
               😂
-            </div>
-            <div 
-              className="absolute -bottom-6 -right-6 w-12 h-12 rounded-full flex items-center justify-center text-xl animate-bounce"
+            </motion.div>
+            <motion.div 
+              className="absolute -bottom-6 -right-6 w-12 h-12 rounded-full flex items-center justify-center text-xl"
               style={{ backgroundColor: '#FF8B6F' }}
+              animate={{ 
+                y: [0, -15, 0],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ 
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5
+              }}
             >
               🔥
-            </div>
-            <div 
-              className="absolute top-1/2 -right-8 w-8 h-8 rounded-full flex items-center justify-center text-sm animate-pulse"
+            </motion.div>
+            <motion.div 
+              className="absolute top-1/2 -right-8 w-8 h-8 rounded-full flex items-center justify-center text-sm"
               style={{ backgroundColor: '#4ECDC4' }}
+              animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.7, 1, 0.7]
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
             >
               ✨
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </section>

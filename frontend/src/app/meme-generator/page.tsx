@@ -6,10 +6,8 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import ImageUpload from '@/components/ui/ImageUpload';
 import TabGroup from '@/components/ui/TabGroup';
-import RangeSlider from '@/components/ui/RangeSlider';
-import Select from '@/components/ui/Select';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
-import { Drama, Palette, Clipboard, ArrowLeft, Lightbulb, Mouse, Save, Rocket, Image as ImageIcon, Smartphone } from 'lucide-react';
+import { Drama, ArrowLeft, Mouse, Save, Rocket, Image as ImageIcon } from 'lucide-react';
 
 interface TextBox {
   x: number;
@@ -54,62 +52,254 @@ const popularTemplates: MemeTemplate[] = [
       { x: 20, y: 20, width: 180, height: 50, defaultText: '화난 여자' },
       { x: 320, y: 150, width: 150, height: 50, defaultText: '무관심한 고양이' }
     ]
+  },
+  {
+    id: 'two-buttons',
+    name: '두 가지 선택',
+    url: 'https://i.imgflip.com/1g8my4.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 180, height: 40, defaultText: '어려운 선택' },
+      { x: 100, y: 120, width: 120, height: 30, defaultText: '선택 A' },
+      { x: 250, y: 120, width: 120, height: 30, defaultText: '선택 B' }
+    ]
+  },
+  {
+    id: 'expanding-brain',
+    name: '확장하는 뇌',
+    url: 'https://i.imgflip.com/1jwhww.jpg',
+    textBoxes: [
+      { x: 200, y: 30, width: 180, height: 40, defaultText: '기본 생각' },
+      { x: 200, y: 130, width: 180, height: 40, defaultText: '조금 더 발전' },
+      { x: 200, y: 230, width: 180, height: 40, defaultText: '더 깊은 생각' },
+      { x: 200, y: 330, width: 180, height: 40, defaultText: '천재적 발상' }
+    ]
+  },
+  {
+    id: 'surprised-pikachu',
+    name: '놀란 피카츄',
+    url: 'https://i.imgflip.com/2kbn1e.jpg',
+    textBoxes: [
+      { x: 10, y: 20, width: 300, height: 60, defaultText: '예상치 못한 결과' },
+      { x: 10, y: 320, width: 300, height: 60, defaultText: '놀라는 반응' }
+    ]
+  },
+  {
+    id: 'change-my-mind',
+    name: '내 생각을 바꿔봐',
+    url: 'https://i.imgflip.com/24y43o.jpg',
+    textBoxes: [
+      { x: 180, y: 250, width: 200, height: 80, defaultText: '논란이 될 만한 의견' }
+    ]
+  },
+  {
+    id: 'roll-safe',
+    name: '현명한 선택',
+    url: 'https://i.imgflip.com/1h7in3.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '실패할 수 없다면' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '애초에 시도하지 않으면 돼' }
+    ]
+  },
+  {
+    id: 'brain-before-sleep',
+    name: '잠들기 전 뇌',
+    url: 'https://picsum.photos/400/400?random=10&grayscale',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '하루 종일: 조용함' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '잠들 때: 온갖 생각' }
+    ]
+  },
+  {
+    id: 'modern-problems',
+    name: '현대적 해결책',
+    url: 'https://picsum.photos/400/400?random=11',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '현대적 문제들은' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '현대적 해결책이 필요해' }
+    ]
+  },
+  {
+    id: 'stonks',
+    name: '주식 상승',
+    url: 'https://picsum.photos/400/400?random=12&blur=1',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '투자했더니' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: 'STONKS ↗️' }
+    ]
+  },
+  {
+    id: 'success-kid',
+    name: '성공한 아이',
+    url: 'https://picsum.photos/400/400?random=13',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '힘든 일을 해냈을 때' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '성취감 최고!' }
+    ]
+  },
+  {
+    id: 'this-is-fine',
+    name: '괜찮다는 척',
+    url: 'https://picsum.photos/400/400?random=14&sepia',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '모든 게 엉망이지만' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '괜찮아, 다 괜찮아' }
+    ]
+  },
+  {
+    id: 'galaxy-brain',
+    name: '갤럭시 브레인',
+    url: 'https://picsum.photos/400/400?random=15&blur=2',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '일반인의 생각' },
+      { x: 10, y: 120, width: 380, height: 60, defaultText: '좀 더 발전된 생각' },
+      { x: 10, y: 220, width: 380, height: 60, defaultText: '천재의 생각' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '우주적 깨달음' }
+    ]
+  },
+  {
+    id: 'money-printer',
+    name: '돈 인쇄기',
+    url: 'https://picsum.photos/400/400?random=16',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '경제 위기가 오면' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '돈을 더 찍으면 돼!' }
+    ]
+  },
+  {
+    id: 'internet-explorer',
+    name: '인터넷 익스플로러',
+    url: 'https://picsum.photos/400/400?random=17&grayscale',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '2023년 트렌드를' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '이제야 발견했어!' }
+    ]
+  },
+  {
+    id: 'coffin-dance',
+    name: '관 춤',
+    url: 'https://picsum.photos/400/400?random=18',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '위험한 일을 할 때' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '미리 준비하는 것들' }
+    ]
+  },
+  {
+    id: 'lisa-simpson-presentation',
+    name: '리사 심슨 발표',
+    url: 'https://picsum.photos/400/400?random=19',
+    textBoxes: [
+      { x: 100, y: 50, width: 250, height: 100, defaultText: '중요한 사실을\n발표합니다' }
+    ]
+  },
+  {
+    id: 'monkey-puppet',
+    name: '원숭이 인형',
+    url: 'https://picsum.photos/400/400?random=20&blur=1',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '어색한 상황에서' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '몰래 지켜보는 중...' }
+    ]
   }
 ];
 
 const koreanDramaTemplates: MemeTemplate[] = [
   {
-    id: 'thinking-face',
-    name: '생각하는 표정',
-    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+    id: 'thinking-korean',
+    name: '깊은 생각에 빠진 모습',
+    url: 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 20, width: 380, height: 60, defaultText: '음...' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '이거 어떻게 하지?' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '음... 이건 좀 고민되네' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '어떻게 해야 할까?' }
     ]
   },
   {
-    id: 'surprised-face',
-    name: '놀란 표정',
-    url: 'https://images.unsplash.com/photo-1566492031773-4f4e44671d66?w=400&h=400&fit=crop&crop=face',
+    id: 'shocked-korean',
+    name: '충격받은 표정',
+    url: 'https://images.unsplash.com/photo-1569913486515-b74bf7751574?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 20, width: 380, height: 60, defaultText: '어?!' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '이게 뭐야?' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '헉! 이게 뭐야?!' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '말도 안 돼!' }
     ]
   },
   {
-    id: 'angry-face',
-    name: '화난 표정',
-    url: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&h=400&fit=crop&crop=face',
+    id: 'romantic-korean',
+    name: '설레는 로맨스',
+    url: 'https://images.unsplash.com/photo-1601455763557-db1bea8a9a5a?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 20, width: 380, height: 60, defaultText: '이건 말이 안 돼!' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '정말 화나!' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '당신을 만나서' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '정말 행복해요' }
     ]
   },
   {
-    id: 'confused-face',
-    name: '당황한 표정',
-    url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
+    id: 'serious-korean',
+    name: '진지한 상황',
+    url: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 20, width: 380, height: 60, defaultText: '헐...' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '이런 일이?' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '이건 정말 심각한 문제야' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '어떻게 해결하지?' }
     ]
   },
   {
-    id: 'serious-face',
-    name: '진지한 표정',
-    url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face',
+    id: 'study-pressure',
+    name: '공부 스트레스',
+    url: 'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 20, width: 380, height: 60, defaultText: '이거 진짜 맞나?' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '뭔가 이상한데...' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '시험이 코앞인데...' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '아직도 할 게 많아!' }
     ]
   },
   {
-    id: 'happy-face',
-    name: '행복한 표정',
-    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+    id: 'confused-korean',
+    name: '당황스러운 상황',
+    url: 'https://images.unsplash.com/photo-1615109398623-88346a601842?w=400&h=400&fit=crop&crop=face',
     textBoxes: [
-      { x: 10, y: 20, width: 380, height: 60, defaultText: '이게 바로 행복이지~' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '진짜 좋다!' }
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '잠깐... 뭐라고?' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '이해가 안 가는데?' }
+    ]
+  },
+  {
+    id: 'angry-korean',
+    name: '화가 난 상황',
+    url: 'https://images.unsplash.com/photo-1614283233556-f35b0c801ef1?w=400&h=400&fit=crop&crop=face',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '진짜 화가 나!' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '이럴 수가 있나?' }
+    ]
+  },
+  {
+    id: 'sad-korean',
+    name: '슬픈 이별',
+    url: 'https://images.unsplash.com/photo-1591084728795-1149f32d9866?w=400&h=400&fit=crop&crop=face',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '이제 정말 끝인가요?' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '잘 지내세요...' }
+    ]
+  },
+  {
+    id: 'jealous-korean',
+    name: '질투하는 모습',
+    url: 'https://images.unsplash.com/photo-1604426633861-11b2faead63c?w=400&h=400&fit=crop&crop=face',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '저 사람이 뭐길래?' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '나보다 예쁘다고?' }
+    ]
+  },
+  {
+    id: 'happy-korean',
+    name: '행복한 순간',
+    url: 'https://images.unsplash.com/photo-1616391182219-e080b4d1043a?w=400&h=400&fit=crop&crop=face',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '세상에서 제일 행복해!' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '꿈만 같아요' }
+    ]
+  },
+  {
+    id: 'workplace-korean',
+    name: '직장인의 고뇌',
+    url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop&crop=face',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '또 야근이야?' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '언제까지 이래야 하지...' }
     ]
   }
 ];
@@ -182,13 +372,18 @@ export default function MemeGenerator() {
 
   // 이미지 프리로딩 및 캐싱 함수
   const preloadImage = useCallback(async (imageUrl: string): Promise<HTMLImageElement> => {
+    // 서버 사이드에서는 실행하지 않음
+    if (typeof window === 'undefined') {
+      throw new Error('preloadImage can only be called on the client side');
+    }
+
     // 캐시에서 확인
     if (imageCache.has(imageUrl)) {
       return imageCache.get(imageUrl)!;
     }
 
     return new Promise((resolve, reject) => {
-      const img = new window.Image();
+      const img = document.createElement('img');
       img.crossOrigin = 'anonymous';
       
       img.onload = () => {
@@ -439,6 +634,30 @@ export default function MemeGenerator() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleTemplateSelect = useCallback((template: MemeTemplate, autoAdvance = true) => {
+    setSelectedTemplate(template);
+    setTextInputs(template.textBoxes.map(box => box.defaultText));
+    // 각 텍스트 박스마다 기본 스타일 적용
+    const newTextStyles = template.textBoxes.map(() => ({ ...defaultTextStyle }));
+    setTextStyles(newTextStyles);
+    setTextBoxPositions([...template.textBoxes]); // 텍스트 박스 위치 초기화
+    setSelectedTextIndex(0);
+    // 템플릿 선택 후 자동으로 미리보기 생성 (즉시 실행)
+    debouncedRender(template, template.textBoxes.map(box => box.defaultText), newTextStyles, 100);
+    // 수동으로 선택했을 때만 다음 단계로 자동 이동
+    if (autoAdvance) {
+      setCurrentStep(2);
+    }
+  }, [debouncedRender]);
+
+  // 페이지 로드 시 기본 템플릿 자동 선택
+  useEffect(() => {
+    if (!selectedTemplate && popularTemplates.length > 0) {
+      const defaultTemplate = popularTemplates[0];
+      handleTemplateSelect(defaultTemplate, false); // autoAdvance = false로 설정
+    }
+  }, [selectedTemplate, handleTemplateSelect]);
+
   // 이미지 편집 설정 변경 시 실시간 미리보기 업데이트
   useEffect(() => {
     if (selectedTemplate) {
@@ -446,18 +665,6 @@ export default function MemeGenerator() {
     }
   }, [selectedTemplate, textInputs, textStyles, imageScale, imageRotation, imageFilter, imageBrightness, imageContrast, debouncedRender]);
 
-  const handleTemplateSelect = (template: MemeTemplate) => {
-    setSelectedTemplate(template);
-    setTextInputs(template.textBoxes.map(box => box.defaultText));
-    // 각 텍스트 박스마다 기본 스타일 적용
-    setTextStyles(template.textBoxes.map(() => ({ ...defaultTextStyle })));
-    setTextBoxPositions([...template.textBoxes]); // 텍스트 박스 위치 초기화
-    setSelectedTextIndex(0);
-    // 템플릿 선택 후 자동으로 미리보기 생성 (즉시 실행)
-    debouncedRender(template, template.textBoxes.map(box => box.defaultText), template.textBoxes.map(() => ({ ...defaultTextStyle })), 100);
-    // 다음 단계로 자동 이동
-    setCurrentStep(2);
-  };
 
   const handleImageUpload = (imageUrl: string) => {
     setUploadedImages(prev => [...prev, imageUrl]);
@@ -1080,7 +1287,7 @@ export default function MemeGenerator() {
                       <div className="w-10 h-10 lg:w-8 lg:h-8 rounded-lg flex items-center justify-center mr-0 lg:mr-3 bg-white/20">
                         <Drama className="w-5 h-5 lg:w-4 lg:h-4 text-white" />
                       </div>
-                      <span className="hidden lg:block">K-드라마</span>
+                      <span className="hidden lg:block">K-콘텐츠</span>
                     </Button>
                     <Button
                       onClick={() => {

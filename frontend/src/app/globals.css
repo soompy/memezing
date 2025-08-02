@@ -1,28 +1,106 @@
 @import "tailwindcss";
 
-:root {
+/* 라이트 모드 CSS 변수 */
+:root,
+.light {
+  /* 기본 색상 */
+  --primary: #1f2937;
+  --secondary: #6b7280;
+  --accent: #3b82f6;
+  
+  /* 배경색 */
   --background: #ffffff;
-  --foreground: #171717;
+  --surface: #f9fafb;
+  --surface-hover: #f3f4f6;
+  
+  /* 텍스트 색상 */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-inverse: #ffffff;
+  
+  /* 보더 색상 */
+  --border-light: #e5e7eb;
+  --border-medium: #d1d5db;
+  --border-dark: #9ca3af;
+  
+  /* 상태 색상 */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  
+  /* 오버레이 */
+  --overlay: rgba(0, 0, 0, 0.5);
+  
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* 밈징어 브랜드 색상 */
+  --brand-primary: #FF6B47;
+  --brand-secondary: #4ECDC4;
+  --brand-accent: #FFD93D;
+}
+
+/* 다크 모드 CSS 변수 */
+.dark {
+  /* 기본 색상 */
+  --primary: #ffffff;
+  --secondary: #9ca3af;
+  --accent: #60a5fa;
+  
+  /* 배경색 */
+  --background: #111827;
+  --surface: #1f2937;
+  --surface-hover: #374151;
+  
+  /* 텍스트 색상 */
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --text-inverse: #1f2937;
+  
+  /* 보더 색상 */
+  --border-light: #374151;
+  --border-medium: #4b5563;
+  --border-dark: #6b7280;
+  
+  /* 상태 색상 */
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --info: #60a5fa;
+  
+  /* 오버레이 */
+  --overlay: rgba(0, 0, 0, 0.7);
+  
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  
+  /* 밈징어 브랜드 색상 (다크모드에서 밝게) */
+  --brand-primary: #FF8A6B;
+  --brand-secondary: #6BE4DB;
+  --brand-accent: #FFE76B;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 300ms ease, color 300ms ease;
 }
 
 /* Custom Select 애니메이션 */

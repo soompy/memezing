@@ -9,7 +9,7 @@ import { Button } from '@/components/ui';
 interface Interest {
   id: string;
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; size?: number; color?: string; style?: React.CSSProperties }>;
   color: string;
   bgColor: string;
 }

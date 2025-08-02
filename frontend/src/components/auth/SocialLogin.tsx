@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { signIn, getSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import styled from '@emotion/styled';
 import Button from '@/components/ui/Button';
+import { useAuthStore } from '@/store/authStore';
 
 interface SocialLoginProps {
   mode?: 'login' | 'register';
@@ -10,13 +14,31 @@ interface SocialLoginProps {
 
 export default function SocialLogin({ mode = 'login', className = '' }: SocialLoginProps) {
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
+  const router = useRouter();
+  const { clearError } = useAuthStore();
 
-  const handleSocialLogin = (provider: 'google' | 'kakao') => {
+  const handleSocialLogin = async (provider: 'google' | 'kakao' | 'naver') => {
     setLoadingProvider(provider);
+    clearError();
     
-    // 백엔드 OAuth 엔드포인트로 리다이렉트
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-    window.location.href = `${backendUrl}/api/auth/${provider}`;
+    try {
+      const result = await signIn(provider, {
+        redirect: false,
+        callbackUrl: '/dashboard'
+      });
+      
+      if (result?.error) {
+        console.error('소셜 로그인 오류:', result.error);
+      } else if (result?.url) {
+        // 로그인 성공 시 세션 업데이트 후 리다이렉트
+        await getSession();
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('소셜 로그인 중 오류:', error);
+    } finally {
+      setLoadingProvider(null);
+    }
   };
 
   const buttonText = mode === 'login' ? '로그인' : '회원가입';
@@ -65,11 +87,10 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
       </Button>
 
       {/* Kakao 로그인 */}
-      <Button
+      <KakaoButton
         onClick={() => handleSocialLogin('kakao')}
         disabled={loadingProvider !== null}
         isLoading={loadingProvider === 'kakao'}
-        className="w-full flex items-center justify-center space-x-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 border-0"
       >
         {loadingProvider !== 'kakao' && (
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -77,7 +98,21 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
           </svg>
         )}
         <span>카카오로 {buttonText}</span>
-      </Button>
+      </KakaoButton>
+
+      {/* Naver 로그인 */}
+      <NaverButton
+        onClick={() => handleSocialLogin('naver')}
+        disabled={loadingProvider !== null}
+        isLoading={loadingProvider === 'naver'}
+      >
+        {loadingProvider !== 'naver' && (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M16.273 12.845 7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z" />
+          </svg>
+        )}
+        <span>네이버로 {buttonText}</span>
+      </NaverButton>
 
       {/* 안내 텍스트 */}
       <p className="text-xs text-gray-500 text-center mt-4">
@@ -94,3 +129,43 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
     </div>
   );
 }
+
+const KakaoButton = styled(Button)`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background-color: #fee500;
+  color: #000000;
+  border: none;
+  
+  &:hover {
+    background-color: #fdd800;
+  }
+  
+  &:disabled {
+    background-color: #f0f0f0;
+    color: #999999;
+  }
+`;
+
+const NaverButton = styled(Button)`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background-color: #03c75a;
+  color: #ffffff;
+  border: none;
+  
+  &:hover {
+    background-color: #02b351;
+  }
+  
+  &:disabled {
+    background-color: #f0f0f0;
+    color: #999999;
+  }
+`;

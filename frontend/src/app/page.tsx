@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Header, Footer } from '@/components/ui';
 import Hero from '@/components/sections/Hero';
-import Demo from '@/components/sections/Demo';
-// import SignUpIncentive from '@/components/sections/SignUpIncentive'; // 추후 공개 예정
+import Features from '@/components/sections/Features';
+import HowItWorks from '@/components/sections/HowItWorks';
+import CallToAction from '@/components/sections/CallToAction';
 import InterestSelectionPopup from '@/components/common/InterestSelectionPopup';
 
 export default function HomePage() {
@@ -67,8 +68,9 @@ export default function HomePage() {
       <Header />
       <main>
         <Hero />
-        <Demo />
-        {/* <SignUpIncentive /> */} {/* 추후 공개 예정 */}
+        <Features />
+        <HowItWorks />
+        <CallToAction />
       </main>
       <Footer />
       
