@@ -1,6 +1,8 @@
 'use client';
 
 import { MousePointer, Image, Share2, Palette, Clock, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
+import UnifiedScrollSection, { ContentSlide } from '@/components/ui/UnifiedScrollSection/UnifiedScrollSection';
 
 const features = [
   {
@@ -63,189 +65,153 @@ const colorStyles = {
 };
 
 export default function Features() {
-  return (
-    <section className="py-20" style={{ backgroundColor: '#F9FAFB' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* 섹션 헤더 */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-            왜 밈징어를 선택해야 할까요?
-          </h2>
-          <p className="text-xl max-w-3xl mx-auto" style={{ color: '#495057' }}>
-            복잡한 편집 프로그램은 이제 그만! 밈징어와 함께 누구나 5분 만에 바이럴 밈을 만들어보세요.
-          </p>
-        </div>
+  // 섹션별 콘텐츠 배열
+  const sections = [
+    // 1. 섹션 헤더
+    <ContentSlide key="header" background="#F9FAFB">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <motion.h2 
+          className="text-3xl sm:text-4xl font-bold mb-4" 
+          style={{ color: '#2C3E50' }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          왜 밈징어를 선택해야 할까요?
+        </motion.h2>
+        <motion.p 
+          className="text-xl max-w-3xl mx-auto" 
+          style={{ color: '#495057' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          복잡한 편집 프로그램은 이제 그만! 밈징어와 함께 누구나 5분 만에 바이럴 밈을 만들어보세요.
+        </motion.p>
+      </div>
+    </ContentSlide>,
 
-        {/* 주요 특징들 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+    // 2. 주요 특징들
+    <ContentSlide key="features" background="#F9FAFB">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             const colors = colorStyles[feature.color as keyof typeof colorStyles];
             
             return (
-              <div
+              <motion.div
                 key={index}
                 className="relative group"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
               >
-                <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2 h-full">
-                  {/* 아이콘 */}
-                  <div 
-                    className="inline-flex items-center justify-center w-16 h-16 rounded-xl mb-6"
-                    style={{ backgroundColor: colors.bg }}
-                  >
-                    <Icon className="w-8 h-8" style={{ color: colors.icon }} />
+                <motion.div 
+                  className="bg-white rounded-2xl p-8 shadow-lg h-full relative overflow-hidden"
+                  whileHover={{ 
+                    y: -8,
+                    boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
+                  <div className="relative z-10">
+                    <motion.div 
+                      className="inline-flex items-center justify-center w-16 h-16 rounded-xl mb-6"
+                      style={{ backgroundColor: colors.bg }}
+                      whileHover={{ 
+                        scale: 1.1,
+                        rotate: 5,
+                        backgroundColor: colors.icon
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Icon className="w-8 h-8" style={{ color: colors.icon }} />
+                    </motion.div>
+
+                    <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
+                      {feature.title}
+                    </h3>
+
+                    <p className="leading-relaxed" style={{ color: '#495057' }}>
+                      {feature.description}
+                    </p>
                   </div>
-
-                  {/* 제목 */}
-                  <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-                    {feature.title}
-                  </h3>
-
-                  {/* 설명 */}
-                  <p className="leading-relaxed" style={{ color: '#495057' }}>
-                    {feature.description}
-                  </p>
-
-                  {/* 호버 액센트 */}
-                  <div 
-                    className="absolute bottom-0 left-0 w-full h-1 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-2xl"
-                    style={{ backgroundColor: colors.accent }}
-                  ></div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             );
           })}
         </div>
-
-        {/* 통계 섹션 */}
-        <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-lg">
-          <div className="text-center mb-12">
-            <h3 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: '#2C3E50' }}>
-              숫자로 보는 밈징어
-            </h3>
-            <p className="text-lg" style={{ color: '#495057' }}>
-              많은 사용자들이 밈징어와 함께 창의적인 콘텐츠를 만들고 있습니다
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              
-              return (
-                <div key={index} className="text-center group">
-                  <div 
-                    className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300"
-                    style={{ background: 'linear-gradient(135deg, #FF6B47 0%, #4ECDC4 100%)' }}
-                  >
-                    <Icon className="w-8 h-8 text-white" />
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: '#2C3E50' }}>
-                    {stat.value}
-                  </div>
-                  <div className="text-lg font-semibold mb-1" style={{ color: '#343A40' }}>
-                    {stat.label}
-                  </div>
-                  <div className="text-sm" style={{ color: '#6B7280' }}>
-                    {stat.description}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 추가 특징 그리드 */}
-        <div className="mt-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* 왼쪽: 특징 리스트 */}
-            <div>
-              <h3 className="text-2xl sm:text-3xl font-bold mb-8" style={{ color: '#2C3E50' }}>
-                더 많은 놀라운 기능들
-              </h3>
-              
-              <div className="space-y-6">
-                {[
-                  {
-                    title: '텍스트 자동 완성',
-                    description: 'AI가 제안하는 재미있는 텍스트로 더욱 센스있는 밈 제작',
-                  },
-                  {
-                    title: '실시간 트렌드',
-                    description: '지금 가장 인기있는 밈 템플릿과 트렌드를 실시간으로 확인',
-                  },
-                  {
-                    title: '무제한 저장',
-                    description: '만든 밈을 무제한으로 저장하고 언제든 다시 편집 가능',
-                  },
-                  {
-                    title: '커뮤니티 공유',
-                    description: '다른 사용자들과 밈을 공유하고 영감을 얻어보세요',
-                  },
-                ].map((item, index) => (
-                  <div key={index} className="flex items-start space-x-4">
-                    <div 
-                      className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-1"
-                      style={{ background: 'linear-gradient(to right, #FF6B47, #4ECDC4)' }}
-                    >
-                      <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold mb-1" style={{ color: '#2C3E50' }}>
-                        {item.title}
-                      </h4>
-                      <p style={{ color: '#495057' }}>
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 오른쪽: 시각적 요소 */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl p-8 relative overflow-hidden">
-                {/* 배경 패턴 */}
-                <div className="absolute inset-0 opacity-10">
-                  <div className="absolute top-4 left-4 w-8 h-8 bg-blue-500 rounded-full"></div>
-                  <div className="absolute top-12 right-8 w-6 h-6 bg-purple-500 rounded-full"></div>
-                  <div className="absolute bottom-8 left-12 w-4 h-4 bg-pink-500 rounded-full"></div>
-                  <div className="absolute bottom-4 right-4 w-10 h-10 bg-yellow-500 rounded-full"></div>
-                </div>
-
-                {/* 메인 콘텐츠 */}
-                <div className="relative z-10 text-center">
-                  <div className="text-6xl mb-6">🎨</div>
-                  <h4 className="text-xl font-bold text-gray-900 mb-4">
-                    창의성에 제한 없이
-                  </h4>
-                  <p className="text-gray-600 mb-8">
-                    상상하는 모든 밈을 자유롭게 만들어보세요. 
-                    우리가 도구를 제공하면, 당신이 창의력을 발휘하세요!
-                  </p>
-                  
-                  {/* 가상의 사용자 아바타들 */}
-                  <div className="flex justify-center space-x-2">
-                    {['😊', '🤔', '😎', '🥳', '😂'].map((emoji, index) => (
-                      <div
-                        key={index}
-                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-lg"
-                        style={{ animationDelay: `${index * 0.2}s` }}
-                      >
-                        {emoji}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-500 mt-4">
-                    +10,000명의 크리에이터들이 함께하고 있어요
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    </section>
+    </ContentSlide>,
+
+    // 3. 통계 섹션
+    <ContentSlide key="stats" background="#F9FAFB">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div 
+          className="bg-white rounded-3xl p-8 sm:p-12 shadow-lg relative overflow-hidden"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="relative z-10">
+            <div className="text-center mb-12">
+              <h3 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: '#2C3E50' }}>
+                숫자로 보는 밈징어
+              </h3>
+              <p className="text-lg" style={{ color: '#495057' }}>
+                많은 사용자들이 밈징어와 함께 창의적인 콘텐츠를 만들고 있습니다
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+              {stats.map((stat, index) => {
+                const Icon = stat.icon;
+                
+                return (
+                  <motion.div
+                    key={index}
+                    className="text-center group"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.2 }}
+                  >
+                    <motion.div 
+                      className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
+                      style={{ background: 'linear-gradient(135deg, #FF6B47 0%, #4ECDC4 100%)' }}
+                      whileHover={{ 
+                        scale: 1.2,
+                        rotate: 10
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Icon className="w-8 h-8 text-white" />
+                    </motion.div>
+                    
+                    <div className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: '#2C3E50' }}>
+                      {stat.value}
+                    </div>
+                    
+                    <div className="text-lg font-semibold mb-1" style={{ color: '#343A40' }}>
+                      {stat.label}
+                    </div>
+                    
+                    <div className="text-sm" style={{ color: '#6B7280' }}>
+                      {stat.description}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </ContentSlide>
+  ];
+
+  return (
+    <UnifiedScrollSection totalHeight="400vh">
+      {sections}
+    </UnifiedScrollSection>
   );
 }
