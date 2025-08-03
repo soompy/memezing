@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* 컬러 변수 import */
+@import '../styles/colorVariables.css';
+
 /* 라이트 모드 CSS 변수 */
 :root,
 .light {
