@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, Users, TrendingUp, Heart } from 'lucide-react';
 import styled from '@emotion/styled';
 import { motion } from 'framer-motion';
 import UnifiedScrollSection, { ContentSlide } from '@/components/ui/UnifiedScrollSection/UnifiedScrollSection';
+import { brandColors, componentColors } from '@/styles/theme';
 
 const FloatingElement = styled.div<{ delay: number }>`
   position: absolute;
@@ -107,19 +108,19 @@ const stats = [
     icon: Users,
     number: "50,000+",
     label: "활성 사용자",
-    color: "#FF6B47"
+    ...componentColors.stats[0]
   },
   {
     icon: TrendingUp,
     number: "1M+",
     label: "제작된 밈",
-    color: "#4ECDC4"
+    ...componentColors.stats[1]
   },
   {
     icon: Heart,
     number: "98%",
     label: "만족도",
-    color: "#FFD93D"
+    ...componentColors.stats[2]
   }
 ];
 
@@ -137,7 +138,7 @@ export default function CallToAction() {
   // 섹션별 콘텐츠 배열
   const sections = [
     // 1. 메인 헤더
-    <ContentSlide key="header" background="linear-gradient(to bottom right, #581C87, #1E3A8A, #4C1D95)">
+    <ContentSlide key="header" background={brandColors.special.gradient.purple}>
       <div className="relative w-full h-full overflow-hidden">
         {/* 배경 패턴 */}
         <div className="absolute inset-0 opacity-10">
@@ -214,7 +215,7 @@ export default function CallToAction() {
     </ContentSlide>,
 
     // 2. 통계 섹션
-    <ContentSlide key="stats" background="linear-gradient(to bottom right, #581C87, #1E3A8A, #4C1D95)">
+    <ContentSlide key="stats" background={brandColors.special.gradient.purple}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {stats.map((stat, index) => {
@@ -248,7 +249,7 @@ export default function CallToAction() {
     </ContentSlide>,
 
     // 3. 사용자 후기
-    <ContentSlide key="testimonials" background="linear-gradient(to bottom right, #581C87, #1E3A8A, #4C1D95)">
+    <ContentSlide key="testimonials" background={brandColors.special.gradient.purple}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="bg-white/5 backdrop-blur-sm rounded-3xl p-8"
@@ -297,7 +298,7 @@ export default function CallToAction() {
     </ContentSlide>,
 
     // 4. 최종 CTA
-    <ContentSlide key="final-cta" background="linear-gradient(to bottom right, #581C87, #1E3A8A, #4C1D95)">
+    <ContentSlide key="final-cta" background={brandColors.special.gradient.purple}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.div 
           className="bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm rounded-3xl p-8 inline-block"

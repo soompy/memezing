@@ -3,6 +3,7 @@
 import { MousePointer, Image, Share2, Palette, Clock, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import UnifiedScrollSection, { ContentSlide } from '@/components/ui/UnifiedScrollSection/UnifiedScrollSection';
+import { brandColors, componentColors } from '@/styles/theme';
 
 const features = [
   {
@@ -46,33 +47,18 @@ const stats = [
   },
 ];
 
-const colorStyles = {
-  blue: {
-    bg: '#FFF5F3',
-    icon: '#FF6B47',
-    accent: '#FF6B47',
-  },
-  purple: {
-    bg: '#F0FDFC',
-    icon: '#4ECDC4',
-    accent: '#4ECDC4',
-  },
-  green: {
-    bg: '#FFFBEB',
-    icon: '#FFD93D',
-    accent: '#FFD93D',
-  },
-};
+// 테마에서 컬러 가져오기
+const colorStyles = componentColors.features;
 
 export default function Features() {
   // 섹션별 콘텐츠 배열
   const sections = [
     // 1. 섹션 헤더
-    <ContentSlide key="header" background="#F9FAFB">
+    <ContentSlide key="header" background={brandColors.gray[50]}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.h2 
           className="text-3xl sm:text-4xl font-bold mb-4" 
-          style={{ color: '#2C3E50' }}
+          style={{ color: brandColors.gray[800] }}
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -81,7 +67,7 @@ export default function Features() {
         </motion.h2>
         <motion.p 
           className="text-xl max-w-3xl mx-auto" 
-          style={{ color: '#495057' }}
+          style={{ color: brandColors.gray[500] }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -92,7 +78,7 @@ export default function Features() {
     </ContentSlide>,
 
     // 2. 주요 특징들
-    <ContentSlide key="features" background="#F9FAFB">
+    <ContentSlide key="features" background={brandColors.gray[50]}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => {
@@ -129,11 +115,11 @@ export default function Features() {
                       <Icon className="w-8 h-8" style={{ color: colors.icon }} />
                     </motion.div>
 
-                    <h3 className="text-xl font-bold mb-4" style={{ color: '#2C3E50' }}>
+                    <h3 className="text-xl font-bold mb-4" style={{ color: brandColors.gray[800] }}>
                       {feature.title}
                     </h3>
 
-                    <p className="leading-relaxed" style={{ color: '#495057' }}>
+                    <p className="leading-relaxed" style={{ color: brandColors.gray[500] }}>
                       {feature.description}
                     </p>
                   </div>
@@ -146,7 +132,7 @@ export default function Features() {
     </ContentSlide>,
 
     // 3. 통계 섹션
-    <ContentSlide key="stats" background="#F9FAFB">
+    <ContentSlide key="stats" background={brandColors.gray[50]}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="bg-white rounded-3xl p-8 sm:p-12 shadow-lg relative overflow-hidden"
@@ -156,10 +142,10 @@ export default function Features() {
         >
           <div className="relative z-10">
             <div className="text-center mb-12">
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: '#2C3E50' }}>
+              <h3 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: brandColors.gray[800] }}>
                 숫자로 보는 밈징어
               </h3>
-              <p className="text-lg" style={{ color: '#495057' }}>
+              <p className="text-lg" style={{ color: brandColors.gray[500] }}>
                 많은 사용자들이 밈징어와 함께 창의적인 콘텐츠를 만들고 있습니다
               </p>
             </div>
@@ -178,7 +164,7 @@ export default function Features() {
                   >
                     <motion.div 
                       className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-                      style={{ background: 'linear-gradient(135deg, #FF6B47 0%, #4ECDC4 100%)' }}
+                      style={{ background: brandColors.special.gradient.primary }}
                       whileHover={{ 
                         scale: 1.2,
                         rotate: 10
@@ -188,15 +174,15 @@ export default function Features() {
                       <Icon className="w-8 h-8 text-white" />
                     </motion.div>
                     
-                    <div className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: '#2C3E50' }}>
+                    <div className="text-3xl sm:text-4xl font-bold mb-2" style={{ color: brandColors.gray[800] }}>
                       {stat.value}
                     </div>
                     
-                    <div className="text-lg font-semibold mb-1" style={{ color: '#343A40' }}>
+                    <div className="text-lg font-semibold mb-1" style={{ color: brandColors.gray[700] }}>
                       {stat.label}
                     </div>
                     
-                    <div className="text-sm" style={{ color: '#6B7280' }}>
+                    <div className="text-sm" style={{ color: brandColors.gray[500] }}>
                       {stat.description}
                     </div>
                   </motion.div>

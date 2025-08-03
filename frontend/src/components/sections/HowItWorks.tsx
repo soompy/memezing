@@ -5,6 +5,7 @@ import { Upload, Edit3, Share2, ArrowRight, Play, Pause } from 'lucide-react';
 import styled from '@emotion/styled';
 import { motion } from 'framer-motion';
 import UnifiedScrollSection, { ContentSlide } from '@/components/ui/UnifiedScrollSection/UnifiedScrollSection';
+import { brandColors, componentColors } from '@/styles/theme';
 
 const steps = [
   {
@@ -13,8 +14,7 @@ const steps = [
     title: '템플릿 선택 또는 업로드',
     description: '인기 K-드라마 템플릿을 선택하거나 직접 이미지를 업로드하세요',
     detail: '1000+ 개의 트렌디한 템플릿이 준비되어 있어요. 드래그 앤 드롭으로 간단하게!',
-    color: '#FF6B47',
-    bgColor: '#FFF5F3',
+    ...componentColors.steps[0],
     demo: '/demo-step1.gif'
   },
   {
@@ -23,8 +23,7 @@ const steps = [
     title: '텍스트 추가 & 편집',
     description: '재미있는 텍스트를 추가하고 폰트, 색상, 크기를 자유롭게 조정하세요',
     detail: '실시간 미리보기로 바로바로 확인하면서 편집할 수 있어요. AI 텍스트 제안 기능도 있답니다!',
-    color: '#4ECDC4',
-    bgColor: '#F0FDFC',
+    ...componentColors.steps[1],
     demo: '/demo-step2.gif'
   },
   {
@@ -33,8 +32,7 @@ const steps = [
     title: '저장 & 공유',
     description: '완성된 밈을 고화질로 다운로드하거나 SNS에 바로 공유하세요',
     detail: 'Instagram, Twitter, Facebook 등 각 플랫폼에 최적화된 사이즈로 자동 변환!',
-    color: '#FFD93D',
-    bgColor: '#FFFBEB',
+    ...componentColors.steps[2],
     demo: '/demo-step3.gif'
   }
 ];

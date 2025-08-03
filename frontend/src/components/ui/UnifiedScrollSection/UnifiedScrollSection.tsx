@@ -140,10 +140,10 @@ export default function UnifiedScrollSection({
               key={index}
               className="w-2 h-8 rounded-full bg-white/30"
               style={{
-                backgroundColor: currentSection === index ? '#ffffff' : 'rgba(255,255,255,0.3)'
+                backgroundColor: currentSection === index ? 'var(--text-inverse)' : 'rgba(255,255,255,0.3)'
               }}
               animate={{
-                backgroundColor: currentSection === index ? '#ffffff' : 'rgba(255,255,255,0.3)',
+                backgroundColor: currentSection === index ? 'var(--text-inverse)' : 'rgba(255,255,255,0.3)',
                 scale: currentSection === index ? 1.2 : 1
               }}
               transition={{ duration: 0.3 }}
