@@ -16,6 +16,7 @@ export interface TextStyle {
   textAlign: 'left' | 'center' | 'right';
   strokeColor: string;
   strokeWidth: number;
+  opacity: number;
 }
 
 interface TextStyleControlsProps {
