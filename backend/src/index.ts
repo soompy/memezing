@@ -50,9 +50,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: '밈징어 API 서버가 정상 작동 중입니다!' });
+  res.json({ status: 'OK', message: '밈징 API 서버가 정상 작동 중입니다!' });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 밈징어 서버가 포트 ${PORT}에서 실행 중입니다!`);
+  console.log(`🚀 밈징 서버가 포트 ${PORT}에서 실행 중입니다!`);
 });
