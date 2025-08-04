@@ -9,11 +9,12 @@ import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControl
 import FabricCanvas, { FabricCanvasRef, MemeTemplate } from '@/components/meme/FabricCanvas';
 import ImageUploadComponent from '@/components/meme/ImageUploadComponent';
 import TextInputArea from '@/components/meme/TextInputArea';
+import AITextGenerator from '@/components/meme/AITextGenerator';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
 import ResizablePanel from '@/components/ui/ResizablePanel';
 import { AlertDialog, ConfirmDialog } from '@/components/ui/Modal';
 
-// 기존 템플릿 데이터 (일부만 가져옴)
+// 인기 밈 템플릿 - 가장 많이 사용되는 클래식 밈들
 const popularTemplates: MemeTemplate[] = [
   {
     id: 'drake',
@@ -52,9 +53,90 @@ const popularTemplates: MemeTemplate[] = [
       { x: 100, y: 120, width: 120, height: 30, defaultText: '선택 A' },
       { x: 250, y: 120, width: 120, height: 30, defaultText: '선택 B' }
     ]
+  },
+  {
+    id: 'success-kid',
+    name: '성공한 아이',
+    url: 'https://i.imgflip.com/1bhk.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '월요일인데' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '공휴일이다!' }
+    ]
+  },
+  {
+    id: 'expanding-brain',
+    name: '진화하는 뇌',
+    url: 'https://i.imgflip.com/1jwhww.jpg',
+    textBoxes: [
+      { x: 10, y: 30, width: 200, height: 40, defaultText: '일반적인 생각' },
+      { x: 10, y: 120, width: 200, height: 40, defaultText: '좀 더 나은 생각' },
+      { x: 10, y: 210, width: 200, height: 40, defaultText: '훌륭한 생각' },
+      { x: 10, y: 300, width: 200, height: 40, defaultText: '천재적인 생각' }
+    ]
   }
 ];
 
+// 동물 밈 템플릿 - 귀엽고 재미있는 동물들
+const animalTemplates: MemeTemplate[] = [
+  {
+    id: 'doge',
+    name: '도지 밈',
+    url: 'https://i.imgflip.com/4t0m5.jpg',
+    textBoxes: [
+      { x: 50, y: 30, width: 150, height: 40, defaultText: 'such wow' },
+      { x: 250, y: 80, width: 120, height: 40, defaultText: 'much meme' },
+      { x: 30, y: 200, width: 140, height: 40, defaultText: 'very funny' },
+      { x: 280, y: 250, width: 100, height: 40, defaultText: 'amaze' }
+    ]
+  },
+  {
+    id: 'grumpy-cat',
+    name: '불기돌고양이',
+    url: 'https://i.imgflip.com/8p0a.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '월요일이 좋다고?' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: 'NO.' }
+    ]
+  },
+  {
+    id: 'surprised-pikachu',
+    name: '놀란 피카츄',
+    url: 'https://i.imgflip.com/2kbn1e.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '과제를 미뤄두고' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '마감일이 내일?' }
+    ]
+  },
+  {
+    id: 'kermit-tea',
+    name: '커밋의 차',
+    url: 'https://i.imgflip.com/16iyn1.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '남의 일에 간섭 안 해' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '그런데 그건 아니지...' }
+    ]
+  },
+  {
+    id: 'evil-kermit',
+    name: '악마 커밋',
+    url: 'https://i.imgflip.com/1e7ql7.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 200, height: 60, defaultText: '일찍 자야지' },
+      { x: 210, y: 200, width: 180, height: 60, defaultText: '한 편만 더 보자' }
+    ]
+  },
+  {
+    id: 'cat-keyboard',
+    name: '키보드 고양이',
+    url: 'https://i.imgflip.com/4x1wc.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '중요한 보고서 작성 중' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '고양이: 지금이야!' }
+    ]
+  }
+];
+
+// 한국 드라마 스타일 템플릿 - 감정 표현이 풍부한 K-드라마 장면들
 const koreanDramaTemplates: MemeTemplate[] = [
   {
     id: 'thinking-korean',
@@ -72,6 +154,106 @@ const koreanDramaTemplates: MemeTemplate[] = [
     textBoxes: [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '헉! 이게 뭐야?!' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: '말도 안 돼!' }
+    ]
+  },
+  {
+    id: 'dramatic-korean',
+    name: '드라마틱한 표정',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '이런 일이...' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '있을 수가!' }
+    ]
+  },
+  {
+    id: 'sad-korean',
+    name: '슬픈 표정',
+    url: 'https://images.unsplash.com/photo-1494790108755-2616c88906f0?w=400&h=400&fit=crop&crop=face',
+    textBoxes: [
+      { x: 10, y: 20, width: 380, height: 60, defaultText: '괜찮다고 했는데' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '괜찮지 않아...' }
+    ]
+  }
+];
+
+// 트렌드/인터넷 밈 템플릿 - 최신 유행하는 밈들
+const trendingTemplates: MemeTemplate[] = [
+  {
+    id: 'this-is-fine',
+    name: '괜찮아 이건',
+    url: 'https://i.imgflip.com/26am.jpg',  
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '모든 게 무너져가고 있지만' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '괜찮아... 이건...' }
+    ]
+  },
+  {
+    id: 'stonks',
+    name: '스톤크스',
+    url: 'https://i.imgflip.com/2ze47r.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '잠깐 자는 동안' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '주식이 떡상했다 STONKS ↗️' }
+    ]
+  },
+  {
+    id: 'woman-pointing',
+    name: '가리키는 여자',
+    url: 'https://i.imgflip.com/345v97.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 180, height: 60, defaultText: '제발 그만해' },
+      { x: 200, y: 200, width: 180, height: 60, defaultText: '아니야 더 해야지' }
+    ]
+  },
+  {
+    id: 'galaxy-brain',
+    name: '갤럭시 브레인',
+    url: 'https://i.imgflip.com/1jwhww.jpg',
+    textBoxes: [
+      { x: 10, y: 30, width: 200, height: 40, defaultText: '8시간 자기' },
+      { x: 10, y: 120, width: 200, height: 40, defaultText: '6시간 자기' },
+      { x: 10, y: 210, width: 200, height: 40, defaultText: '4시간 자기' },
+      { x: 10, y: 300, width: 200, height: 40, defaultText: '안 자기' }
+    ]
+  }
+];
+
+// 감정 표현 템플릿 - 다양한 감정을 표현하는 밈들
+const emotionTemplates: MemeTemplate[] = [
+  {
+    id: 'crying-jordan',
+    name: '우는 조던',
+    url: 'https://i.imgflip.com/9ehk.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '금요일이 끝나고' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '또 월요일이 온다는 현실' }
+    ]
+  },
+  {
+    id: 'hide-pain-harold',
+    name: '고통 숨기는 해롤드',
+    url: 'https://i.imgflip.com/gk5el.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '"괜찮냐?"' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '"네 괜찮아요 ^^"' }
+    ]
+  },
+  {
+    id: 'surprised-tom',
+    name: '놀란 톰',
+    url: 'https://i.imgflip.com/37y8cg.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '집에 가려고 하는데' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '갑자기 야근이라고?' }
+    ]
+  },
+  {
+    id: 'evil-smile',
+    name: '사악한 미소',
+    url: 'https://i.imgflip.com/2wifvo.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '친구가 시험 망했다고 할 때' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '나도 망했지만 위로해주는 나' }
     ]
   }
 ];
@@ -389,7 +571,8 @@ export default function MemeGeneratorPage() {
 
   const tabs = [
     { key: 'images', label: '이미지 선택', icon: ImageIcon },
-    { key: 'text', label: '텍스트', icon: Type }
+    { key: 'text', label: '텍스트', icon: Type },
+    { key: 'ai', label: 'AI 텍스트', icon: RefreshCw }
   ];
 
   // 커뮤니티 페이지 이동
@@ -497,7 +680,97 @@ export default function MemeGeneratorPage() {
                           ))}
                         </div>
                         
-                        <h3 className="text-lg font-semibold mb-4">한국 드라마 스타일</h3>
+                        <h3 className="text-lg font-semibold mb-4">🐾 동물</h3>
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                          {animalTemplates.map((template) => (
+                            <button
+                              key={template.id}
+                              className={`
+                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                ${selectedTemplate?.id === template.id 
+                                  ? 'border-blue-500 ring-2 ring-blue-200' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                                }
+                              `}
+                              onClick={() => {
+                                handleTemplateSelect(template);
+                                setIsSidebarOpen(false);
+                              }}
+                              disabled={isLoading}
+                            >
+                              <img
+                                src={template.url}
+                                alt={template.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                <p className="text-xs font-medium truncate">{template.name}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <h3 className="text-lg font-semibold mb-4">🔥 트렌드</h3>
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                          {trendingTemplates.map((template) => (
+                            <button
+                              key={template.id}
+                              className={`
+                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                ${selectedTemplate?.id === template.id 
+                                  ? 'border-blue-500 ring-2 ring-blue-200' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                                }
+                              `}
+                              onClick={() => {
+                                handleTemplateSelect(template);
+                                setIsSidebarOpen(false);
+                              }}
+                              disabled={isLoading}
+                            >
+                              <img
+                                src={template.url}
+                                alt={template.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                <p className="text-xs font-medium truncate">{template.name}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <h3 className="text-lg font-semibold mb-4">😭 감정 표현</h3>
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                          {emotionTemplates.map((template) => (
+                            <button
+                              key={template.id}
+                              className={`
+                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                ${selectedTemplate?.id === template.id 
+                                  ? 'border-blue-500 ring-2 ring-blue-200' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                                }
+                              `}
+                              onClick={() => {
+                                handleTemplateSelect(template);
+                                setIsSidebarOpen(false);
+                              }}
+                              disabled={isLoading}
+                            >
+                              <img
+                                src={template.url}
+                                alt={template.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                <p className="text-xs font-medium truncate">{template.name}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <h3 className="text-lg font-semibold mb-4">🎬 한국 드라마 스타일</h3>
                         <div className="grid grid-cols-2 gap-3">
                           {koreanDramaTemplates.map((template) => (
                             <button
@@ -559,6 +832,15 @@ export default function MemeGeneratorPage() {
                           onReset={handleStyleReset}
                         />
                       </div>
+                    </div>
+                  )}
+                  
+                  {activeTab === 'ai' && (
+                    <div className="space-y-6">
+                      <AITextGenerator
+                        onTextSelect={handleAddText}
+                        existingTexts={[]} // TODO: 캔버스의 기존 텍스트들을 가져와서 전달
+                      />
                     </div>
                   )}
                 </div>
@@ -670,7 +952,88 @@ export default function MemeGeneratorPage() {
                             ))}
                           </div>
                           
-                          <h3 className="text-lg font-semibold mb-4">한국 드라마 스타일</h3>
+                          <h3 className="text-lg font-semibold mb-4">🐾 동물</h3>
+                          <div className="grid grid-cols-2 gap-3 mb-6">
+                            {animalTemplates.map((template) => (
+                              <button
+                                key={template.id}
+                                className={`
+                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                  ${selectedTemplate?.id === template.id 
+                                    ? 'border-blue-500 ring-2 ring-blue-200' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                  }
+                                `}
+                                onClick={() => handleTemplateSelect(template)}
+                                disabled={isLoading}
+                              >
+                                <img
+                                  src={template.url}
+                                  alt={template.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                  <p className="text-xs font-medium truncate">{template.name}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <h3 className="text-lg font-semibold mb-4">🔥 트렌드</h3>
+                          <div className="grid grid-cols-2 gap-3 mb-6">
+                            {trendingTemplates.map((template) => (
+                              <button
+                                key={template.id}
+                                className={`
+                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                  ${selectedTemplate?.id === template.id 
+                                    ? 'border-blue-500 ring-2 ring-blue-200' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                  }
+                                `}
+                                onClick={() => handleTemplateSelect(template)}
+                                disabled={isLoading}
+                              >
+                                <img
+                                  src={template.url}
+                                  alt={template.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                  <p className="text-xs font-medium truncate">{template.name}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <h3 className="text-lg font-semibold mb-4">😭 감정 표현</h3>
+                          <div className="grid grid-cols-2 gap-3 mb-6">
+                            {emotionTemplates.map((template) => (
+                              <button
+                                key={template.id}
+                                className={`
+                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                  ${selectedTemplate?.id === template.id 
+                                    ? 'border-blue-500 ring-2 ring-blue-200' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                  }
+                                `}
+                                onClick={() => handleTemplateSelect(template)}
+                                disabled={isLoading}
+                              >
+                                <img
+                                  src={template.url}
+                                  alt={template.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                  <p className="text-xs font-medium truncate">{template.name}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <h3 className="text-lg font-semibold mb-4">🎬 한국 드라마 스타일</h3>
                           <div className="grid grid-cols-2 gap-3">
                             {koreanDramaTemplates.map((template) => (
                               <button
@@ -729,6 +1092,15 @@ export default function MemeGeneratorPage() {
                             onReset={handleStyleReset}
                           />
                         </div>
+                      </div>
+                    )}
+                    
+                    {activeTab === 'ai' && (
+                      <div className="space-y-6">
+                        <AITextGenerator
+                          onTextSelect={handleAddText}
+                          existingTexts={[]} // TODO: 캔버스의 기존 텍스트들을 가져와서 전달
+                        />
                       </div>
                     )}
                   </div>
