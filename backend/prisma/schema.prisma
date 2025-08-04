@@ -19,10 +19,17 @@ model User {
   providerId  String?  // OAuth provider ID
   avatar      String?  // Profile image URL
   displayName String?  // Full name from OAuth
+  bio         String?  // User bio
+  location    String?  // User location
+  website     String?  // User website
+  interests   String[] // User selected interests
+  isOnboarded Boolean  @default(false) // Onboarding completion status
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  memes Meme[]
+  memes         Meme[]
+  preferences   UserPreference[]
+  interactions  UserInteraction[]
 
   @@map("users")
 }
@@ -38,7 +45,8 @@ model Template {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  memes Meme[]
+  memes                 Meme[]
+  recommendationMappings RecommendationMapping[]
 
   @@map("templates")
 }
@@ -59,4 +67,57 @@ model Meme {
   template Template? @relation(fields: [templateId], references: [id])
 
   @@map("memes")
+}
+
+// 유저 선호도 데이터 (서비스 통계용)
+model UserPreference {
+  id         String   @id @default(cuid())
+  userId     String
+  category   String   // 관심사 카테고리 (예: 'drama', 'food', 'music')
+  value      String   // 선호도 값
+  weight     Float    @default(1.0) // 가중치 (사용 빈도에 따라 조정)
+  source     String   // 데이터 출처 ('onboarding', 'interaction', 'explicit')
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, value])
+  @@map("user_preferences")
+}
+
+// 유저 상호작용 로그 (통계 분석용)
+model UserInteraction {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String   // 'view', 'like', 'share', 'create', 'download'
+  targetType   String   // 'meme', 'template', 'user'
+  targetId     String   // 대상의 ID
+  metadata     Json?    // 추가 메타데이터 (템플릿 카테고리, 태그 등)
+  sessionId    String?  // 세션 ID
+  ipAddress    String?  // IP 주소 (개인정보 보호를 위해 해시화)
+  userAgent    String?  // User Agent
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, action])
+  @@index([createdAt])
+  @@map("user_interactions")
+}
+
+// 밈 추천 시스템을 위한 카테고리별 템플릿 매핑
+model RecommendationMapping {
+  id         String   @id @default(cuid())
+  interest   String   // 관심사 (예: 'drama', 'food', 'music')
+  templateId String   // 추천할 템플릿 ID
+  priority   Int      @default(1) // 우선순위 (높을수록 우선)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([interest, templateId])
+  @@map("recommendation_mappings")
 }
