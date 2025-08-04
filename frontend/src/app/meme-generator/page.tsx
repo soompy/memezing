@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users, Sparkles } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
@@ -14,6 +14,7 @@ import CanvasOverlay from '@/components/meme/CanvasOverlay';
 import ResizablePanel from '@/components/ui/ResizablePanel';
 import { AlertDialog, ConfirmDialog } from '@/components/ui/Modal';
 import { getRandomImageFromPool } from '@/utils/imagePool';
+import RecommendedMemesModal from '@/components/meme/RecommendedMemesModal';
 
 // 인기 밈 템플릿 - 가장 많이 사용되는 클래식 밈들
 const popularTemplates: MemeTemplate[] = [
@@ -270,6 +271,7 @@ const emotionTemplates: MemeTemplate[] = [
 
 export default function MemeGeneratorPage() {
   const router = useRouter();
+  const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
   const canvasRef = useRef<FabricCanvasRef>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MemeTemplate | null>(null);
   const [activeTab, setActiveTab] = useState('images');
@@ -288,6 +290,33 @@ export default function MemeGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(null);
+  
+  // 추천 밈 모달 관련 상태
+  const [showRecommendationsModal, setShowRecommendationsModal] = useState(false);
+  const [isWelcome, setIsWelcome] = useState(false);
+  const [userInterests, setUserInterests] = useState<string[]>([]);
+
+  // URL 파라미터 확인
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setSearchParams(params);
+      
+      // 첫 방문 및 웰컴 플래그 확인
+      const isFirst = params.get('first') === 'true';
+      const isWelcomeParam = params.get('welcome') === 'true';
+      const interests = params.get('interests')?.split(',') || [];
+      
+      if (isFirst || isWelcomeParam) {
+        // 페이지 로드 후 잠시 후 모달 표시
+        setTimeout(() => {
+          setShowRecommendationsModal(true);
+          setIsWelcome(isWelcomeParam);
+          setUserInterests(interests);
+        }, 500);
+      }
+    }
+  }, []);
   
   // 모달 상태들
   const [alertModal, setAlertModal] = useState<{
@@ -615,6 +644,29 @@ export default function MemeGeneratorPage() {
     window.location.reload();
   }, []);
 
+  // 추천 밈 템플릿 선택 핸들러
+  const handleRecommendedTemplateSelect = useCallback((template: any) => {
+    // 추천 밈의 템플릿 형식을 MemeTemplate 형식으로 변환
+    const memeTemplate: MemeTemplate = {
+      id: template.id,
+      name: template.name,
+      url: template.imageUrl,
+      textBoxes: [
+        { x: 10, y: 10, width: 380, height: 60, defaultText: '상단 텍스트' },
+        { x: 10, y: 320, width: 380, height: 60, defaultText: '하단 텍스트' }
+      ]
+    };
+    
+    // 실제로 캔버스에 템플릿 로드
+    handleTemplateSelect(memeTemplate);
+  }, [handleTemplateSelect]);
+
+  // 추천 밈 모달 열기 (헤더 버튼용)
+  const openRecommendationsModal = useCallback(() => {
+    setShowRecommendationsModal(true);
+    setIsWelcome(false); // 헤더에서 열 때는 웰컴 메시지 없음
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
@@ -625,6 +677,16 @@ export default function MemeGeneratorPage() {
           </div>
           
           <div className="flex items-center space-x-2 md:space-x-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openRecommendationsModal}
+              className="bg-gradient-to-r from-primary-50 to-secondary-50 border-primary-200 text-primary-700 hover:from-primary-100 hover:to-secondary-100"
+            >
+              <Sparkles size={16} className="mr-1 md:mr-2" />
+              <span className="hidden sm:inline">추천 밈</span>
+              <span className="sm:hidden">추천</span>
+            </Button>
             <Button
               variant="secondary"
               size="sm"
@@ -960,8 +1022,8 @@ export default function MemeGeneratorPage() {
         {/* 데스크톱 리사이저블 레이아웃 */}
         <div className="hidden md:block h-full">
           <ResizablePanel
-            defaultLeftWidth={350}
-            minLeftWidth={280}
+            defaultLeftWidth={420}
+            minLeftWidth={350}
             maxLeftWidth={600}
             leftPanel={
               <>
@@ -1247,6 +1309,15 @@ export default function MemeGeneratorPage() {
           confirmModal.type === 'danger' ? <X className="w-6 h-6" /> :
           <RefreshCw className="w-6 h-6" />
         }
+      />
+
+      {/* 추천 밈 모달 */}
+      <RecommendedMemesModal
+        isOpen={showRecommendationsModal}
+        onClose={() => setShowRecommendationsModal(false)}
+        onTemplateSelect={handleRecommendedTemplateSelect}
+        isWelcome={isWelcome}
+        selectedInterests={userInterests}
       />
     </div>
   );
