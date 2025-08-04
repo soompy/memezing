@@ -128,7 +128,7 @@ export default function FeedPage() {
       try {
         await navigator.share({
           title: meme.title,
-          text: `${meme.title} - 밈징어에서 확인하세요!`,
+          text: `${meme.title} - 밈징에서 확인하세요!`,
           url: `${window.location.origin}/meme/${meme.id}`
         });
       } catch {

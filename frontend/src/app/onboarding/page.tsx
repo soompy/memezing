@@ -96,7 +96,7 @@ export default function Onboarding() {
           <div className="text-center mb-12">
             <Drama size={64} className="mb-6 mx-auto text-blue-600" />
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              밈징어에 오신 것을 환영합니다!
+              밈징에 오신 것을 환영합니다!
             </h1>
             <p className="text-xl text-gray-600 mb-8">
               한국 문화에 특화된 밈 생성과 공유의 새로운 경험을 시작해보세요

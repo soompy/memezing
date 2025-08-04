@@ -66,11 +66,11 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <div className="text-3xl font-bold mb-2">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-              🎭 밈징어
+              🎭 밈징
             </span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">로그인</h1>
-          <p className="text-gray-600">밈징어에 다시 오신 것을 환영합니다!</p>
+          <p className="text-gray-600">밈징에 다시 오신 것을 환영합니다!</p>
         </div>
 
         {/* 로그인 폼 */}

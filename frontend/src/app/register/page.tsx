@@ -119,11 +119,11 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <div className="text-3xl font-bold mb-2">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-              🎭 밈징어
+              🎭 밈징
             </span>
           </div>
           <h1 className="text-2xl font-bold text-900 mb-2">회원가입</h1>
-          <p className="text-600">밈징어에서 창의적인 여정을 시작하세요!</p>
+          <p className="text-600">밈징에서 창의적인 여정을 시작하세요!</p>
         </div>
 
         {/* 회원가입 폼 */}
