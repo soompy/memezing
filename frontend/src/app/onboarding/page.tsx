@@ -53,26 +53,44 @@ export default function Onboarding() {
     setIsLoading(true);
     
     try {
-      // 관심사가 선택된 경우 API를 통해 저장
+      // 관심사가 선택된 경우 로컬 스토리지에 저장 (추후 API 연동 시 사용)
       if (selectedInterests.length > 0) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/user/interests`, {
-          method: 'PUT',
+        // 로컬 스토리지에 관심사 저장
+        localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
+        
+        // 선호도 데이터 저장 (통계용)
+        const preferencesData = selectedInterests.map(interest => ({
+          category: interest,
+          value: interest,
+          weight: 1.0,
+          source: 'onboarding'
+        }));
+        localStorage.setItem('userPreferences', JSON.stringify(preferencesData));
+        
+        // 온보딩 완료 플래그 설정
+        localStorage.setItem('onboardingCompleted', 'true');
+        
+        // 추후 API 서버가 준비되면 사용
+        /*
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/user/preferences`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
-          body: JSON.stringify({ interests: selectedInterests }),
+          body: JSON.stringify({
+            interests: selectedInterests,
+            preferences: preferencesData,
+            isOnboarded: true
+          }),
         });
-
-        if (!response.ok) {
-          console.warn('관심사 저장에 실패했지만 계속 진행합니다.');
-        }
+        */
       }
       
       // 성공 시 밈 생성기로 이동 (첫 방문 플래그 포함)
-      router.push('/meme-generator?first=true&welcome=true');
+      router.push('/meme-generator?first=true&welcome=true&interests=' + selectedInterests.join(','));
     } catch (error) {
-      console.error('관심사 저장 실패:', error);
+      console.error('온보딩 데이터 저장 실패:', error);
       // 실패해도 온보딩은 완료하고 진행
       router.push('/meme-generator?first=true');
     } finally {
@@ -207,23 +225,54 @@ export default function Onboarding() {
             </div>
 
             <div className="text-center mb-6">
-              <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm transition-all duration-300 ${
+              <div className={`inline-flex items-center px-6 py-3 rounded-full text-sm transition-all duration-300 shadow-lg ${
                 selectedInterests.length >= 3 
-                  ? 'bg-green-100 text-green-700 border border-green-200' 
-                  : 'bg-orange-100 text-orange-700 border border-orange-200'
+                  ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border-2 border-green-300 shadow-green-200/50' 
+                  : 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border-2 border-orange-300 shadow-orange-200/50'
               }`}>
-                <div className="mr-2">
-                  {selectedInterests.length >= 3 ? '특' : '🕰️'}
+                <div className="mr-2 text-lg">
+                  {selectedInterests.length >= 3 ? '🎉' : '🕰️'}
                 </div>
-                <span>
-                  선택된 관심사: {selectedInterests.length}개
+                <span className="font-medium">
+                  선택된 관심사: <span className="font-bold">{selectedInterests.length}</span>개
                   {selectedInterests.length < 3 && (
-                    <span className="ml-1">
+                    <span className="ml-2 opacity-75">
                       (최소 3개 선택 필요)
+                    </span>
+                  )}
+                  {selectedInterests.length >= 3 && (
+                    <span className="ml-2 opacity-75">
+                      ✨ 완벽해요!
                     </span>
                   )}
                 </span>
               </div>
+              
+              {selectedInterests.length >= 3 && (
+                <div className="mt-4 text-center">
+                  <div className="text-sm text-gray-600 mb-2">
+                    선택하신 관심사로 맞춤형 밈을 추천해드릴게요! 🎁
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-2 max-w-md mx-auto">
+                    {selectedInterests.slice(0, 5).map((interestId) => {
+                      const interest = interests.find(i => i.id === interestId);
+                      return interest ? (
+                        <span
+                          key={interestId}
+                          className="px-3 py-1 bg-gradient-to-r from-primary-100 to-secondary-100 text-primary-700 rounded-full text-xs font-medium border border-primary-200"
+                        >
+                          #{interest.name}
+                        </span>
+                      ) : null;
+                    })}
+                    {selectedInterests.length > 5 && (
+                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                        +{selectedInterests.length - 5}개 더
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
