@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
-import { Check, ArrowRight, Drama, Palette, Star, MessageCircle, Laugh, Music, Tv, Cat, Utensils, Gamepad2, Zap, BookOpen, Heart, Briefcase, CloudRain, Newspaper } from 'lucide-react';
+import { Check, Drama, Palette, Star, MessageCircle, Laugh, Music, Tv, Cat, Utensils, Gamepad2, Zap, BookOpen, Heart, Briefcase, CloudRain, Newspaper } from 'lucide-react';
 
 interface Interest {
   id: string;
@@ -52,12 +52,29 @@ export default function Onboarding() {
   const handleComplete = async () => {
     setIsLoading(true);
     
-    // TODO: API 호출로 관심사 저장
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 임시 딜레이
-      router.push('/meme-generator?first=true');
+      // 관심사가 선택된 경우 API를 통해 저장
+      if (selectedInterests.length > 0) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/user/interests`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({ interests: selectedInterests }),
+        });
+
+        if (!response.ok) {
+          console.warn('관심사 저장에 실패했지만 계속 진행합니다.');
+        }
+      }
+      
+      // 성공 시 밈 생성기로 이동 (첫 방문 플래그 포함)
+      router.push('/meme-generator?first=true&welcome=true');
     } catch (error) {
       console.error('관심사 저장 실패:', error);
+      // 실패해도 온보딩은 완료하고 진행
+      router.push('/meme-generator?first=true');
     } finally {
       setIsLoading(false);
     }
@@ -66,27 +83,45 @@ export default function Onboarding() {
   const canProceed = currentStep === 1 || selectedInterests.length >= 3;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-8 relative overflow-hidden">
+      {/* 배경 데코레이션 */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-32 w-80 h-80 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-accent-200 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-3000"></div>
+      </div>
+      <div className="max-w-4xl mx-auto px-4 relative z-10">
         {/* 진행 단계 */}
         <div className="mb-8">
           <div className="flex justify-center space-x-4 mb-4">
             {[1, 2].map((step) => (
-              <div
-                key={step}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                  step <= currentStep
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-400'
-                }`}
-              >
-                {step < currentStep ? <Check className="w-5 h-5" /> : step}
+              <div key={step} className="relative">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                    step < currentStep
+                      ? 'bg-primary-500 text-white scale-110'
+                      : step === currentStep
+                      ? 'bg-primary text-white scale-110 shadow-lg'
+                      : 'bg-gray-200 text-gray-400'
+                  }`}
+                >
+                  {step < currentStep ? <Check className="w-5 h-5" /> : step}
+                </div>
+                {/* 현재 단계에 펄스 링 효과 */}
+                {step === currentStep && (
+                  <div 
+                    className="absolute inset-0 rounded-full animate-ping opacity-50"
+                    style={{
+                      background: 'linear-gradient(to right, #FF6B47, #4ECDC4)'
+                    }}
+                  ></div>
+                )}
               </div>
             ))}
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-primary-500 to-secondary-400 h-2 rounded-full transition-all duration-500 shadow-sm"
               style={{ width: `${(currentStep / 2) * 100}%` }}
             />
           </div>
@@ -94,29 +129,41 @@ export default function Onboarding() {
 
         {currentStep === 1 && (
           <div className="text-center mb-12">
-            <Drama size={64} className="mb-6 mx-auto text-blue-600" />
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            {/* 로고 애니메이션 */}
+            <div className="mb-8">
+              <div className="text-6xl font-bold mb-4 animate-bounce" style={{fontFamily: "'Black Han Sans', sans-serif"}}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400">
+                  밈징
+                </span>
+              </div>
+              <div className="flex justify-center space-x-2 mb-6">
+                <div className="text-4xl animate-bounce animation-delay-100">🎉</div>
+                <div className="text-4xl animate-bounce animation-delay-300">🎭</div>
+                <div className="text-4xl animate-bounce animation-delay-500">✨</div>
+              </div>
+            </div>
+            <h1 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               밈징에 오신 것을 환영합니다!
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
               한국 문화에 특화된 밈 생성과 공유의 새로운 경험을 시작해보세요
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <Palette size={32} className="mb-3 mx-auto text-blue-600" />
-                <h3 className="font-semibold text-gray-900 mb-2">쉬운 밈 생성</h3>
-                <p className="text-sm text-gray-600">다양한 템플릿으로 간편하게 밈을 만들어보세요</p>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Palette size={32} className="mb-3 mx-auto text-primary-500" />
+                <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>쉬운 밈 생성</h3>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>다양한 템플릿으로 간편하게 밈을 만들어보세요</p>
               </div>
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <Star size={32} className="mb-3 mx-auto text-blue-600" />
-                <h3 className="font-semibold text-gray-900 mb-2">맞춤형 피드</h3>
-                <p className="text-sm text-gray-600">당신의 관심사에 맞는 밈을 추천해드려요</p>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <Star size={32} className="mb-3 mx-auto text-secondary-500" />
+                <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>맞춤형 피드</h3>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>당신의 관심사에 맞는 밈을 추천해드려요</p>
               </div>
-              <div className="bg-white rounded-xl p-6 shadow-sm">
-                <MessageCircle size={32} className="mb-3 mx-auto text-blue-600" />
-                <h3 className="font-semibold text-gray-900 mb-2">활발한 커뮤니티</h3>
-                <p className="text-sm text-gray-600">다른 사용자들과 밈을 공유하고 소통하세요</p>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 hover:scale-105">
+                <MessageCircle size={32} className="mb-3 mx-auto text-accent-500" />
+                <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>활발한 커뮤니티</h3>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>다른 사용자들과 밈을 공유하고 소통하세요</p>
               </div>
             </div>
           </div>
@@ -124,10 +171,11 @@ export default function Onboarding() {
 
         {currentStep === 2 && (
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            <div className="text-5xl mb-6 animate-bounce">🎯</div>
+            <h1 className="text-3xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
               관심사를 선택해주세요
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg mb-8" style={{ color: 'var(--text-secondary)' }}>
               최소 3개 이상 선택하시면 맞춤형 밈을 추천해드려요
             </p>
             
@@ -136,18 +184,22 @@ export default function Onboarding() {
                 <button
                   key={interest.id}
                   onClick={() => toggleInterest(interest.id)}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  className={`p-4 rounded-xl border-2 transition-all duration-300 transform hover:scale-105 ${
                     selectedInterests.includes(interest.id)
-                      ? 'border-blue-500 bg-blue-50 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                      ? 'border-primary-500 bg-gradient-to-r from-primary-50 to-secondary-50 shadow-lg scale-105'
+                      : 'border-gray-200 bg-white/80 backdrop-blur-sm hover:border-primary-300 hover:shadow-md'
                   }`}
                 >
-                  <interest.icon size={24} className="mb-2 mx-auto text-gray-700" />
-                  <div className="font-semibold text-gray-900 mb-1">{interest.name}</div>
+                  <interest.icon size={24} className={`mb-2 mx-auto transition-colors duration-300 ${
+                    selectedInterests.includes(interest.id) ? 'text-primary-600' : 'text-gray-700'
+                  }`} />
+                  <div className={`font-semibold mb-1 transition-colors duration-300 ${
+                    selectedInterests.includes(interest.id) ? 'text-primary-700' : 'text-gray-900'
+                  }`}>{interest.name}</div>
                   <div className="text-xs text-gray-500">{interest.description}</div>
                   {selectedInterests.includes(interest.id) && (
-                    <div className="mt-2">
-                      <Check className="w-5 h-5 text-blue-600 mx-auto" />
+                    <div className="mt-2 animate-bounce">
+                      <Check className="w-5 h-5 text-primary-600 mx-auto" />
                     </div>
                   )}
                 </button>
@@ -155,14 +207,23 @@ export default function Onboarding() {
             </div>
 
             <div className="text-center mb-6">
-              <p className="text-sm text-gray-600">
-                선택된 관심사: {selectedInterests.length}개
-                {selectedInterests.length < 3 && (
-                  <span className="text-red-500 ml-1">
-                    (최소 3개 선택 필요)
-                  </span>
-                )}
-              </p>
+              <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm transition-all duration-300 ${
+                selectedInterests.length >= 3 
+                  ? 'bg-green-100 text-green-700 border border-green-200' 
+                  : 'bg-orange-100 text-orange-700 border border-orange-200'
+              }`}>
+                <div className="mr-2">
+                  {selectedInterests.length >= 3 ? '특' : '🕰️'}
+                </div>
+                <span>
+                  선택된 관심사: {selectedInterests.length}개
+                  {selectedInterests.length < 3 && (
+                    <span className="ml-1">
+                      (최소 3개 선택 필요)
+                    </span>
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -180,10 +241,10 @@ export default function Onboarding() {
             onClick={handleNext}
             disabled={!canProceed}
             isLoading={isLoading}
-            className="group"
+            className="group bg-gradient-to-r from-primary-500 to-secondary-400 hover:from-primary-600 hover:to-secondary-500 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+            size="lg"
           >
             {currentStep === 1 ? '시작하기' : '완료하고 첫 밈 만들기'}
-            <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </div>
 
