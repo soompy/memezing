@@ -35,6 +35,12 @@ const fontGroups: SelectGroup[] = [
   {
     label: '한글 폰트',
     options: [
+      { value: '"Black Han Sans", sans-serif', label: '블랙한산스' },
+      { value: '"Nanum Myeongjo", serif', label: '나눔명조' },
+      { value: '"Gamja Flower", cursive', label: '감자꽃' },
+      { value: '"Do Hyeon", sans-serif', label: '도현' },
+      { value: '"Jua", sans-serif', label: '주아' },
+      { value: '"Gothic A1", sans-serif', label: '고딕 A1' },
       { value: '"Noto Sans KR", sans-serif', label: '노토 산스' },
       { value: '"Nanum Gothic", sans-serif', label: '나눔고딕' },
       { value: '"Malgun Gothic", sans-serif', label: '맑은 고딕' },
