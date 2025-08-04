@@ -54,22 +54,23 @@ function ContentSlideWrapper({
 }: ContentSlideWrapperProps) {
   const sectionStart = index / totalSections;
   const sectionEnd = (index + 1) / totalSections;
+  const isLastSection = index === totalSections - 1;
   
   const opacity = useTransform(
     smoothProgress,
     [
       Math.max(0, sectionStart - 0.05),
       sectionStart + 0.02,
-      sectionEnd - 0.02,
-      Math.min(1, sectionEnd + 0.05)
+      isLastSection ? 1 : sectionEnd - 0.02,
+      isLastSection ? 1 : Math.min(1, sectionEnd + 0.05)
     ],
-    [0, 1, 1, 0]
+    [0, 1, 1, isLastSection ? 1 : 0]
   );
 
   const y = useTransform(
     smoothProgress,
-    [sectionStart, sectionEnd],
-    [10, -10]
+    [sectionStart, isLastSection ? 1 : sectionEnd],
+    [10, isLastSection ? 0 : -10]
   );
 
   const scale = useTransform(
@@ -77,10 +78,10 @@ function ContentSlideWrapper({
     [
       Math.max(0, sectionStart - 0.02),
       sectionStart + 0.01,
-      sectionEnd - 0.01,
-      Math.min(1, sectionEnd + 0.02)
+      isLastSection ? 1 : sectionEnd - 0.01,
+      isLastSection ? 1 : Math.min(1, sectionEnd + 0.02)
     ],
-    [0.98, 1, 1, 0.98]
+    [0.98, 1, 1, isLastSection ? 1 : 0.98]
   );
 
   return (

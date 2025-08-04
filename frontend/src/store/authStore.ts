@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { AuthState, User, LoginRequest, RegisterRequest } from '@/types/auth';
+import { apiClient, ApiError } from '@/lib/api';
 
 interface AuthStore extends AuthState {
   login: (credentials: LoginRequest) => Promise<boolean>;
@@ -28,17 +29,12 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(credentials),
-          });
-
-          const result = await response.json();
+          const result = await apiClient.login(credentials);
 
           if (result.success && result.data) {
+            // 토큰을 로컬 스토리지에 저장
+            localStorage.setItem('token', result.data.token);
+            
             set({
               user: result.data.user,
               token: result.data.token,
@@ -53,10 +49,14 @@ export const useAuthStore = create<AuthStore>()(
             });
             return false;
           }
-        } catch {
+        } catch (error) {
+          const errorMessage = error instanceof ApiError 
+            ? error.message 
+            : '네트워크 오류가 발생했습니다.';
+          
           set({
             isLoading: false,
-            error: '네트워크 오류가 발생했습니다.',
+            error: errorMessage,
           });
           return false;
         }
@@ -66,17 +66,12 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-          });
-
-          const result = await response.json();
+          const result = await apiClient.register(data);
 
           if (result.success && result.data) {
+            // 토큰을 로컬 스토리지에 저장
+            localStorage.setItem('token', result.data.token);
+            
             set({
               user: result.data.user,
               token: result.data.token,
@@ -91,10 +86,14 @@ export const useAuthStore = create<AuthStore>()(
             });
             return false;
           }
-        } catch {
+        } catch (error) {
+          const errorMessage = error instanceof ApiError 
+            ? error.message 
+            : '네트워크 오류가 발생했습니다.';
+          
           set({
             isLoading: false,
-            error: '네트워크 오류가 발생했습니다.',
+            error: errorMessage,
           });
           return false;
         }
@@ -129,7 +128,21 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true });
         
         try {
+          // API를 통해 로그아웃 (서버의 토큰 무효화)
+          try {
+            await apiClient.logout();
+          } catch (error) {
+            // 로그아웃 API 실패해도 로컬 상태는 클리어
+            console.warn('Server logout failed:', error);
+          }
+          
+          // 로컬 토큰 제거
+          localStorage.removeItem('token');
+          sessionStorage.removeItem('token');
+          
+          // 소셜 로그인 세션도 정리
           await signOut({ redirect: false });
+          
           set({
             user: null,
             token: null,
@@ -156,15 +169,7 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true, error: null });
         
         try {
-          const response = await fetch(`${API_BASE_URL}/api/user/interests`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ interests }),
-          });
-          
-          const result = await response.json();
+          const result = await apiClient.updateInterests(interests);
           
           if (result.success) {
             set((state) => ({
@@ -175,14 +180,18 @@ export const useAuthStore = create<AuthStore>()(
           } else {
             set({
               isLoading: false,
-              error: result.message || '관심사 업데이트에 실패했습니다.',
+              error: '관심사 업데이트에 실패했습니다.',
             });
             return false;
           }
-        } catch {
+        } catch (error) {
+          const errorMessage = error instanceof ApiError 
+            ? error.message 
+            : '네트워크 오류가 발생했습니다.';
+          
           set({
             isLoading: false,
-            error: '네트워크 오류가 발생했습니다.',
+            error: errorMessage,
           });
           return false;
         }

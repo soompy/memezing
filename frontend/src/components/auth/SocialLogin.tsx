@@ -61,7 +61,7 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
         onClick={() => handleSocialLogin('google')}
         disabled={loadingProvider !== null}
         isLoading={loadingProvider === 'google'}
-        className="w-full flex items-center justify-center space-x-3 border-gray-300 hover:bg-gray-50"
+        className="w-full flex items-center justify-center space-x-3 border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-300"
       >
         {loadingProvider !== 'google' && (
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -139,14 +139,18 @@ const KakaoButton = styled(Button)`
   background-color: #fee500;
   color: #000000;
   border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
   
   &:hover {
-    background-color: #fdd800;
+    background-color: #fee500;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   
   &:disabled {
     background-color: #f0f0f0;
     color: #999999;
+    box-shadow: none;
   }
 `;
 
@@ -159,13 +163,17 @@ const NaverButton = styled(Button)`
   background-color: #03c75a;
   color: #ffffff;
   border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
   
   &:hover {
-    background-color: #02b351;
+    background-color: #03c75a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   
   &:disabled {
     background-color: #f0f0f0;
     color: #999999;
+    box-shadow: none;
   }
 `;

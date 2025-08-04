@@ -107,31 +107,38 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4 relative overflow-hidden">
       {/* 배경 데코레이션 */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -top-40 -right-32 w-80 h-80 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
         <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-accent-200 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-3000"></div>
       </div>
 
       <div className="relative w-full max-w-md">
         {/* 로고 섹션 */}
         <div className="text-center mb-8">
-          <div className="text-3xl font-bold mb-2">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-              🎭 밈징
-            </span>
+          <div className="mb-4">
+            <div className="text-4xl font-bold mb-2" style={{fontFamily: "'Black Han Sans', sans-serif"}}>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400">
+                밈징
+              </span>
+            </div>
+            <div className="text-sm text-gray-500 tracking-wider">MEME-ZING</div>
           </div>
-          <h1 className="text-2xl font-bold text-900 mb-2">회원가입</h1>
-          <p className="text-600">밈징에서 창의적인 여정을 시작하세요!</p>
+          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>회원가입</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>밈징에서 창의적인 여정을 시작하세요!</p>
         </div>
 
         {/* 회원가입 폼 */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 animate-shake">
+                <div className="flex items-center">
+                  <div className="text-red-500 mr-2">⚠️</div>
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
               </div>
             )}
 
@@ -273,11 +280,11 @@ export default function RegisterPage() {
                   required
                 />
                 <span className="ml-3 text-sm text-gray-600">
-                  <Link href="/terms" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/terms" className="text-primary-600 hover:text-primary-700 hover:underline transition-colors">
                     이용약관
                   </Link>
                   {' '}및{' '}
-                  <Link href="/privacy" className="text-blue-600 hover:text-blue-700 hover:underline">
+                  <Link href="/privacy" className="text-primary-600 hover:text-primary-700 hover:underline transition-colors">
                     개인정보처리방침
                   </Link>
                   에 동의합니다. (필수)
@@ -306,7 +313,7 @@ export default function RegisterPage() {
               이미 계정이 있으신가요?{' '}
               <Link
                 href="/login"
-                className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                className="font-medium text-primary-600 hover:text-primary-700 hover:underline transition-colors"
               >
                 로그인
               </Link>

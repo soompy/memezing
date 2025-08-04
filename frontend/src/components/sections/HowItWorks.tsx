@@ -7,6 +7,7 @@ import styled from '@emotion/styled';
 import { motion } from 'framer-motion';
 import UnifiedScrollSection, { ContentSlide } from '@/components/ui/UnifiedScrollSection/UnifiedScrollSection';
 import { brandColors, componentColors } from '@/styles/theme';
+import { keyframes } from '@emotion/react';
 
 const steps = [
   {
@@ -47,10 +48,36 @@ const StepContainer = styled.div<{ isActive: boolean; color: string; bgColor: st
   cursor: pointer;
   width: 100%;
   max-width: none;
-  
-  &:hover {
-    transform: ${props => props.isActive ? 'scale(1.02)' : 'scale(1.01)'};
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+`;
+
+// flicker keyframe 정의
+const flicker = keyframes`
+  0%   { opacity: 1; }
+  10%  { opacity: 0.4; }
+  20%  { opacity: 1; }
+  30%  { opacity: 0.3; }
+  40%  { opacity: 1; }
+  50%  { opacity: 0.6; }
+  60%  { opacity: 1; }
+  70%  { opacity: 0.5; }
+  80%  { opacity: 1; }
+  90%  { opacity: 0.7; }
+  100% { opacity: 1; }
+`;
+
+// pulse ring keyframe 정의 (펄스링 가시성을 위한 애니메이션)
+const pulseRing = keyframes`
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 107, 71, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(255, 107, 71, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 107, 71, 0);
   }
 `;
 
@@ -62,11 +89,18 @@ const IconWrapper = styled.div<{ color: string; bgColor: string; isActive: boole
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: ${props => props.isActive ? `${pulseRing} 2s infinite, ${flicker} 8s infinite` : `${flicker} 8s infinite`};
   margin-bottom: 2rem;
   transition: all 0.3s ease;
   transform: ${props => props.isActive ? 'rotate(5deg)' : 'rotate(0deg)'};
+  position: relative;
+  
+  /* 진행 중인 스텝에만 펄스링 보더 추가 */
+  ${props => props.isActive && `
+    border: 3px solid ${props.color};
+    box-shadow: 0 0 0 0 ${props.color}33;
+  `}
 `;
-
 
 export default function HowItWorks() {
 
@@ -76,7 +110,8 @@ export default function HowItWorks() {
       <ContentSlide key="title">
           <div className="w-full px-8 sm:px-12 lg:px-16 h-screen flex items-center justify-center">
               <motion.h2
-                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold text-center text-gray-900 w-full"
+                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold text-center w-full"
+                  style={{ color: 'var(--text-primary)' }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.8 }}
@@ -117,19 +152,22 @@ export default function HowItWorks() {
                               <div className="space-y-4">
                                   <div className="flex items-center justify-center space-x-3 mb-4">
                                       <span
-                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold text-white"
+                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold"
                                           style={{
                                               backgroundColor: steps[0].color,
+                                              color: 'white',
+                                              border: `2px solid ${steps[0].color}`,
+                                              boxShadow: `0 0 0 4px ${steps[0].color}22`
                                           }}
                                       >
                                           1
                                       </span>
-                                      <h3 className="text-4xl lg:text-5xl font-bold text-gray-900">
+                                      <h3 className="text-4xl lg:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                           {steps[0].title}
                                       </h3>
                                   </div>
 
-                                  <p className="text-2xl lg:text-3xl text-gray-600 mb-8 leading-relaxed">
+                                  <p className="text-2xl lg:text-3xl mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                                       {steps[0].description}
                                   </p>
 
@@ -188,19 +226,22 @@ export default function HowItWorks() {
                               <div className="space-y-4">
                                   <div className="flex items-center justify-center space-x-3 mb-4">
                                       <span
-                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold text-white"
+                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold"
                                           style={{
                                               backgroundColor: steps[1].color,
+                                              color: 'white',
+                                              border: `2px solid ${steps[1].color}`,
+                                              boxShadow: `0 0 0 4px ${steps[1].color}22`
                                           }}
                                       >
                                           2
                                       </span>
-                                      <h3 className="text-4xl lg:text-5xl font-bold text-gray-900">
+                                      <h3 className="text-4xl lg:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                           {steps[1].title}
                                       </h3>
                                   </div>
 
-                                  <p className="text-2xl lg:text-3xl text-gray-600 mb-8 leading-relaxed">
+                                  <p className="text-2xl lg:text-3xl mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                                       {steps[1].description}
                                   </p>
 
@@ -259,19 +300,22 @@ export default function HowItWorks() {
                               <div className="space-y-4">
                                   <div className="flex items-center justify-center space-x-3 mb-4">
                                       <span
-                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold text-white"
+                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold"
                                           style={{
                                               backgroundColor: steps[2].color,
+                                              color: 'white',
+                                              border: `2px solid ${steps[2].color}`,
+                                              boxShadow: `0 0 0 4px ${steps[2].color}22`
                                           }}
                                       >
                                           3
                                       </span>
-                                      <h3 className="text-4xl lg:text-5xl font-bold text-gray-900">
+                                      <h3 className="text-4xl lg:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                           {steps[2].title}
                                       </h3>
                                   </div>
 
-                                  <p className="text-2xl lg:text-3xl text-gray-600 mb-8 leading-relaxed">
+                                  <p className="text-2xl lg:text-3xl mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                                       {steps[2].description}
                                   </p>
 
@@ -296,35 +340,6 @@ export default function HowItWorks() {
                       </StepContainer>
                   </motion.div>
               </div>
-          </div>
-      </ContentSlide>,
-
-      // 5. CTA
-      <ContentSlide key="cta">
-          <div className="w-full px-8 sm:px-12 lg:px-16 text-center h-screen flex items-center justify-center">
-              <motion.div
-                  className="flex flex-col items-center space-y-8 p-8"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-              >
-                  <div className="text-center">
-                      <p className="text-4xl lg:text-6xl font-bold text-gray-900 mb-4 leading-relaxed">
-                          지금 바로 시작해보세요!
-                      </p>
-                      <p className="text-2xl lg:text-4xl text-gray-600">
-                          회원가입 없이도 바로 사용 가능해요
-                      </p>
-                  </div>
-                  <Button
-                      variant="primary"
-                      size="lg"
-                      onClick={() => (window.location.href = "/meme-generator")}
-                      className="text-xl px-12 py-6 rounded-2xl font-bold"
-                  >
-                      밈 만들기 시작하기
-                  </Button>
-              </motion.div>
           </div>
       </ContentSlide>,
   ];

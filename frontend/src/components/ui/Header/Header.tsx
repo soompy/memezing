@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, X, ArrowRight, User, LogOut, Drama } from 'lucide-react';
+import { Menu, X, User, LogOut, Drama } from 'lucide-react';
 import styled from '@emotion/styled';
 import Button from '@/components/ui/Button';
 import ThemeToggle from '@/components/ui/ThemeToggle';
@@ -17,15 +17,14 @@ export default function Header() {
 
   const navigation = [
     { name: '밈징', href: '/meme-generator' },
-    { name: '피드', href: '/feed' },
-    { name: '커뮤니티', href: '#community' },
+    { name: '커뮤니티', href: '/community' },
   ];
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const scrollToSection = (href: string) => {
+  const handleNavigation = (href: string) => {
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
       element?.scrollIntoView({ behavior: 'smooth' });
@@ -66,7 +65,7 @@ export default function Header() {
             {navigation.map((item) => (
               <NavItem
                 key={item.name}
-                onClick={() => scrollToSection(item.href)}
+                onClick={() => handleNavigation(item.href)}
               >
                 {item.name}
               </NavItem>
@@ -118,8 +117,7 @@ export default function Header() {
                   로그인
                 </Button>
                 <Button size="sm" className="group" onClick={handleRegister}>
-                  시작하기
-                  <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  회원가입
                 </Button>
               </AuthButtons>
             )}
@@ -147,7 +145,7 @@ export default function Header() {
               {navigation.map((item) => (
                 <MobileNavItem
                   key={item.name}
-                  onClick={() => scrollToSection(item.href)}
+                  onClick={() => handleNavigation(item.href)}
                 >
                   {item.name}
                 </MobileNavItem>
@@ -183,8 +181,7 @@ export default function Header() {
                       로그인
                     </Button>
                     <Button size="sm" className="w-full group" onClick={handleRegister}>
-                      시작하기
-                      <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      회원가입
                     </Button>
                   </MobileAuthButtons>
                 )}
