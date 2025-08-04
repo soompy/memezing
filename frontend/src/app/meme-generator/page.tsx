@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, Menu, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
@@ -9,6 +10,8 @@ import FabricCanvas, { FabricCanvasRef, MemeTemplate } from '@/components/meme/F
 import ImageUploadComponent from '@/components/meme/ImageUploadComponent';
 import TextInputArea from '@/components/meme/TextInputArea';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
+import ResizablePanel from '@/components/ui/ResizablePanel';
+import { AlertDialog, ConfirmDialog } from '@/components/ui/Modal';
 
 // 기존 템플릿 데이터 (일부만 가져옴)
 const popularTemplates: MemeTemplate[] = [
@@ -74,6 +77,7 @@ const koreanDramaTemplates: MemeTemplate[] = [
 ];
 
 export default function MemeGeneratorPage() {
+  const router = useRouter();
   const canvasRef = useRef<FabricCanvasRef>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MemeTemplate | null>(null);
   const [activeTab, setActiveTab] = useState('images');
@@ -92,6 +96,87 @@ export default function MemeGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(null);
+  
+  // 모달 상태들
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'info' | 'warning' | 'danger' | 'success';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info'
+  });
+  
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    confirmText: string;
+    type: 'info' | 'warning' | 'danger' | 'success';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    confirmText: '확인',
+    type: 'info'
+  });
+
+  // 알럿 표시 함수
+  const showAlert = useCallback((title: string, message: string, type: 'info' | 'warning' | 'danger' | 'success' = 'info') => {
+    setAlertModal({
+      isOpen: true,
+      title,
+      message,
+      type
+    });
+  }, []);
+
+  // 컨펌 표시 함수
+  const showConfirm = useCallback((
+    title: string, 
+    message: string, 
+    onConfirm: () => void, 
+    confirmText: string = '확인',
+    type: 'info' | 'warning' | 'danger' | 'success' = 'info'
+  ) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm,
+      confirmText,
+      type
+    });
+  }, []);
+
+  // 모달 닫기 함수들
+  const closeAlert = useCallback(() => {
+    setAlertModal(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
+  const closeConfirm = useCallback(() => {
+    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
+  // 모바일 감지 및 리디렉션
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        router.push('/meme-generator/mobile');
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [router]);
 
   // 템플릿 선택 핸들러
   const handleTemplateSelect = useCallback(async (template: MemeTemplate) => {
@@ -113,20 +198,23 @@ export default function MemeGeneratorPage() {
         // CORS 에러의 경우 경고만 표시하고 계속 진행
         setSelectedTemplate(template);
       } else if (errorMessage.includes('Network')) {
-        alert('네트워크 연결을 확인해주세요. 인터넷 연결이 불안정할 수 있습니다.');
+        showAlert('네트워크 오류', '네트워크 연결을 확인해주세요. 인터넷 연결이 불안정할 수 있습니다.', 'warning');
       } else {
         // 일반적인 에러의 경우 재시도 옵션 제공
-        const retry = confirm('템플릿을 불러오는데 실패했습니다. 다시 시도하시겠습니까?');
-        if (retry) {
-          // 재시도
-          setTimeout(() => handleTemplateSelect(template), 500);
-          return;
-        }
+        showConfirm(
+          '템플릿 로딩 실패',
+          '템플릿을 불러오는데 실패했습니다. 다시 시도하시겠습니까?',
+          () => {
+            setTimeout(() => handleTemplateSelect(template), 500);
+          },
+          '재시도',
+          'warning'
+        );
       }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showAlert, showConfirm]);
 
   // 텍스트 추가
   const handleAddText = useCallback((text: string = '새 텍스트') => {
@@ -179,11 +267,11 @@ export default function MemeGeneratorPage() {
       await canvasRef.current.addImageFromFile(file);
     } catch (error) {
       console.error('Image upload failed:', error);
-      alert('이미지 업로드에 실패했습니다.');
+      showAlert('업로드 실패', '이미지 업로드에 실패했습니다. 파일 형식이나 크기를 확인해주세요.', 'danger');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showAlert]);
 
   // 이미지 URL 추가
   const handleImageUrl = useCallback(async (url: string) => {
@@ -194,11 +282,11 @@ export default function MemeGeneratorPage() {
       await canvasRef.current.addImageFromUrl(url);
     } catch (error) {
       console.error('Image URL loading failed:', error);
-      alert('이미지 URL 로딩에 실패했습니다.');
+      showAlert('URL 로딩 실패', '이미지 URL 로딩에 실패했습니다. URL이 올바른지 확인해주세요.', 'danger');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showAlert]);
 
   // 밈 다운로드
   const handleDownload = useCallback(() => {
@@ -206,7 +294,7 @@ export default function MemeGeneratorPage() {
     
     const dataURL = canvasRef.current.exportAsImage();
     if (!dataURL) {
-      alert('이미지 생성에 실패했습니다.');
+      showAlert('다운로드 실패', '이미지 생성에 실패했습니다. 다시 시도해주세요.', 'danger');
       return;
     }
     
@@ -217,7 +305,10 @@ export default function MemeGeneratorPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, []);
+    
+    // 성공 메시지 표시
+    showAlert('다운로드 완료', '밈이 성공적으로 다운로드되었습니다!', 'success');
+  }, [showAlert]);
 
   // 캔버스 클리어
   const handleClear = useCallback(() => {
@@ -301,10 +392,10 @@ export default function MemeGeneratorPage() {
     { key: 'text', label: '텍스트', icon: Type }
   ];
 
-  // 사이드바 토글
-  const toggleSidebar = useCallback(() => {
-    setIsSidebarOpen(prev => !prev);
-  }, []);
+  // 커뮤니티 페이지 이동
+  const goToCommunity = useCallback(() => {
+    router.push('/community');
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -312,24 +403,18 @@ export default function MemeGeneratorPage() {
       <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            {/* 모바일 메뉴 버튼 */}
-            <Button 
-              variant="secondary" 
-              size="sm"
-              onClick={toggleSidebar}
-              className="md:hidden"
-            >
-              {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-            </Button>
-            
-            <Button variant="secondary" size="sm" className="hidden md:flex">
-              <ArrowLeft size={16} className="mr-2" />
-              뒤로가기
-            </Button>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">밈 생성기</h1>
+            <h1 className="text-gray-900" style={{fontFamily: "'Black Han Sans', sans-serif", fontSize: '1.7rem', fontWeight: 'light'}}>밈징</h1>
           </div>
           
           <div className="flex items-center space-x-2 md:space-x-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={goToCommunity}
+            >
+              <Users size={16} className="mr-1 md:mr-2" />
+              <span className="hidden sm:inline">커뮤니티</span>
+            </Button>
             <Button
               variant="primary"
               size="sm"
@@ -343,184 +428,386 @@ export default function MemeGeneratorPage() {
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-80px)] relative">
-        {/* 사이드바 */}
-        <div className={`
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0 transition-transform duration-300 ease-in-out
-          fixed md:relative z-30 md:z-auto
-          w-80 h-full bg-white border-r border-gray-200 flex flex-col
-        `}>
-          {/* Sticky 탭 헤더 */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 z-10 p-4 shadow-sm">
-            <TabGroup
-              items={tabs}
-              activeKey={activeTab}
-              onChange={setActiveTab}
-            />
-          </div>
-          
-          {/* 스크롤 가능한 콘텐츠 영역 */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-4">
-              {activeTab === 'images' && (
-                <div className="space-y-6">
-                  {/* 이미지 업로드 섹션 */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">직접 업로드</h3>
-                    <ImageUploadComponent
-                      onImageSelect={handleImageUpload}
-                      onImageUrl={handleImageUrl}
-                    />
-                  </div>
-
-                  {/* 구분선 */}
-                  <div className="border-t border-gray-200"></div>
-
-                  {/* 인기 템플릿 섹션 */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">인기 템플릿</h3>
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                      {popularTemplates.map((template) => (
-                        <button
-                          key={template.id}
-                          className={`
-                            relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                            ${selectedTemplate?.id === template.id 
-                              ? 'border-blue-500 ring-2 ring-blue-200' 
-                              : 'border-gray-200 hover:border-gray-300'
-                            }
-                          `}
-                          onClick={() => {
-                            handleTemplateSelect(template);
-                            setIsSidebarOpen(false); // 모바일에서 템플릿 선택 후 사이드바 닫기
-                          }}
-                          disabled={isLoading}
-                        >
-                          <img
-                            src={template.url}
-                            alt={template.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                            <p className="text-xs font-medium truncate">{template.name}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <h3 className="text-lg font-semibold mb-4">한국 드라마 스타일</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {koreanDramaTemplates.map((template) => (
-                        <button
-                          key={template.id}
-                          className={`
-                            relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                            ${selectedTemplate?.id === template.id 
-                              ? 'border-blue-500 ring-2 ring-blue-200' 
-                              : 'border-gray-200 hover:border-gray-300'
-                            }
-                          `}
-                          onClick={() => {
-                            handleTemplateSelect(template);
-                            setIsSidebarOpen(false);
-                          }}
-                          disabled={isLoading}
-                        >
-                          <img
-                            src={template.url}
-                            alt={template.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                            <p className="text-xs font-medium truncate">{template.name}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+      <div className="h-[calc(100vh-80px)]">
+        {/* 모바일에서는 기존 방식 유지, 데스크톱에서는 리사이저블 패널 사용 */}
+        <div className="block md:hidden h-full">
+          {/* 모바일 레이아웃 */}
+          <div className="flex h-full relative">
+            {/* 모바일 사이드바 */}
+            <div className={`
+              ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+              transition-transform duration-300 ease-in-out
+              fixed z-30 w-80 h-full bg-white border-r border-gray-200 flex flex-col
+            `}>
+              {/* Sticky 탭 헤더 */}
+              <div className="sticky top-0 bg-white border-b border-gray-200 z-10 p-4 shadow-sm">
+                <TabGroup
+                  items={tabs}
+                  activeKey={activeTab}
+                  onChange={setActiveTab}
+                />
+              </div>
               
-              {activeTab === 'text' && (
-                <div className="space-y-6">
-                  {/* 글귀 입력 섹션 */}
-                  <div>
-                    <TextInputArea
-                      onTextAdd={handleAddText}
-                    />
-                  </div>
+              {/* 스크롤 가능한 콘텐츠 영역 */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-4">
+                  {activeTab === 'images' && (
+                    <div className="space-y-6">
+                      {/* 이미지 업로드 섹션 */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4">직접 업로드</h3>
+                        <ImageUploadComponent
+                          onImageSelect={handleImageUpload}
+                          onImageUrl={handleImageUrl}
+                        />
+                      </div>
 
-                  {/* 구분선 */}
-                  <div className="border-t border-gray-200"></div>
+                      {/* 구분선 */}
+                      <div className="border-t border-gray-200"></div>
 
-                  {/* 텍스트 스타일 섹션 */}
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold">텍스트 스타일</h3>
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddText()}
-                      >
-                        기본 텍스트 추가
-                      </Button>
+                      {/* 인기 템플릿 섹션 */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4">인기 템플릿</h3>
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                          {popularTemplates.map((template) => (
+                            <button
+                              key={template.id}
+                              className={`
+                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                ${selectedTemplate?.id === template.id 
+                                  ? 'border-blue-500 ring-2 ring-blue-200' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                                }
+                              `}
+                              onClick={() => {
+                                handleTemplateSelect(template);
+                                setIsSidebarOpen(false);
+                              }}
+                              disabled={isLoading}
+                            >
+                              <img
+                                src={template.url}
+                                alt={template.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                <p className="text-xs font-medium truncate">{template.name}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                        
+                        <h3 className="text-lg font-semibold mb-4">한국 드라마 스타일</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {koreanDramaTemplates.map((template) => (
+                            <button
+                              key={template.id}
+                              className={`
+                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                ${selectedTemplate?.id === template.id 
+                                  ? 'border-blue-500 ring-2 ring-blue-200' 
+                                  : 'border-gray-200 hover:border-gray-300'
+                                }
+                              `}
+                              onClick={() => {
+                                handleTemplateSelect(template);
+                                setIsSidebarOpen(false);
+                              }}
+                              disabled={isLoading}
+                            >
+                              <img
+                                src={template.url}
+                                alt={template.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                <p className="text-xs font-medium truncate">{template.name}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                    <TextStyleControls
-                      style={textStyle}
-                      onChange={handleStyleChange}
-                      onReset={handleStyleReset}
-                    />
-                  </div>
+                  )}
+                  
+                  {activeTab === 'text' && (
+                    <div className="space-y-6">
+                      {/* 글귀 입력 섹션 */}
+                      <div>
+                        <TextInputArea
+                          onTextAdd={handleAddText}
+                        />
+                      </div>
+
+                      {/* 구분선 */}
+                      <div className="border-t border-gray-200"></div>
+
+                      {/* 텍스트 스타일 섹션 */}
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold">텍스트 스타일</h3>
+                          <Button
+                            size="sm"
+                            onClick={() => handleAddText()}
+                          >
+                            기본 텍스트 추가
+                          </Button>
+                        </div>
+                        <TextStyleControls
+                          style={textStyle}
+                          onChange={handleStyleChange}
+                          onReset={handleStyleReset}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+            </div>
+
+            {/* 모바일 오버레이 */}
+            {isSidebarOpen && (
+              <div 
+                className="fixed inset-0 bg-black bg-opacity-50 z-20"
+                onClick={() => setIsSidebarOpen(false)}
+              />
+            )}
+
+            {/* 모바일 캔버스 영역 */}
+            <div className="flex-1 flex items-center justify-center p-4 bg-gray-100">
+              <div className="w-full h-full max-w-4xl relative">
+                {isLoading && (
+                  <div className="text-center mb-4">
+                    <div className="inline-flex items-center space-x-2">
+                      <RefreshCw size={16} className="animate-spin" />
+                      <span>로딩 중...</span>
+                    </div>
+                  </div>
+                )}
+                
+                <FabricCanvas
+                  ref={canvasRef}
+                  width={800}
+                  height={600}
+                  onSelectionChange={setSelectedObject}
+                  className="w-full h-full"
+                />
+
+                <CanvasOverlay
+                  selectedObject={selectedObject}
+                  canvasContainer={canvasContainer}
+                  onDelete={handleDeleteSelected}
+                  onClear={handleClear}
+                  onDuplicate={handleDuplicateSelected}
+                  onRotate={handleRotateSelected}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 오버레이 (모바일에서 사이드바가 열렸을 때) */}
-        {isSidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
+        {/* 데스크톱 리사이저블 레이아웃 */}
+        <div className="hidden md:block h-full">
+          <ResizablePanel
+            defaultLeftWidth={350}
+            minLeftWidth={280}
+            maxLeftWidth={600}
+            leftPanel={
+              <>
+                {/* Sticky 탭 헤더 */}
+                <div className="sticky top-0 bg-white border-b border-gray-200 z-10 p-4 shadow-sm">
+                  <TabGroup
+                    items={tabs}
+                    activeKey={activeTab}
+                    onChange={setActiveTab}
+                  />
+                </div>
+                
+                {/* 스크롤 가능한 콘텐츠 영역 */}
+                <div className="flex-1 overflow-y-auto">
+                  <div className="p-4">
+                    {activeTab === 'images' && (
+                      <div className="space-y-6">
+                        {/* 이미지 업로드 섹션 */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">직접 업로드</h3>
+                          <ImageUploadComponent
+                            onImageSelect={handleImageUpload}
+                            onImageUrl={handleImageUrl}
+                          />
+                        </div>
 
-        {/* 메인 캔버스 영역 */}
-        <div className="flex-1 flex flex-col lg:flex-row min-h-0 relative">
-          {/* 캔버스 컨테이너 */}
-          <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-gray-100 min-h-0">
-            <div className="w-full h-full max-w-4xl relative">
-              {isLoading && (
-                <div className="text-center mb-4">
-                  <div className="inline-flex items-center space-x-2">
-                    <RefreshCw size={16} className="animate-spin" />
-                    <span>로딩 중...</span>
+                        {/* 구분선 */}
+                        <div className="border-t border-gray-200"></div>
+
+                        {/* 인기 템플릿 섹션 */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">인기 템플릿</h3>
+                          <div className="grid grid-cols-2 gap-3 mb-6">
+                            {popularTemplates.map((template) => (
+                              <button
+                                key={template.id}
+                                className={`
+                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                  ${selectedTemplate?.id === template.id 
+                                    ? 'border-blue-500 ring-2 ring-blue-200' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                  }
+                                `}
+                                onClick={() => handleTemplateSelect(template)}
+                                disabled={isLoading}
+                              >
+                                <img
+                                  src={template.url}
+                                  alt={template.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                  <p className="text-xs font-medium truncate">{template.name}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <h3 className="text-lg font-semibold mb-4">한국 드라마 스타일</h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {koreanDramaTemplates.map((template) => (
+                              <button
+                                key={template.id}
+                                className={`
+                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
+                                  ${selectedTemplate?.id === template.id 
+                                    ? 'border-blue-500 ring-2 ring-blue-200' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                  }
+                                `}
+                                onClick={() => handleTemplateSelect(template)}
+                                disabled={isLoading}
+                              >
+                                <img
+                                  src={template.url}
+                                  alt={template.name}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                                  <p className="text-xs font-medium truncate">{template.name}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {activeTab === 'text' && (
+                      <div className="space-y-6">
+                        {/* 글귀 입력 섹션 */}
+                        <div>
+                          <TextInputArea
+                            onTextAdd={handleAddText}
+                          />
+                        </div>
+
+                        {/* 구분선 */}
+                        <div className="border-t border-gray-200"></div>
+
+                        {/* 텍스트 스타일 섹션 */}
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold">텍스트 스타일</h3>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddText()}
+                            >
+                              기본 텍스트 추가
+                            </Button>
+                          </div>
+                          <TextStyleControls
+                            style={textStyle}
+                            onChange={handleStyleChange}
+                            onReset={handleStyleReset}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
-              
-              <FabricCanvas
-                ref={canvasRef}
-                width={800}
-                height={600}
-                onSelectionChange={setSelectedObject}
-                className="w-full h-full"
-              />
+              </>
+            }
+            rightPanel={
+              <div className="flex flex-col h-full">
+                {/* 캔버스 컨테이너 */}
+                <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-gray-100 min-h-0">
+                  <div className="w-full h-full max-w-4xl relative">
+                    {isLoading && (
+                      <div className="text-center mb-4">
+                        <div className="inline-flex items-center space-x-2">
+                          <RefreshCw size={16} className="animate-spin" />
+                          <span>로딩 중...</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <FabricCanvas
+                      ref={canvasRef}
+                      width={800}
+                      height={600}
+                      onSelectionChange={setSelectedObject}
+                      className="w-full h-full"
+                    />
 
-              {/* 캔버스 오버레이 - 선택된 객체 주변에 액션 버튼 표시 */}
-              <CanvasOverlay
-                selectedObject={selectedObject}
-                canvasContainer={canvasContainer}
-                onDelete={handleDeleteSelected}
-                onClear={handleClear}
-                onDuplicate={handleDuplicateSelected}
-                onRotate={handleRotateSelected}
-                isLoading={isLoading}
-              />
-            </div>
-          </div>
+                    {/* 캔버스 오버레이 */}
+                    <CanvasOverlay
+                      selectedObject={selectedObject}
+                      canvasContainer={canvasContainer}
+                      onDelete={handleDeleteSelected}
+                      onClear={handleClear}
+                      onDuplicate={handleDuplicateSelected}
+                      onRotate={handleRotateSelected}
+                      isLoading={isLoading}
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+          />
         </div>
       </div>
+
+      {/* 알럿 모달 */}
+      <AlertDialog
+        isOpen={alertModal.isOpen}
+        onClose={closeAlert}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+        icon={
+          alertModal.type === 'danger' ? <X className="w-6 h-6" /> :
+          alertModal.type === 'warning' ? <AlertTriangle className="w-6 h-6" /> :
+          alertModal.type === 'success' ? <Download className="w-6 h-6" /> :
+          <ArrowLeft className="w-6 h-6" />
+        }
+      />
+
+      {/* 컨펌 모달 */}
+      <ConfirmDialog
+        isOpen={confirmModal.isOpen}
+        onConfirm={() => {
+          confirmModal.onConfirm();
+          closeConfirm();
+        }}
+        onCancel={closeConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        type={confirmModal.type}
+        icon={
+          confirmModal.type === 'warning' ? <AlertTriangle className="w-6 h-6" /> :
+          confirmModal.type === 'danger' ? <X className="w-6 h-6" /> :
+          <RefreshCw className="w-6 h-6" />
+        }
+      />
     </div>
   );
 }
