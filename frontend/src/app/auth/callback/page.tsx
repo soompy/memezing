@@ -80,24 +80,48 @@ function AuthCallbackContent() {
   }, [searchParams, router, setToken]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* 배경 데코레이션 */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-32 w-80 h-80 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+      </div>
+      
+      <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 max-w-md w-full text-center">
         {status === 'loading' && (
           <>
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">로그인 처리 중</h2>
-            <p className="text-gray-600">{message}</p>
+            {/* 로고 */}
+            <div className="mb-6">
+              <div className="text-3xl font-bold" style={{fontFamily: "'Black Han Sans', sans-serif"}}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400">
+                  밈징
+                </span>
+              </div>
+            </div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-6"></div>
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>로그인 처리 중</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{message}</p>
+            <div className="mt-4 flex justify-center space-x-1">
+              <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce animation-delay-200"></div>
+              <div className="w-2 h-2 bg-primary-400 rounded-full animate-bounce animation-delay-400"></div>
+            </div>
           </>
         )}
         
         {status === 'success' && (
           <>
-            <div className="text-6xl mb-6">✅</div>
-            <h2 className="text-xl font-bold text-green-600 mb-2">로그인 성공!</h2>
-            <p className="text-gray-600">{message}</p>
-            <div className="mt-4">
-              <div className="inline-flex items-center space-x-2 text-sm text-gray-500">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            {/* 성공 애니메이션 */}
+            <div className="relative mb-6">
+              <div className="text-6xl animate-bounce">🎉</div>
+              <div className="absolute -top-2 -right-2 text-2xl animate-ping">✨</div>
+              <div className="absolute -bottom-2 -left-2 text-xl animate-pulse">🎆</div>
+            </div>
+            <h2 className="text-xl font-bold text-green-600 mb-2 animate-pulse">로그인 성공!</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{message}</p>
+            <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+              <div className="inline-flex items-center space-x-2 text-sm text-green-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500"></div>
                 <span>페이지를 이동하고 있습니다...</span>
               </div>
             </div>
@@ -106,12 +130,14 @@ function AuthCallbackContent() {
         
         {status === 'error' && (
           <>
-            <div className="text-6xl mb-6">❌</div>
+            <div className="text-6xl mb-6 animate-bounce">😢</div>
             <h2 className="text-xl font-bold text-red-600 mb-2">로그인 실패</h2>
-            <p className="text-gray-600 mb-4">{message}</p>
-            <div className="inline-flex items-center space-x-2 text-sm text-gray-500">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-              <span>로그인 페이지로 이동 중...</span>
+            <p style={{ color: 'var(--text-secondary)' }} className="mb-4">{message}</p>
+            <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="inline-flex items-center space-x-2 text-sm text-red-600">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                <span>로그인 페이지로 이동 중...</span>
+              </div>
             </div>
           </>
         )}
@@ -123,11 +149,11 @@ function AuthCallbackContent() {
 export default function AuthCallback() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-6"></div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">로그인 처리 중</h2>
-          <p className="text-gray-600">잠시만 기다려주세요...</p>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 max-w-md w-full text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-500 mx-auto mb-6"></div>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>로그인 처리 중</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>잠시만 기다려주세요...</p>
         </div>
       </div>
     }>
