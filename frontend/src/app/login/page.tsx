@@ -19,6 +19,7 @@ export default function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [formErrors, setFormErrors] = useState<{email?: string; password?: string}>({});
 
   // 이미 로그인된 사용자는 홈으로 리다이렉트
   useEffect(() => {
@@ -38,13 +39,48 @@ export default function LoginPage() {
       ...prev,
       [name]: value,
     }));
+    
+    // 실시간 유효성 검사
+    if (name === 'email' && formErrors.email) {
+      setFormErrors(prev => ({ ...prev, email: undefined }));
+    }
+    if (name === 'password' && formErrors.password) {
+      setFormErrors(prev => ({ ...prev, password: undefined }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors: {email?: string; password?: string} = {};
+    
+    if (!formData.email) {
+      errors.email = '이메일을 입력해주세요.';
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)) {
+      errors.email = '올바른 이메일 형식이 아닙니다.';
+    }
+    
+    if (!formData.password) {
+      errors.password = '비밀번호를 입력해주세요.';
+    } else if (formData.password.length < 6) {
+      errors.password = '비밀번호는 최소 6자 이상이어야 합니다.';
+    }
+    
+    return errors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    
     const success = await login(formData);
     if (success) {
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+      }
       router.push('/');
     }
   };
@@ -93,6 +129,7 @@ export default function LoginPage() {
                 placeholder="이메일을 입력하세요"
                 required
                 className="pl-10"
+                error={formErrors.email}
               />
               <Mail className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
             </div>
@@ -108,6 +145,7 @@ export default function LoginPage() {
                 placeholder="비밀번호를 입력하세요"
                 required
                 className="pl-10 pr-10"
+                error={formErrors.password}
               />
               <Lock className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
               <button
@@ -151,7 +189,7 @@ export default function LoginPage() {
               isLoading={isLoading}
               disabled={isLoading || !formData.email || !formData.password}
             >
-              로그인
+              {isLoading ? '로그인 중...' : '로그인'}
             </Button>
           </form>
 

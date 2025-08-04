@@ -40,11 +40,8 @@ const steps = [
 
 const StepContainer = styled.div<{ isActive: boolean; color: string; bgColor: string }>`
   position: relative;
-  background: white;
   border-radius: 32px;
   padding: 3rem 4rem;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
-  border: 4px solid ${props => props.isActive ? props.color : 'transparent'};
   transform: ${props => props.isActive ? 'scale(1.02)' : 'scale(1)'};
   transition: all 0.3s ease;
   cursor: pointer;
@@ -54,20 +51,6 @@ const StepContainer = styled.div<{ isActive: boolean; color: string; bgColor: st
   &:hover {
     transform: ${props => props.isActive ? 'scale(1.02)' : 'scale(1.01)'};
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: ${props => `linear-gradient(135deg, ${props.color}, ${props.color}80)`};
-    border-radius: 26px;
-    opacity: ${props => props.isActive ? 1 : 0};
-    transition: opacity 0.3s ease;
-    z-index: -1;
   }
 `;
 
