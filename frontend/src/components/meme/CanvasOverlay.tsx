@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Trash2, RefreshCw, Move, Copy, RotateCw } from 'lucide-react';
+import { Trash2, Move, Copy, RotateCw } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 interface CanvasOverlayProps {
@@ -164,7 +164,7 @@ const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
             onClick={onRotate}
             disabled={isLoading}
             className="h-8 px-2 min-w-0 text-gray-600 hover:text-green-600 hover:bg-green-50"
-            title="회전 (45도)"
+            title="회전 (90도)"
           >
             <RotateCw size={14} />
           </Button>
@@ -180,18 +180,6 @@ const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
           title="삭제"
         >
           <Trash2 size={14} />
-        </Button>
-
-        {/* 전체 초기화 버튼 */}
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={onClear}
-          disabled={isLoading}
-          className="h-8 px-2 min-w-0 text-gray-600 hover:text-orange-600 hover:bg-orange-50"
-          title="전체 초기화"
-        >
-          <RefreshCw size={14} />
         </Button>
       </div>
 

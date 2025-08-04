@@ -7,6 +7,7 @@ export interface TextStyle {
   fontSize: number;
   fontFamily: string;
   fontWeight: 'normal' | 'bold';
+  fontStyle: 'normal' | 'italic';
   color: string;
   strokeColor: string;
   strokeWidth: number;
@@ -389,9 +390,9 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
       fontSize: 40,
       fontFamily: 'Arial Black, Arial, sans-serif',
       fontWeight: 'bold',
-      fill: '#ffffff',
-      stroke: '#000000',
-      strokeWidth: 2,
+      fill: '#000000',
+      stroke: '',
+      strokeWidth: 0,
       textAlign: 'center',
       originX: 'center',
       originY: 'center',
@@ -420,6 +421,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     if (style.fontSize !== undefined) textObj.set('fontSize', style.fontSize);
     if (style.fontFamily !== undefined) textObj.set('fontFamily', style.fontFamily);
     if (style.fontWeight !== undefined) textObj.set('fontWeight', style.fontWeight);
+    if (style.fontStyle !== undefined) textObj.set('fontStyle', style.fontStyle);
     if (style.color !== undefined) textObj.set('fill', style.color);
     if (style.strokeColor !== undefined) textObj.set('stroke', style.strokeColor);
     if (style.strokeWidth !== undefined) textObj.set('strokeWidth', style.strokeWidth);
@@ -555,15 +557,24 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     }
   }, [saveCanvasState]);
 
-  // 선택된 객체 회전
+  // 선택된 객체 회전 (90도씩 시계방향)
   const rotateSelectedObject = useCallback(() => {
     if (!fabricCanvasRef.current) return;
     
     const activeObject = fabricCanvasRef.current.getActiveObject();
     if (activeObject) {
       const currentAngle = activeObject.angle || 0;
-      const newAngle = (currentAngle + 45) % 360;
+      const newAngle = (currentAngle + 90) % 360;
       activeObject.set('angle', newAngle);
+      
+      // 이미지 객체의 경우 중심점 재조정
+      if (activeObject.type === 'image') {
+        activeObject.set({
+          originX: 'center',
+          originY: 'center'
+        });
+      }
+      
       fabricCanvasRef.current.renderAll();
       
       // 히스토리 저장

@@ -116,7 +116,7 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
 
       {/* 안내 텍스트 */}
       <p className="text-xs text-gray-500 text-center mt-4">
-        소셜 {buttonText} 시 밈징어의{' '}
+        소셜 {buttonText} 시 밈징의{' '}
         <a href="/terms" className="text-blue-600 hover:underline">
           이용약관
         </a>
