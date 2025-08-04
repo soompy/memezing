@@ -11,7 +11,7 @@ export default function Footer() {
       <Container>
         <Content>
           <BrandSection>
-            <Brand>🎭 밈징어</Brand>
+            <Brand>🎭 밈징</Brand>
             <Description>
               누구나 쉽게 밈을 만들 수 있는 플랫폼입니다.
             </Description>
@@ -28,7 +28,7 @@ export default function Footer() {
 
         <FooterBottom>
           <Copyright>
-            © {currentYear} 밈징어. All rights reserved.
+            © {currentYear} 밈징. All rights reserved.
           </Copyright>
           
           <Location>

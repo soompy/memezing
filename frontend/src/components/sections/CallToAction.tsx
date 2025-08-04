@@ -135,6 +135,13 @@ export default function CallToAction() {
     return () => clearInterval(interval);
   }, []);
 
+  // 스마트 리디렉션 함수
+  const handleMemeGeneratorRedirect = () => {
+    const isMobile = window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const targetPath = isMobile ? '/meme-generator/mobile' : '/meme-generator';
+    window.location.href = targetPath;
+  };
+
   // 섹션별 콘텐츠 배열
   const sections = [
     // 1. 메인 헤더
@@ -200,7 +207,7 @@ export default function CallToAction() {
               transition={{ duration: 0.8, delay: 0.8 }}
             >
               <GradientButton
-                onClick={() => window.location.href = '/meme-generator'}
+                onClick={handleMemeGeneratorRedirect}
                 className="group mr-4 mb-4"
               >
                 <span className="flex items-center">
@@ -319,7 +326,7 @@ export default function CallToAction() {
               whileTap={{ scale: 0.95 }}
             >
               <GradientButton
-                onClick={() => window.location.href = '/meme-generator'}
+                onClick={handleMemeGeneratorRedirect}
                 className="group"
               >
                 <span className="flex items-center">

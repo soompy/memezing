@@ -54,7 +54,7 @@ export default function Features() {
   // 섹션별 콘텐츠 배열
   const sections = [
     // 1. 섹션 헤더
-    <ContentSlide key="header" background={brandColors.gray[50]}>
+    <ContentSlide key="header">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.h2 
           className="text-3xl sm:text-4xl font-bold mb-4" 
@@ -63,7 +63,7 @@ export default function Features() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          왜 밈징어를 선택해야 할까요?
+          왜 밈징을 선택해야 할까요?
         </motion.h2>
         <motion.p 
           className="text-xl max-w-3xl mx-auto" 
@@ -72,13 +72,13 @@ export default function Features() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          복잡한 편집 프로그램은 이제 그만! 밈징어와 함께 누구나 5분 만에 바이럴 밈을 만들어보세요.
+          복잡한 편집 프로그램은 이제 그만! 밈징과 함께 누구나 5분 만에 바이럴 밈을 만들어보세요.
         </motion.p>
       </div>
     </ContentSlide>,
 
     // 2. 주요 특징들
-    <ContentSlide key="features" background={brandColors.gray[50]}>
+    <ContentSlide key="features">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature, index) => {
@@ -132,7 +132,7 @@ export default function Features() {
     </ContentSlide>,
 
     // 3. 통계 섹션
-    <ContentSlide key="stats" background={brandColors.gray[50]}>
+    <ContentSlide key="stats">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="bg-white rounded-3xl p-8 sm:p-12 shadow-lg relative overflow-hidden"
@@ -143,10 +143,10 @@ export default function Features() {
           <div className="relative z-10">
             <div className="text-center mb-12">
               <h3 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: brandColors.gray[800] }}>
-                숫자로 보는 밈징어
+                숫자로 보는 밈징
               </h3>
               <p className="text-lg" style={{ color: brandColors.gray[500] }}>
-                많은 사용자들이 밈징어와 함께 창의적인 콘텐츠를 만들고 있습니다
+                많은 사용자들이 밈징과 함께 창의적인 콘텐츠를 만들고 있습니다
               </p>
             </div>
 
@@ -196,7 +196,7 @@ export default function Features() {
   ];
 
   return (
-    <UnifiedScrollSection totalHeight="400vh">
+    <UnifiedScrollSection totalHeight="300vh">
       {sections}
     </UnifiedScrollSection>
   );

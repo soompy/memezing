@@ -16,7 +16,7 @@ export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navigation = [
-    { name: '밈징어', href: '/meme-generator' },
+    { name: '밈징', href: '/meme-generator' },
     { name: '피드', href: '/feed' },
     { name: '커뮤니티', href: '#community' },
   ];
@@ -57,7 +57,7 @@ export default function Header() {
           <LogoSection>
             <Logo>
               <Drama size={24} />
-              밈징어
+              밈징
             </Logo>
           </LogoSection>
 
