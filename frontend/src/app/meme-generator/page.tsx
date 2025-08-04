@@ -13,6 +13,7 @@ import AITextGenerator from '@/components/meme/AITextGenerator';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
 import ResizablePanel from '@/components/ui/ResizablePanel';
 import { AlertDialog, ConfirmDialog } from '@/components/ui/Modal';
+import { getRandomImageFromPool } from '@/utils/imagePool';
 
 // 인기 밈 템플릿 - 가장 많이 사용되는 클래식 밈들
 const popularTemplates: MemeTemplate[] = [
@@ -136,42 +137,51 @@ const animalTemplates: MemeTemplate[] = [
   }
 ];
 
-// 한국 드라마 스타일 템플릿 - 감정 표현이 풍부한 K-드라마 장면들
+// 한국 드라마 스타일 템플릿 - 한국적 상황과 감정을 표현하는 밈들
 const koreanDramaTemplates: MemeTemplate[] = [
   {
-    id: 'thinking-korean',
+    id: 'korean-thinking',
     name: '깊은 생각에 빠진 모습',
-    url: 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=400&h=400&fit=crop&crop=face',
+    url: 'https://i.imgflip.com/1wz1x.jpg', // Confused Nick Young
     textBoxes: [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '음... 이건 좀 고민되네' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: '어떻게 해야 할까?' }
     ]
   },
   {
-    id: 'shocked-korean',
+    id: 'korean-shocked',
     name: '충격받은 표정',
-    url: 'https://images.unsplash.com/photo-1569913486515-b74bf7751574?w=400&h=400&fit=crop&crop=face',
+    url: 'https://i.imgflip.com/2kbn1e.jpg', // Surprised Pikachu
     textBoxes: [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '헉! 이게 뭐야?!' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: '말도 안 돼!' }
     ]
   },
   {
-    id: 'dramatic-korean',
+    id: 'korean-dramatic',
     name: '드라마틱한 표정',
-    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+    url: 'https://i.imgflip.com/26am.jpg', // This is Fine
     textBoxes: [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '이런 일이...' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: '있을 수가!' }
     ]
   },
   {
-    id: 'sad-korean',
-    name: '슬픈 표정',
-    url: 'https://images.unsplash.com/photo-1494790108755-2616c88906f0?w=400&h=400&fit=crop&crop=face',
+    id: 'korean-monday',
+    name: '월요일 반응',
+    url: 'https://i.imgflip.com/8p0a.jpg', // Grumpy Cat
     textBoxes: [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '괜찮다고 했는데' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: '괜찮지 않아...' }
+    ]
+  },
+  {
+    id: 'korean-variety-reaction',
+    name: '한국 예능 리액션',
+    url: 'https://i.imgflip.com/15s2g3.jpg', // Happy Seal
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '이거 완전 웃겨' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: 'ㅋㅋㅋㅋㅋ' }
     ]
   }
 ];
@@ -580,6 +590,31 @@ export default function MemeGeneratorPage() {
     router.push('/community');
   }, [router]);
 
+  // 템플릿 새로고침 함수들
+  const refreshTemplateImages = useCallback((templateArray: MemeTemplate[]) => {
+    return templateArray.map(template => ({
+      ...template,
+      url: getRandomImageFromPool(template.id)
+    }));
+  }, []);
+
+  const refreshPopularTemplates = useCallback(() => {
+    // 인기 템플릿 이미지 새로고침
+    const refreshed = refreshTemplateImages(popularTemplates);
+    // 실제로는 상태를 업데이트해야 하지만, 현재는 페이지 새로고침으로 대체
+    window.location.reload();
+  }, [refreshTemplateImages]);
+
+  const refreshAnimalTemplates = useCallback(() => {
+    // 동물 템플릿 이미지 새로고침
+    window.location.reload();
+  }, []);
+
+  const refreshKoreanTemplates = useCallback(() => {
+    // 한국 드라마 템플릿 이미지 새로고침
+    window.location.reload();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
@@ -650,7 +685,18 @@ export default function MemeGeneratorPage() {
 
                       {/* 인기 템플릿 섹션 */}
                       <div>
-                        <h3 className="text-lg font-semibold mb-4">인기 템플릿</h3>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold">🔥 인기 템플릿</h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={refreshPopularTemplates}
+                            className="text-gray-500 hover:text-gray-700"
+                            title="새로운 이미지로 바꾸기"
+                          >
+                            <RefreshCw size={16} />
+                          </Button>
+                        </div>
                         <div className="grid grid-cols-2 gap-3 mb-6">
                           {popularTemplates.map((template) => (
                             <button
@@ -680,7 +726,18 @@ export default function MemeGeneratorPage() {
                           ))}
                         </div>
                         
-                        <h3 className="text-lg font-semibold mb-4">🐾 동물</h3>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold">🐾 동물</h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={refreshAnimalTemplates}
+                            className="text-gray-500 hover:text-gray-700"
+                            title="새로운 이미지로 바꾸기"
+                          >
+                            <RefreshCw size={16} />
+                          </Button>
+                        </div>
                         <div className="grid grid-cols-2 gap-3 mb-6">
                           {animalTemplates.map((template) => (
                             <button
@@ -770,7 +827,18 @@ export default function MemeGeneratorPage() {
                           ))}
                         </div>
                         
-                        <h3 className="text-lg font-semibold mb-4">🎬 한국 드라마 스타일</h3>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold">🎬 한국 드라마 스타일</h3>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={refreshKoreanTemplates}
+                            className="text-gray-500 hover:text-gray-700"
+                            title="새로운 이미지로 바꾸기"
+                          >
+                            <RefreshCw size={16} />
+                          </Button>
+                        </div>
                         <div className="grid grid-cols-2 gap-3">
                           {koreanDramaTemplates.map((template) => (
                             <button

@@ -40,8 +40,8 @@ export default function Hero() {
         <div className="w-full max-w-none">
           {/* 메인 헤드라인 - 화면 꽉 차게, 좌측 정렬, 세 문단으로 */}
           <motion.h1 
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold mb-6 leading-tight text-left w-full" 
-            style={{ color: '#2C3E50', fontFamily: "'Black Han Sans', sans-serif" }}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl mb-6 leading-tight text-left w-full" 
+            style={{ color: '#2C3E50', fontFamily: "'Black Han Sans', sans-serif", fontWeight: 'light' }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}

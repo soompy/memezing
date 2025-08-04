@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button';
 import MobileFabricCanvas, { MobileFabricCanvasRef, MemeTemplate } from '@/components/meme/MobileFabricCanvas';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
 import AITextGenerator from '@/components/meme/AITextGenerator';
+import { getRandomImageFromPool } from '@/utils/imagePool';
 
 // 템플릿 데이터
 const popularTemplates: MemeTemplate[] = [
