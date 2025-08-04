@@ -93,8 +93,7 @@ const toneModifiers = {
 // AI 텍스트 생성 함수 (실제로는 Claude API를 사용할 수 있지만, 여기서는 템플릿 기반으로 구현)
 export function generateMemeText(
   category?: string,
-  tone?: 'funny' | 'sarcastic' | 'cute' | 'dramatic' | 'trendy',
-  context?: string
+  tone?: 'funny' | 'sarcastic' | 'cute' | 'dramatic' | 'trendy'
 ): MemeTextSuggestion[] {
   const suggestions: MemeTextSuggestion[] = [];
   
@@ -174,7 +173,7 @@ export function generateRandomKoreanMeme(): MemeTextSuggestion[] {
 }
 
 // 실제 AI API를 사용하는 함수 (나중에 구현)
-export async function generateAIText(prompt: string, context?: any): Promise<MemeTextSuggestion[]> {
+export async function generateAIText(_prompt: string): Promise<MemeTextSuggestion[]> {
   // TODO: 실제 AI API (Claude, GPT 등) 연동
   // 현재는 템플릿 기반 응답 반환
   

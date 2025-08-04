@@ -200,7 +200,7 @@ export default function MobileMemeGeneratorPage() {
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(null);
   const [currentTool, setCurrentTool] = useState<'none' | 'templates' | 'text' | 'ai' | 'upload' | 'settings'>('none');
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
-  const [quickTexts, setQuickTexts] = useState<string[]>(['상단 텍스트', '하단 텍스트']);
+  const [quickTexts] = useState<string[]>(['상단 텍스트', '하단 텍스트']);
   const [newText, setNewText] = useState('');
 
   // 데스크톱 감지 및 리디렉션
