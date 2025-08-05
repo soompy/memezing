@@ -980,7 +980,8 @@ export default function MemeGeneratorPage() {
             {/* 모바일 오버레이 */}
             {isSidebarOpen && (
               <div 
-                className="fixed inset-0 bg-black bg-opacity-50 z-20"
+                className="fixed inset-0 bg-black z-20"
+                style={{ opacity: 0.5 }}
                 onClick={() => setIsSidebarOpen(false)}
               />
             )}

@@ -33,8 +33,9 @@ export default function Home() {
     <>
       {/* 첫 방문 웰컴 모달 */}
       {showWelcome && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black" style={{ opacity: 0.5 }}></div>
+          <div className="relative bg-white rounded-2xl max-w-md w-full p-8 text-center">
             <div className="text-6xl mb-6">🎭</div>
             <h2 className="text-2xl font-bold text-900 mb-4">
               밈징어에 오신 것을 환영합니다!

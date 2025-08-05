@@ -742,7 +742,8 @@ export default function MobileMemeGeneratorPage() {
       {/* 백드롭 */}
       {isBottomSheetExpanded && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-25 z-40"
+          className="fixed inset-0 bg-black z-40"
+          style={{ opacity: 0.5 }}
           onClick={() => {
             setCurrentTool('none');
             setIsBottomSheetExpanded(false);
