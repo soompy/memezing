@@ -43,6 +43,7 @@ export interface MobileFabricCanvasRef {
   redo: () => void;
   getCanvas: () => fabric.Canvas | null;
   getCanvasContainer: () => HTMLDivElement | null;
+  getAllTexts: () => string[];
 }
 
 interface MobileFabricCanvasProps {
@@ -640,6 +641,25 @@ const MobileFabricCanvas = forwardRef<MobileFabricCanvasRef, MobileFabricCanvasP
   const getCanvasContainer = useCallback(() => containerRef.current, []);
   const getCanvas = useCallback(() => fabricCanvasRef.current, []);
 
+  // 캔버스의 모든 텍스트 추출
+  const getAllTexts = useCallback(() => {
+    if (!fabricCanvasRef.current) return [];
+    
+    const objects = fabricCanvasRef.current.getObjects();
+    const texts: string[] = [];
+    
+    objects.forEach(obj => {
+      if (obj.type === 'i-text' || obj.type === 'text') {
+        const textObj = obj as fabric.IText;
+        if (textObj.text && textObj.text.trim()) {
+          texts.push(textObj.text.trim());
+        }
+      }
+    });
+    
+    return texts;
+  }, []);
+
   // ref 메서드들 노출
   useImperativeHandle(ref, () => ({
     exportAsImage,
@@ -655,8 +675,9 @@ const MobileFabricCanvas = forwardRef<MobileFabricCanvasRef, MobileFabricCanvasP
     undo,
     redo,
     getCanvas,
-    getCanvasContainer
-  }), [exportAsImage, addText, updateTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer]);
+    getCanvasContainer,
+    getAllTexts
+  }), [exportAsImage, addText, updateTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts]);
 
   return (
     <div 

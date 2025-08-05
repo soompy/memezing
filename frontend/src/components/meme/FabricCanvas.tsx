@@ -44,6 +44,7 @@ export interface FabricCanvasRef {
   redo: () => void;
   getCanvas: () => fabric.Canvas | null;
   getCanvasContainer: () => HTMLDivElement | null;
+  getAllTexts: () => string[];
 }
 
 interface FabricCanvasProps {
@@ -588,6 +589,25 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
   // 캔버스 인스턴스 반환
   const getCanvas = useCallback(() => fabricCanvasRef.current, []);
 
+  // 캔버스의 모든 텍스트 추출
+  const getAllTexts = useCallback(() => {
+    if (!fabricCanvasRef.current) return [];
+    
+    const objects = fabricCanvasRef.current.getObjects();
+    const texts: string[] = [];
+    
+    objects.forEach(obj => {
+      if (obj.type === 'i-text' || obj.type === 'text') {
+        const textObj = obj as fabric.IText;
+        if (textObj.text && textObj.text.trim()) {
+          texts.push(textObj.text.trim());
+        }
+      }
+    });
+    
+    return texts;
+  }, []);
+
   // ref 메서드들 노출
   useImperativeHandle(ref, () => ({
     exportAsImage,
@@ -603,8 +623,9 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     undo,
     redo,
     getCanvas,
-    getCanvasContainer
-  }), [exportAsImage, addText, updateTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer]);
+    getCanvasContainer,
+    getAllTexts
+  }), [exportAsImage, addText, updateTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts]);
 
   return (
     <div 

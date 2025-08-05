@@ -407,7 +407,7 @@ export default function MemeGeneratorPage() {
     try {
       await canvasRef.current.loadTemplate(template);
       setSelectedTemplate(template);
-      console.log('Template loaded successfully:', template.name);
+      // TODO: 템플릿 로딩 성공 로그 - 프로덕션에서는 제거됨
     } catch (error) {
       console.error('Template loading failed:', error);
       
@@ -969,7 +969,7 @@ export default function MemeGeneratorPage() {
                     <div className="space-y-6">
                       <AITextGenerator
                         onTextSelect={handleAddText}
-                        existingTexts={[]} // TODO: 캔버스의 기존 텍스트들을 가져와서 전달
+                        existingTexts={canvasRef.current?.getAllTexts() || []}
                       />
                     </div>
                   )}
@@ -1229,7 +1229,7 @@ export default function MemeGeneratorPage() {
                       <div className="space-y-6">
                         <AITextGenerator
                           onTextSelect={handleAddText}
-                          existingTexts={[]} // TODO: 캔버스의 기존 텍스트들을 가져와서 전달
+                          existingTexts={canvasRef.current?.getAllTexts() || []}
                         />
                       </div>
                     )}

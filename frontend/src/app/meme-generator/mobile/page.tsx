@@ -274,7 +274,7 @@ export default function MobileMemeGeneratorPage() {
       })
       .catch((error) => {
         console.error('Image upload failed:', error);
-        alert('이미지 업로드에 실패했습니다.');
+        // TODO: 토스트 알림으로 교체 예정 - 이미지 업로드 실패 알림
       })
       .finally(() => {
         setIsLoading(false);
@@ -287,7 +287,7 @@ export default function MobileMemeGeneratorPage() {
     
     const dataURL = canvasRef.current.exportAsImage();
     if (!dataURL) {
-      alert('이미지 생성에 실패했습니다.');
+      // TODO: 토스트 알림으로 교체 예정 - 이미지 생성 실패 알림
       return;
     }
     
@@ -683,7 +683,7 @@ export default function MobileMemeGeneratorPage() {
               <div className="space-y-4">
                 <AITextGenerator
                   onTextSelect={handleAddText}
-                  existingTexts={[]} // TODO: 캔버스의 기존 텍스트들을 가져와서 전달
+                  existingTexts={canvasRef.current?.getAllTexts() || []}
                   className="border-0 p-0"
                 />
               </div>
