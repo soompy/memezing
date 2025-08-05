@@ -172,17 +172,36 @@ export function generateRandomKoreanMeme(): MemeTextSuggestion[] {
   return generateMemeText(randomCategory, randomTone);
 }
 
-// 실제 AI API를 사용하는 함수 (나중에 구현)
-export async function generateAIText(_prompt: string): Promise<MemeTextSuggestion[]> {
-  // TODO: 실제 AI API (Claude, GPT 등) 연동
-  // 현재는 템플릿 기반 응답 반환
-  
+// Claude AI API를 사용한 실제 AI 텍스트 생성
+export async function generateAIText(prompt: string, existingTexts?: string[]): Promise<MemeTextSuggestion[]> {
   try {
-    // 임시로 랜덤 생성 사용
-    await new Promise(resolve => setTimeout(resolve, 1000)); // API 호출 시뮬레이션
-    return generateRandomKoreanMeme();
+    // 서버 API를 통해 Claude API 호출
+    const response = await fetch('/api/ai/generate-text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prompt,
+        existingTexts: existingTexts || [],
+        count: 5
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.success && data.suggestions) {
+      return data.suggestions;
+    } else {
+      throw new Error(data.error || 'Failed to generate AI text');
+    }
   } catch (error) {
     console.error('AI text generation failed:', error);
-    return generateRandomKoreanMeme(); // 폴백
+    // 폴백으로 템플릿 기반 생성 사용
+    return generateRandomKoreanMeme();
   }
 }
