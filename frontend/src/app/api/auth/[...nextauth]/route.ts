@@ -61,35 +61,18 @@ const NaverProvider: Provider = {
 };
 
 const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // 최소한의 설정으로 시작
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    ...(process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET ? [KakaoProvider] : []),
-    ...(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET ? [NaverProvider] : []),
+    // 환경변수가 있을 때만 Google 제공자 활성화
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      })
+    ] : []),
   ],
-  callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-      }
-      return session;
-    },
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-  },
-  pages: {
-    signIn: '/login',
-    error: '/auth/error',
-  },
   session: {
-    strategy: 'database',
+    strategy: 'jwt', // JWT 사용
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

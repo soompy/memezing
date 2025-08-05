@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+// import { useSession } from 'next-auth/react';
 import { Header } from '@/components/ui';
 import Hero from '@/components/sections/Hero';
 import Features from '@/components/sections/Features';
@@ -10,7 +10,10 @@ import InterestSelectionPopup from '@/components/common/InterestSelectionPopup';
 
 export default function HomePage() {
   const [showInterestPopup, setShowInterestPopup] = useState(false);
-  const { data: session, status } = useSession();
+  // 임시로 useSession 비활성화
+  // const { data: session, status } = useSession();
+  const session = null;
+  const status = 'unauthenticated';
 
   useEffect(() => {
     // NextAuth 세션을 통한 실제 로그인 상태 확인

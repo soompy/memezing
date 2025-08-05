@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
-import Button from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
 
 interface SocialLoginProps {
@@ -46,12 +45,10 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
   return (
     <div className={`space-y-3 ${className}`}>
       {/* Google 로그인 */}
-      <Button
-        variant="outline"
+      <button
         onClick={() => handleSocialLogin('google')}
         disabled={loadingProvider !== null}
-        isLoading={loadingProvider === 'google'}
-        className="w-full flex items-center justify-center space-x-3 border-gray-300 shadow-sm hover:shadow-md transition-shadow duration-300"
+        className="w-full flex items-center justify-center space-x-3 border border-gray-300 bg-white shadow-sm hover:shadow-[0_8px_20px_rgba(0,0,0,0.3)] transition-shadow duration-300 py-4 px-6 rounded-xl text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loadingProvider !== 'google' && (
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -73,35 +70,54 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
             />
           </svg>
         )}
-        <span>Google로 {buttonText}</span>
-      </Button>
+        {loadingProvider === 'google' ? (
+          <div className="flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mr-2"></div>
+            로딩 중...
+          </div>
+        ) : (
+          <span>Google로 {buttonText}</span>
+        )}
+      </button>
 
       {/* Kakao 로그인 */}
       <KakaoButton
         onClick={() => handleSocialLogin('kakao')}
         disabled={loadingProvider !== null}
-        isLoading={loadingProvider === 'kakao'}
       >
         {loadingProvider !== 'kakao' && (
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 3c5.799 0 10.5 3.664 10.5 8.185 0 4.52-4.701 8.184-10.5 8.184a13.5 13.5 0 0 1-1.727-.11l-4.408 2.883c-.501.265-.678.236-.472-.413l.892-3.678c-2.88-1.46-4.785-3.99-4.785-6.866C1.5 6.665 6.201 3 12 3z" />
           </svg>
         )}
-        <span>카카오로 {buttonText}</span>
+        {loadingProvider === 'kakao' ? (
+          <div className="flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin mr-2"></div>
+            로딩 중...
+          </div>
+        ) : (
+          <span>카카오로 {buttonText}</span>
+        )}
       </KakaoButton>
 
       {/* Naver 로그인 */}
       <NaverButton
         onClick={() => handleSocialLogin('naver')}
         disabled={loadingProvider !== null}
-        isLoading={loadingProvider === 'naver'}
       >
         {loadingProvider !== 'naver' && (
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16.273 12.845 7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727v12.845z" />
           </svg>
         )}
-        <span>네이버로 {buttonText}</span>
+        {loadingProvider === 'naver' ? (
+          <div className="flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            로딩 중...
+          </div>
+        ) : (
+          <span>네이버로 {buttonText}</span>
+        )}
       </NaverButton>
 
       {/* 안내 텍스트 */}
@@ -120,7 +136,7 @@ export default function SocialLogin({ mode = 'login', className = '' }: SocialLo
   );
 }
 
-const KakaoButton = styled(Button)`
+const KakaoButton = styled.button`
   width: 100%;
   display: flex;
   align-items: center;
@@ -128,23 +144,28 @@ const KakaoButton = styled(Button)`
   gap: 0.75rem;
   background-color: #fee500;
   color: #000000;
-  border: none;
+  border: 1px solid #ddd;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
   
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: #fee500;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   }
   
   &:disabled {
     background-color: #f0f0f0;
     color: #999999;
     box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 `;
 
-const NaverButton = styled(Button)`
+const NaverButton = styled.button`
   width: 100%;
   display: flex;
   align-items: center;
@@ -152,18 +173,23 @@ const NaverButton = styled(Button)`
   gap: 0.75rem;
   background-color: #03c75a;
   color: #ffffff;
-  border: none;
+  border: 1px solid #ddd;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
   
-  &:hover {
+  &:hover:not(:disabled) {
     background-color: #03c75a;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   }
   
   &:disabled {
     background-color: #f0f0f0;
     color: #999999;
     box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 `;

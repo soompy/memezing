@@ -10,9 +10,10 @@ interface ClientProvidersProps {
 export default function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <ThemeProvider>
-      <SessionProvider>
+      {/* 임시로 SessionProvider 비활성화 */}
+      {/* <SessionProvider> */}
         {children}
-      </SessionProvider>
+      {/* </SessionProvider> */}
     </ThemeProvider>
   );
 }
