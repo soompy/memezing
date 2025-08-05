@@ -69,7 +69,7 @@ export default function InterestSelectionPopup({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size="lg"
+      size="md"
       showCloseButton={false}
       closeOnOverlayClick={true}
       closeOnEscape={true}
@@ -171,6 +171,13 @@ export default function InterestSelectionPopup({
 const Container = styled.div`
   text-align: center;
   margin-bottom: 2rem;
+  max-width: 500px;
+  margin: 0 auto 2rem auto;
+  
+  @media (max-width: 640px) {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
 `;
 
 const Header = styled.div`
@@ -204,6 +211,31 @@ const Description = styled.p`
 
 const InterestsContainer = styled.div`
   max-height: 24rem;
+  overflow-y: auto;
+  
+  @media (max-width: 640px) {
+    max-height: 20rem;
+    padding-right: 0.25rem;
+    
+    /* 스크롤바 스타일링 */
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 2px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 2px;
+    }
+    
+    &::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  }
 `;
 
 const InterestsGrid = styled.div`
@@ -213,7 +245,13 @@ const InterestsGrid = styled.div`
   margin-bottom: 2rem;
   
   @media (min-width: 640px) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  @media (max-width: 640px) {
+    gap: 0.5rem;
+    padding: 0.25rem;
   }
 `;
 
@@ -224,14 +262,34 @@ const InterestButton = styled.button<{ isSelected: boolean; bgColor: string }>`
   border: 2px solid ${props => props.isSelected ? '#E65100' : '#e5e7eb'};
   background: ${props => props.isSelected ? '#f3f4f6' : props.bgColor};
   transition: all 0.2s ease;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transform: ${props => props.isSelected ? 'scale(1.05)' : 'scale(1)'};
   box-shadow: ${props => props.isSelected ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'};
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  @media (max-width: 640px) {
+    padding: 0.75rem 0.5rem;
+    min-height: 100px;
+    transform: none;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
   
   &:hover {
     transform: scale(1.02);
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+    
+    @media (max-width: 640px) {
+      transform: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
   }
 `;
 
@@ -257,6 +315,13 @@ const InterestLabel = styled.div<{ isSelected: boolean }>`
   font-weight: 600;
   font-size: 0.875rem;
   color: ${props => props.isSelected ? '#581c87' : '#111827'};
+  text-align: center;
+  line-height: 1.2;
+  
+  @media (max-width: 640px) {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
 `;
 
 const SelectedCount = styled.div`
@@ -277,6 +342,15 @@ const ButtonContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding-top: 1rem;
+  
+  @media (max-width: 640px) {
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+  }
 `;
 
 const SubButtonContainer = styled.div`
