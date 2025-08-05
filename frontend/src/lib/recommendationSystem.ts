@@ -41,8 +41,36 @@ const INTEREST_MAPPING: Record<string, string[]> = {
   politics: ['news', 'politics', 'society', 'current', 'issue']
 };
 
-// 샘플 밈 템플릿 데이터 (실제로는 API나 데이터베이스에서 가져올 것)
-export const SAMPLE_MEME_TEMPLATES: MemeTemplate[] = [
+// API를 통해 밈 템플릿 데이터를 가져오는 함수
+export async function fetchMemeTemplates(
+  category?: string, 
+  limit?: number, 
+  interests?: string[]
+): Promise<MemeTemplate[]> {
+  try {
+    const params = new URLSearchParams();
+    if (category) params.append('category', category);
+    if (limit) params.append('limit', limit.toString());
+    if (interests && interests.length > 0) {
+      params.append('interests', interests.join(','));
+    }
+
+    const response = await fetch(`/api/memes?${params.toString()}`);
+    const data = await response.json();
+
+    if (data.success) {
+      return data.data;
+    } else {
+      throw new Error(data.error || 'Failed to fetch meme templates');
+    }
+  } catch (error) {
+    console.error('Error fetching meme templates:', error);
+    return FALLBACK_MEME_TEMPLATES;
+  }
+}
+
+// 폴백 밈 템플릿 데이터 (API 실패 시 사용)
+const FALLBACK_MEME_TEMPLATES: MemeTemplate[] = [
   // 유머 관련
   {
     id: 'distracted-boyfriend',
@@ -141,12 +169,13 @@ export const SAMPLE_MEME_TEMPLATES: MemeTemplate[] = [
 /**
  * 사용자 관심사를 기반으로 밈 템플릿을 추천합니다.
  */
-export function recommendMemes(
+export async function recommendMemes(
   userInterests: string[],
   userPreferences: UserPreference[] = [],
-  templates: MemeTemplate[] = SAMPLE_MEME_TEMPLATES,
   limit: number = 6
-): RecommendationResult[] {
+): Promise<RecommendationResult[]> {
+  // API를 통해 템플릿 가져오기
+  const templates = await fetchMemeTemplates(undefined, limit * 2, userInterests);
   if (!userInterests.length) {
     // 관심사가 없으면 인기순으로 반환
     return templates

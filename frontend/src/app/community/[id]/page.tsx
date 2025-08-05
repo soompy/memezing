@@ -30,77 +30,65 @@ interface Comment {
   replies?: Comment[];
 }
 
-// 샘플 데이터
-const sampleMeme: MemePost = {
-  id: '1',
-  title: '월요일 오전의 현실',
-  imageUrl: 'https://i.imgflip.com/30b1gx.jpg',
-  author: '밈마스터',
-  likes: 1247,
-  shares: 342,
-  views: 15632,
-  createdAt: '2시간 전',
-  isLiked: false,
-  description: '월요일 아침에 일어나는 모든 직장인들의 마음을 대변하는 밈입니다. 😴'
-};
-
-const sampleComments: Comment[] = [
-  {
-    id: '1',
-    author: '직장인99',
-    content: '너무 공감됩니다 ㅠㅠ 월요일은 정말...',
-    createdAt: '1시간 전',
-    likes: 23,
-    isLiked: false,
-    replies: [
-      {
-        id: '1-1',
-        author: '밈마스터',
-        content: '월요병은 진짜 국민병이죠 ㅋㅋ',
-        createdAt: '50분 전',
-        likes: 5,
-        isLiked: false
-      }
-    ]
-  },
-  {
-    id: '2',
-    author: '코딩왕',
-    content: '개발자도 마찬가지... 월요일엔 코드가 더 안 보여요 😅',
-    createdAt: '30분 전',
-    likes: 15,
-    isLiked: true
-  },
-  {
-    id: '3',
-    author: '대학생라이프',
-    content: '학생도 월요일은 힘들어요... 특히 1교시 있을 때',
-    createdAt: '15분 전',
-    likes: 8,
-    isLiked: false
+// API에서 데이터를 가져오는 함수
+async function fetchMemeData(id: string): Promise<{ meme: MemePost; comments: Comment[] } | null> {
+  try {
+    const response = await fetch(`/api/community/${id}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      return data.data;
+    } else {
+      throw new Error(data.error || 'Failed to fetch meme data');
+    }
+  } catch (error) {
+    console.error('Error fetching meme data:', error);
+    return null;
   }
-];
+}
 
 export default function MemeDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const [meme, setMeme] = useState<MemePost>(sampleMeme);
-  const [comments, setComments] = useState<Comment[]>(sampleComments);
+  const [meme, setMeme] = useState<MemePost | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
+
+  // API에서 데이터 가져오기
+  useEffect(() => {
+    const loadMemeData = async () => {
+      if (!params?.id) return;
+      
+      setLoading(true);
+      const data = await fetchMemeData(params.id as string);
+      
+      if (data) {
+        setMeme(data.meme);
+        setComments(data.comments);
+      }
+      
+      setLoading(false);
+    };
+
+    loadMemeData();
+  }, [params?.id]);
 
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
 
   const handleLike = useCallback(() => {
-    setMeme(prev => ({
+    if (!meme) return;
+    
+    setMeme(prev => prev ? ({
       ...prev,
       isLiked: !prev.isLiked,
       likes: prev.isLiked ? prev.likes - 1 : prev.likes + 1
-    }));
-  }, []);
+    }) : null);
+  }, [meme]);
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
@@ -115,7 +103,7 @@ export default function MemeDetailPage() {
       }
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('링크가 클립보드에 복사되었습니다!');
+      // TODO: 토스트 알림으로 교체
     }
   }, [meme.title]);
 
@@ -221,6 +209,21 @@ export default function MemeDetailPage() {
 
       {/* 메인 콘텐츠 */}
       <main className="max-w-4xl mx-auto p-4 md:p-6">
+        {loading ? (
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">밈을 불러오는 중...</p>
+            </div>
+          </div>
+        ) : !meme ? (
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center">
+              <p className="text-gray-600 mb-4">밈을 찾을 수 없습니다.</p>
+              <Button onClick={handleBack}>뒤로가기</Button>
+            </div>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 밈 이미지 및 정보 */}
           <div className="lg:col-span-2">
@@ -446,6 +449,7 @@ export default function MemeDetailPage() {
             </div>
           </div>
         </div>
+        )}
       </main>
     </div>
   );
