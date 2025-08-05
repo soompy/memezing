@@ -60,7 +60,7 @@ const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
         const scaleX = canvasRect.width / canvas.width;
         const scaleY = canvasRect.height / canvas.height;
 
-        // 실제 화면 좌표로 변환
+        // 캔버스 컨테이너 내 상대 좌표로 변환 (absolute 포지셔닝용)
         const left = canvasRect.left - containerRect.left + (objBounds.left * scaleX);
         const top = canvasRect.top - containerRect.top + (objBounds.top * scaleY);
         const width = objBounds.width * scaleX;
@@ -109,36 +109,31 @@ const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
     return null;
   }
 
-  // 버튼 툴팁 위치 계산 (객체 바로 근처에 표시)
+  // 버튼 툴팁 위치 계산 (객체로부터 10px 위, 0px right에 배치)
   const tooltipHeight = 44; // 툴팁의 실제 높이
   const tooltipWidth = 240; // 툴팁의 예상 너비
-  const gap = 2; // 객체와 툴팁 사이의 간격을 더 줄임
+  const gap = 10; // 객체와 툴팁 사이의 간격 (10px)
   
-  // 객체 중앙을 기준으로 툴팁 배치
-  const objectCenterX = objectBounds.left + (objectBounds.width / 2);
-  const objectCenterY = objectBounds.top + (objectBounds.height / 2);
-  
-  // 기본적으로 객체 바로 위쪽 중앙에 배치
+  // 기본 위치: 객체의 오른쪽 상단 모서리를 기준으로 10px 위에 배치
   let tooltipTop = objectBounds.top - tooltipHeight - gap;
-  let tooltipLeft = objectCenterX - (tooltipWidth / 2);
+  let tooltipLeft = objectBounds.left + objectBounds.width - tooltipWidth; // 0px right (오른쪽 끝 맞춤)
   
-  // 화면 상단 경계 확인 및 조정
+  // 컨테이너 내 경계 확인 및 조정
+  const containerWidth = canvasContainer?.clientWidth || 800;
+  const containerHeight = canvasContainer?.clientHeight || 600;
+  
   if (tooltipTop < 10) {
     // 위쪽 공간이 부족하면 객체 바로 아래쪽에 배치
     tooltipTop = objectBounds.top + objectBounds.height + gap;
   }
   
-  // 화면 좌우 경계 확인 및 조정
+  // 컨테이너 좌우 경계 확인 및 조정
   if (tooltipLeft < 10) {
     // 왼쪽 공간이 부족하면 객체 왼쪽 가장자리에 맞춤
     tooltipLeft = objectBounds.left;
-  } else if (tooltipLeft + tooltipWidth > window.innerWidth - 10) {
-    // 오른쪽 공간이 부족하면 객체 오른쪽 가장자리에 맞춤
-    tooltipLeft = objectBounds.left + objectBounds.width - tooltipWidth;
-    // 그래도 화면을 벗어나면 화면 경계에서 여백을 둠
-    if (tooltipLeft < 10) {
-      tooltipLeft = window.innerWidth - tooltipWidth - 10;
-    }
+  } else if (tooltipLeft + tooltipWidth > containerWidth - 10) {
+    // 오른쪽 공간이 부족하면 컨테이너 경계에서 10px 여백
+    tooltipLeft = containerWidth - tooltipWidth - 10;
   }
 
   const adjustedTop = tooltipTop;
@@ -146,7 +141,7 @@ const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
 
   return (
     <div
-      className="fixed pointer-events-none z-50"
+      className="absolute pointer-events-none z-50"
       style={{
         top: adjustedTop,
         left: adjustedLeft,
@@ -212,7 +207,7 @@ const CanvasOverlay: React.FC<CanvasOverlayProps> = ({
         className="absolute w-0.5 h-1 bg-gray-300"
         style={{ 
           top: tooltipTop < objectBounds.top ? '100%' : '-4px',
-          left: Math.min(tooltipWidth - 10, Math.max(10, objectCenterX - adjustedLeft))
+          left: Math.min(tooltipWidth - 20, Math.max(20, tooltipWidth - 40)) // 툴팁 오른쪽 부분에 포인터 배치
         }}
       />
     </div>
