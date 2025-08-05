@@ -76,10 +76,7 @@ export default function InterestSelectionPopup({
     >
       <Container>
         <Header>
-          <IconWrapper>
-            <Sparkles size={40} color="white" />
-          </IconWrapper>
-          <Title>어떤 밈이 관심있으세요?</Title>
+          <Title>어떤 밈에 관심있으세요?</Title>
           <Description>
             관심사를 선택하면 더욱 재미있고<br/>
             개인화된 밈 템플릿을 추천해드려요!
@@ -107,7 +104,7 @@ export default function InterestSelectionPopup({
                   
                   <Icon 
                     size={32} 
-                    color={isSelected ? '#8b5cf6' : interest.color}
+                    color={isSelected ? '#E65100' : interest.color}
                     style={{ marginBottom: '0.75rem' }}
                   />
                   
@@ -162,7 +159,7 @@ export default function InterestSelectionPopup({
 
         <InfoBox>
           <p>
-            💡 <strong>개인화 혜택:</strong> 선택하신 관심사를 바탕으로<br/>
+            <strong>개인화 혜택:</strong> 선택하신 관심사를 바탕으로<br/>
             인기 템플릿, 트렌드 키워드, 맞춤 스타일을 우선 추천해드려요!
           </p>
         </InfoBox>
@@ -207,7 +204,6 @@ const Description = styled.p`
 
 const InterestsContainer = styled.div`
   max-height: 24rem;
-  overflow-y: auto;
 `;
 
 const InterestsGrid = styled.div`
@@ -225,7 +221,7 @@ const InterestButton = styled.button<{ isSelected: boolean; bgColor: string }>`
   position: relative;
   padding: 1rem;
   border-radius: 0.75rem;
-  border: 2px solid ${props => props.isSelected ? '#8b5cf6' : '#e5e7eb'};
+  border: 2px solid ${props => props.isSelected ? '#E65100' : '#e5e7eb'};
   background: ${props => props.isSelected ? '#f3f4f6' : props.bgColor};
   transition: all 0.2s ease;
   text-align: left;
@@ -245,7 +241,7 @@ const SelectedBadge = styled.div`
   right: -0.5rem;
   width: 1.5rem;
   height: 1.5rem;
-  background: #8b5cf6;
+  background: #E65100;
   border-radius: 50%;
   display: flex;
   align-items: center;
