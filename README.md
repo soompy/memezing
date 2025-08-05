@@ -16,8 +16,8 @@
 - 🚀 **Vercel 프로덕션 배포** 완료
 
 ### 🌐 배포된 사이트
-- **Production**: [https://frontend-z52wglvg9-suris-projects.vercel.app](https://frontend-z52wglvg9-suris-projects.vercel.app)
-- **Components Demo**: [/components](https://frontend-z52wglvg9-suris-projects.vercel.app/components)
+- **Production**: [https://memezing.vercel.app/](https://memezing.vercel.app/)
+- **Components Demo**: [/components](https://memezing.vercel.app/components)
 
 ## 🚀 프로젝트 구조
 
@@ -160,7 +160,7 @@ npm run dev
 ### 컴포넌트 사용법
 프로젝트의 모든 UI 컴포넌트는 `/components` 페이지에서 확인할 수 있습니다:
 ```
-https://frontend-z52wglvg9-suris-projects.vercel.app/components
+https://memezing.vercel.app/components
 ```
 
 ### 디자인 시스템
