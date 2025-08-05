@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Header } from '@/components/ui';
 import Hero from '@/components/sections/Hero';
 import Features from '@/components/sections/Features';
@@ -9,10 +10,11 @@ import InterestSelectionPopup from '@/components/common/InterestSelectionPopup';
 
 export default function HomePage() {
   const [showInterestPopup, setShowInterestPopup] = useState(false);
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    // 로그인 상태 확인 (실제로는 auth store나 session에서 확인)
-    const isLoggedIn = false; // 임시로 false로 설정
+    // NextAuth 세션을 통한 실제 로그인 상태 확인
+    const isLoggedIn = status === 'authenticated' && !!session?.user;
     
     // 1주일간 보지 않기 설정 확인
     const dontShowUntil = localStorage.getItem('interestPopup_dontShowUntil');
@@ -20,6 +22,9 @@ export default function HomePage() {
     
     // 이미 관심사를 선택했는지 확인
     const hasSelectedInterests = localStorage.getItem('userInterests');
+    
+    // 세션 로딩 중이면 팝업 로직 실행하지 않음
+    if (status === 'loading') return;
     
     // 로그인하지 않았고, 1주일간 보지 않기가 설정되지 않았고, 관심사를 선택하지 않았으면 팝업 표시
     if (!isLoggedIn && !shouldNotShow && !hasSelectedInterests) {
@@ -30,7 +35,7 @@ export default function HomePage() {
       
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [session, status]);
 
   const handleInterestConfirm = (selectedInterests: string[]) => {
     // 선택된 관심사 저장
@@ -38,13 +43,12 @@ export default function HomePage() {
     setShowInterestPopup(false);
     
     // 분석을 위한 이벤트 전송 (실제 구현 시)
-    console.log('Selected interests:', selectedInterests);
+    // TODO: 실제 분석 이벤트 전송
   };
 
   const handleInterestSkip = () => {
     setShowInterestPopup(false);
-    // 건너뛰기 이벤트 전송
-    console.log('Interest selection skipped');
+    // TODO: 건너뛰기 이벤트 전송
   };
 
   const handleDontShowAgain = () => {
@@ -54,7 +58,7 @@ export default function HomePage() {
     localStorage.setItem('interestPopup_dontShowUntil', oneWeekLater.toISOString());
     
     setShowInterestPopup(false);
-    console.log('Interest popup disabled for 1 week');
+    // TODO: 팝업 비활성화 이벤트 전송
   };
 
   const handlePopupClose = () => {
