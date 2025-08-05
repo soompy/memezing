@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// OpenAI 클라이언트 초기화
-const openai = new OpenAI({
+// OpenAI 클라이언트 초기화 (환경변수가 없으면 null로 설정)
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-});
+}) : null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +16,33 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'Prompt is required' },
         { status: 400 }
       );
+    }
+
+    // OpenAI API 키가 설정되지 않은 경우 폴백 응답
+    if (!openai) {
+      console.warn('OPENAI_API_KEY not configured, using fallback response');
+      
+      // 폴백으로 템플릿 기반 응답 반환
+      const fallbackSuggestions = [
+        {
+          id: `fallback-${Date.now()}-1`,
+          text: '재미있는 밈 텍스트 예시',
+          category: 'general',
+          tone: 'funny' as const,
+        },
+        {
+          id: `fallback-${Date.now()}-2`,
+          text: '또 다른 밈 텍스트',
+          category: 'general', 
+          tone: 'trendy' as const,
+        }
+      ];
+
+      return NextResponse.json({
+        success: true,
+        suggestions: fallbackSuggestions,
+        note: 'Using fallback response - configure OPENAI_API_KEY for AI-generated content'
+      });
     }
 
     // ChatGPT API 호출을 위한 시스템 프롬프트
