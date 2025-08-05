@@ -187,7 +187,6 @@ export default function LoginPage() {
               {formErrors.email && (
                 <p className="text-red-500 text-sm mt-2">{formErrors.email}</p>
               )}
-              </div>
             </motion.div>
 
             <motion.div 
@@ -230,7 +229,6 @@ export default function LoginPage() {
               {formErrors.password && (
                 <p className="text-red-500 text-sm mt-2">{formErrors.password}</p>
               )}
-              </div>
             </motion.div>
 
             {/* 기억하기 체크박스 */}
