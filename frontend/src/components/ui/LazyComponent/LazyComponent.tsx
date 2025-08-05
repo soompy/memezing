@@ -2,7 +2,7 @@
 
 import { Suspense, ReactNode } from 'react';
 import styled from '@emotion/styled';
-import { keyframes } from '@emotion/react';
+import { keyframes, css } from '@emotion/react';
 
 interface LazyComponentProps {
   children: ReactNode;

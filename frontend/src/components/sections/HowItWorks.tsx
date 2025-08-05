@@ -7,7 +7,7 @@ import styled from '@emotion/styled';
 import { motion } from 'framer-motion';
 import UnifiedScrollSection, { ContentSlide } from '@/components/ui/UnifiedScrollSection/UnifiedScrollSection';
 import { brandColors, componentColors } from '@/styles/theme';
-import { keyframes } from '@emotion/react';
+import { keyframes, css } from '@emotion/react';
 
 const steps = [
   {
@@ -89,14 +89,14 @@ const IconWrapper = styled.div<{ color: string; bgColor: string; isActive: boole
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: ${props => props.isActive ? `${pulseRing} 2s infinite, ${flicker} 8s infinite` : `${flicker} 8s infinite`};
+  animation: ${props => props.isActive ? css`${pulseRing} 2s infinite, ${flicker} 8s infinite` : css`${flicker} 8s infinite`};
   margin-bottom: 2rem;
   transition: all 0.3s ease;
   transform: ${props => props.isActive ? 'rotate(5deg)' : 'rotate(0deg)'};
   position: relative;
   
   /* 진행 중인 스텝에만 펄스링 보더 추가 */
-  ${props => props.isActive && `
+  ${props => props.isActive && css`
     border: 3px solid ${props.color};
     box-shadow: 0 0 0 0 ${props.color}33;
   `}

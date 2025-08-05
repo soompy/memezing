@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { keyframes } from '@emotion/react';
+import { keyframes, css } from '@emotion/react';
 
 interface LazyImageProps {
   src: string;
@@ -150,10 +150,12 @@ const PlaceholderContent = styled.div`
     border: 2px solid var(--border-light);
     border-top: 2px solid var(--brand-primary);
     border-radius: 50%;
-    animation: ${keyframes`
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    `} 1s linear infinite;
+    animation: ${css`
+      ${keyframes`
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      `} 1s linear infinite;
+    `};
   }
 `;
 
@@ -173,7 +175,7 @@ const Image = styled.img<{ isLoaded: boolean }>`
   transition: opacity 0.3s ease;
   opacity: ${({ isLoaded }) => (isLoaded ? 1 : 0)};
   
-  ${({ isLoaded }) => isLoaded && `
+  ${({ isLoaded }) => isLoaded && css`
     animation: ${fadeIn} 0.3s ease;
   `}
 `;
