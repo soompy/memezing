@@ -33,7 +33,9 @@ export const useAuthStore = create<AuthStore>()(
 
           if (result.success && result.data) {
             // 토큰을 로컬 스토리지에 저장
-            localStorage.setItem('token', result.data.token);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('token', result.data.token);
+            }
             
             set({
               user: result.data.user,
@@ -70,7 +72,9 @@ export const useAuthStore = create<AuthStore>()(
 
           if (result.success && result.data) {
             // 토큰을 로컬 스토리지에 저장
-            localStorage.setItem('token', result.data.token);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('token', result.data.token);
+            }
             
             set({
               user: result.data.user,
@@ -136,9 +140,11 @@ export const useAuthStore = create<AuthStore>()(
             console.warn('Server logout failed:', error);
           }
           
-          // 로컬 토큰 제거
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
+          // 로컬 토큰 제거 (SSR 안전)
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+          }
           
           // 소셜 로그인 세션도 정리
           await signOut({ redirect: false });

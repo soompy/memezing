@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, Lock, User, CheckCircle, XCircle } from 'lucide-react';
-import { Button, Input } from '@/components/ui';
+import { Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Button, Input, Checkbox } from '@/components/ui';
 import SocialLogin from '@/components/auth/SocialLogin';
 import { useAuthStore } from '@/store/authStore';
+import { motion } from 'framer-motion';
 
 interface PasswordStrength {
   hasLength: boolean;
@@ -18,6 +19,7 @@ interface PasswordStrength {
 export default function RegisterPage() {
   const router = useRouter();
   const { register, isLoading, error, clearError, user } = useAuthStore();
+  const [isMounted, setIsMounted] = useState(false);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -35,12 +37,17 @@ export default function RegisterPage() {
     hasSpecial: false,
   });
 
+  // 컴포넌트 마운트 상태 관리
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // 이미 로그인된 사용자는 홈으로 리다이렉트
   useEffect(() => {
-    if (user) {
+    if (isMounted && user) {
       router.push('/');
     }
-  }, [user, router]);
+  }, [user, router, isMounted]);
 
   // 에러 클리어
   useEffect(() => {
@@ -102,230 +109,235 @@ export default function RegisterPage() {
     );
   };
 
+  // 하이드레이션 완료 전까지는 로딩 상태
+  if (!isMounted) {
+    return (
+      <div className="flex items-center justify-center p-5 relative">
+        <div className="text-gray-500">로딩 중...</div>
+      </div>
+    );
+  }
+
+  // 로그인된 사용자는 아무것도 보여주지 않음 (리다이렉트 처리됨)
   if (user) {
-    return null; // 로딩 중에는 아무것도 보여주지 않음
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* 배경 데코레이션 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-80 h-80 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-primary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-accent-200 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-3000"></div>
-      </div>
-
-      <div className="relative w-full max-w-md">
+    <div className="flex items-center justify-center p-5 relative">
+      <div className="w-full max-w-md relative">
         {/* 로고 섹션 */}
-        <div className="text-center mb-8">
+        <motion.div 
+          className="text-center mb-6"
+          initial={isMounted ? { opacity: 0, scale: 0.9 } : false}
+          animate={isMounted ? { opacity: 1, scale: 1 } : false}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
           <div className="mb-4">
-            <div className="text-4xl font-bold mb-2" style={{fontFamily: "'Black Han Sans', sans-serif"}}>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-secondary-400">
+            <motion.div 
+              className="text-5xl mb-4"
+              style={{fontFamily: "'Black Han Sans', sans-serif"}}
+              whileHover={isMounted ? { scale: 1.05 } : {}}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <motion.h2
+                animate={isMounted ? { rotate: [0, 10, -10, 0] } : false}
+                transition={{ duration: 2, repeat: Infinity, delay: 0 }}>
                 밈징
-              </span>
-            </div>
-            <div className="text-sm text-gray-500 tracking-wider">MEME-ZING</div>
+              </motion.h2>
+            </motion.div>
           </div>
-          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>회원가입</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>밈징에서 창의적인 여정을 시작하세요!</p>
-        </div>
+          <p className="text-base text-gray-600 leading-relaxed">
+            밈으로 세상을 더 재미있게 만들어보세요!
+          </p>
+        </motion.div>
 
         {/* 회원가입 폼 */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 animate-shake">
-                <div className="flex items-center">
-                  <div className="text-red-500 mr-2">⚠️</div>
-                  <p className="text-sm text-red-600">{error}</p>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 animate-shake">
+              <div className="flex items-center">
+                <div className="text-red-500 mr-2">⚠️</div>
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            </div>
+          )}
+
+          {/* 이메일 입력 */}
+          <Input
+            label="이메일"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="이메일을 입력하세요"
+            required
+          />
+
+          {/* 사용자명 입력 */}
+          <Input
+            label="사용자명"
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            placeholder="사용자명을 입력하세요 (2-20자)"
+            required
+            helperText="한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다"
+          />
+
+          {/* 비밀번호 입력 */}
+          <div className="relative">
+            <Input
+              label="비밀번호"
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="비밀번호를 입력하세요"
+              required
+              className="pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-[2.2rem] text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+
+          {/* 비밀번호 강도 표시 */}
+          {formData.password && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700">비밀번호 조건</p>
+              <div className="space-y-1">
+                <div className="flex items-center text-sm">
+                  {passwordStrength.hasLength ? (
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-gray-300 mr-2" />
+                  )}
+                  <span className={passwordStrength.hasLength ? 'text-green-600' : 'text-gray-500'}>
+                    최소 6자 이상
+                  </span>
+                </div>
+                <div className="flex items-center text-sm">
+                  {passwordStrength.hasLetter ? (
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-gray-300 mr-2" />
+                  )}
+                  <span className={passwordStrength.hasLetter ? 'text-green-600' : 'text-gray-500'}>
+                    영문 포함
+                  </span>
+                </div>
+                <div className="flex items-center text-sm">
+                  {passwordStrength.hasNumber ? (
+                    <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-gray-300 mr-2" />
+                  )}
+                  <span className={passwordStrength.hasNumber ? 'text-green-600' : 'text-gray-500'}>
+                    숫자 포함
+                  </span>
                 </div>
               </div>
-            )}
-
-            {/* 이메일 입력 */}
-            <div className="relative">
-              <Input
-                label="이메일"
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="이메일을 입력하세요"
-                required
-                className="pl-10"
-              />
-              <Mail className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
             </div>
+          )}
 
-            {/* 사용자명 입력 */}
-            <div className="relative">
-              <Input
-                label="사용자명"
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="사용자명을 입력하세요 (2-20자)"
-                required
-                className="pl-10"
-                helperText="한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다"
-              />
-              <User className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
-            </div>
+          {/* 비밀번호 확인 */}
+          <div className="relative">
+            <Input
+              label="비밀번호 확인"
+              type={showConfirmPassword ? 'text' : 'password'}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="비밀번호를 다시 입력하세요"
+              required
+              className="pr-12"
+              error={
+                formData.confirmPassword && formData.password !== formData.confirmPassword
+                  ? '비밀번호가 일치하지 않습니다'
+                  : undefined
+              }
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-[2.2rem] text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
 
-            {/* 비밀번호 입력 */}
-            <div className="relative">
-              <Input
-                label="비밀번호"
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="비밀번호를 입력하세요"
-                required
-                className="pl-10 pr-10"
-              />
-              <Lock className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-
-            {/* 비밀번호 강도 표시 */}
-            {formData.password && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-gray-700">비밀번호 조건</p>
-                <div className="space-y-1">
-                  <div className="flex items-center text-sm">
-                    {passwordStrength.hasLength ? (
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-gray-300 mr-2" />
-                    )}
-                    <span className={passwordStrength.hasLength ? 'text-green-600' : 'text-gray-500'}>
-                      최소 6자 이상
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    {passwordStrength.hasLetter ? (
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-gray-300 mr-2" />
-                    )}
-                    <span className={passwordStrength.hasLetter ? 'text-green-600' : 'text-gray-500'}>
-                      영문 포함
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    {passwordStrength.hasNumber ? (
-                      <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-gray-300 mr-2" />
-                    )}
-                    <span className={passwordStrength.hasNumber ? 'text-green-600' : 'text-gray-500'}>
-                      숫자 포함
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 비밀번호 확인 */}
-            <div className="relative">
-              <Input
-                label="비밀번호 확인"
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="비밀번호를 다시 입력하세요"
-                required
-                className="pl-10 pr-10"
-                error={
-                  formData.confirmPassword && formData.password !== formData.confirmPassword
-                    ? '비밀번호가 일치하지 않습니다'
-                    : undefined
-                }
-              />
-              <Lock className="absolute left-3 top-9 w-5 h-5 text-gray-400" />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600"
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="w-5 h-5" />
-                ) : (
-                  <Eye className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-
-            {/* 이용약관 동의 */}
-            <div className="space-y-4">
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
-                  required
-                />
-                <span className="ml-3 text-sm text-gray-600">
-                  <Link href="/terms" className="text-primary-600 hover:text-primary-700 hover:underline transition-colors">
+          {/* 이용약관 동의 */}
+          <div className="space-y-4">
+            <Checkbox
+              checked={agreedToTerms}
+              onChange={setAgreedToTerms}
+              label={
+                <span className="text-sm text-gray-600">
+                  <Link href="/terms" className="text-gray-600 hover:text-gray-800 hover:underline transition-colors">
                     이용약관
                   </Link>
                   {' '}및{' '}
-                  <Link href="/privacy" className="text-primary-600 hover:text-primary-700 hover:underline transition-colors">
+                  <Link href="/privacy" className="text-gray-600 hover:text-gray-800 hover:underline transition-colors">
                     개인정보처리방침
                   </Link>
                   에 동의합니다. (필수)
                 </span>
-              </label>
-            </div>
-
-            {/* 회원가입 버튼 */}
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full"
-              isLoading={isLoading}
-              disabled={isLoading || !isFormValid()}
-            >
-              회원가입
-            </Button>
-          </form>
-
-          {/* 소셜 로그인 */}
-          <SocialLogin mode="register" className="mt-6" />
-
-          {/* 로그인 링크 */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600">
-              이미 계정이 있으신가요?{' '}
-              <Link
-                href="/login"
-                className="font-medium text-primary-600 hover:text-primary-700 hover:underline transition-colors"
-              >
-                로그인
-              </Link>
-            </p>
+              }
+            />
           </div>
+
+          {/* 회원가입 버튼 */}
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            isLoading={isLoading}
+            disabled={isLoading || !isFormValid()}
+          >
+            회원가입
+          </Button>
+        </form>
+
+        {/* 소셜 로그인 */}
+        <SocialLogin mode="register" className="mt-6" />
+
+        {/* 로그인 링크 */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-600">
+            이미 계정이 있으신가요?{' '}
+            <Link
+              href="/login"
+              className="font-medium text-gray-600 hover:text-gray-800 hover:underline transition-colors"
+            >
+              로그인
+            </Link>
+          </p>
         </div>
+        
 
         {/* 추가 정보 */}
         <div className="mt-8 text-center">
           <div className="text-sm text-gray-500">
-            <Link href="/" className="hover:text-gray-700">
-              ← 홈으로 돌아가기
+            <Link 
+              href="/" 
+              className="inline-flex items-center px-6 py-3 bg-secondary text-white font-semibold rounded-lg hover:from-primary-600 hover:to-secondary-500 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg group"
+            >
+              <span>홈으로 돌아가기</span>
             </Link>
           </div>
         </div>
