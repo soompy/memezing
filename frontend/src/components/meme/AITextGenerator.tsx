@@ -57,7 +57,7 @@ export default function AITextGenerator({ onTextSelect, existingTexts = [], clas
   };
 
   const handleTextSelect = (text: string, id: string) => {
-    console.log('handleTextSelect called with:', text); // 디버깅용
+    // TODO: 디버깅용 로그 - 텍스트 선택 이벤트 추적
     setSelectedId(id);
     onTextSelect(text);
     

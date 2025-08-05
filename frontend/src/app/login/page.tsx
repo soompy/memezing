@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Sparkles } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import SocialLogin from '@/components/auth/SocialLogin';
@@ -92,7 +92,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center p-4 relative overflow-hidden">
       {/* 배경 데코레이션 */}
       <div className="absolute inset-0">
         <div className="absolute -top-40 -right-32 w-80 h-80 bg-secondary-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
@@ -106,58 +106,40 @@ export default function LoginPage() {
       </div>
 
       <motion.div 
-        className="w-full max-w-md relative z-10"
+        className="w-full max-w-md relative z-10 max-h-[95vh] overflow-y-auto"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className={`bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/30 p-8 transition-all duration-500 ${isFormFocused ? 'shadow-3xl scale-[1.02]' : 'hover:shadow-3xl'}`}>
+        <div className={`bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/30 p-6 transition-all duration-500 ${isFormFocused ? 'shadow-3xl scale-[1.02]' : 'hover:shadow-3xl'}`}>
           {/* 로고 및 제목 */}
           <motion.div 
-            className="text-center mb-10"
+            className="text-center mb-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <div className="mb-6">
+            <div className="mb-4">
               <motion.div 
-                className="text-5xl font-bold mb-4"
+                className="text-5xl mb-4"
                 style={{fontFamily: "'Black Han Sans', sans-serif"}}
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-500 via-secondary-400 to-accent-400">
-                  밈징
-                </span>
-              </motion.div>
-              <div className="flex justify-center space-x-2 mb-4">
-                <motion.div 
-                  className="text-2xl"
+                <motion.h2
                   animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-                >🎭</motion.div>
-                <motion.div 
-                  className="text-2xl"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                >✨</motion.div>
-                <motion.div 
-                  className="text-2xl"
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-                >🚀</motion.div>
-              </div>
+                  transition={{ duration: 2, repeat: Infinity, delay: 0 }}>
+                  밈징
+                </motion.h2>
+              </motion.div>
             </div>
-            <h1 className="text-3xl font-bold mb-3 bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
-              다시 만나서 반가워요!
-            </h1>
             <p className="text-base text-gray-600 leading-relaxed">
-              밈으로 세상을 더 재미있게 만들어보세요! 🎉
+              밈으로 세상을 더 재미있게 만들어보세요!
             </p>
           </motion.div>
 
           {/* 로그인 폼 */}
-          <form onSubmit={handleSubmit} className="space-y-7">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <motion.div 
                 className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-400 text-red-700 px-5 py-4 rounded-r-lg text-sm shadow-sm"
@@ -179,7 +161,7 @@ export default function LoginPage() {
               transition={{ delay: 0.3, duration: 0.5 }}
             >
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
-                📧 이메일
+                이메일 <span className="text-red-500">*</span>
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -195,11 +177,16 @@ export default function LoginPage() {
                   onBlur={() => setIsFormFocused(false)}
                   placeholder="your@email.com"
                   required
-                  className="pl-12 pr-4 py-4 w-full border-2 border-gray-200 rounded-xl focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all duration-300 group-hover:border-gray-300 text-gray-800 placeholder-gray-400"
+                  className={`pl-12 pr-4 py-4 w-full border-2 rounded-xl focus:ring-2 focus:ring-primary-100 transition-all duration-300 group-hover:border-gray-300 text-gray-800 placeholder-gray-400 ${
+                    formErrors.email 
+                      ? 'border-red-400 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-primary-400'
+                  }`}
                 />
-                {formErrors.email && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
-                )}
+              </div>
+              {formErrors.email && (
+                <p className="text-red-500 text-sm mt-2">{formErrors.email}</p>
+              )}
               </div>
             </motion.div>
 
@@ -210,7 +197,7 @@ export default function LoginPage() {
               transition={{ delay: 0.4, duration: 0.5 }}
             >
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
-                🔒 비밀번호
+                비밀번호 <span className="text-red-500">*</span>
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -226,7 +213,11 @@ export default function LoginPage() {
                   onBlur={() => setIsFormFocused(false)}
                   placeholder="비밀번호를 입력하세요"
                   required
-                  className="pl-12 pr-14 py-4 w-full border-2 border-gray-200 rounded-xl focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all duration-300 group-hover:border-gray-300 text-gray-800 placeholder-gray-400"
+                  className={`pl-12 pr-14 py-4 w-full border-2 rounded-xl focus:ring-2 focus:ring-primary-100 transition-all duration-300 group-hover:border-gray-300 text-gray-800 placeholder-gray-400 ${
+                    formErrors.password 
+                      ? 'border-red-400 focus:border-red-500' 
+                      : 'border-gray-200 focus:border-primary-400'
+                  }`}
                 />
                 <button
                   type="button"
@@ -235,9 +226,10 @@ export default function LoginPage() {
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
-                {formErrors.password && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.password}</p>
-                )}
+              </div>
+              {formErrors.password && (
+                <p className="text-red-500 text-sm mt-2">{formErrors.password}</p>
+              )}
               </div>
             </motion.div>
 
@@ -275,6 +267,7 @@ export default function LoginPage() {
               </Link>
             </motion.div>
 
+
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -295,7 +288,6 @@ export default function LoginPage() {
                   <div className="flex items-center justify-center group">
                     <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
                     <span>로그인하기</span>
-                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 )}
               </Button>
@@ -304,7 +296,7 @@ export default function LoginPage() {
 
           {/* 소셜 로그인 */}
           <motion.div 
-            className="mt-8"
+            className="mt-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.5 }}
@@ -314,32 +306,31 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500 font-medium">✨ 간편 로그인 ✨</span>
+                <span className="px-4 bg-white text-gray-500 font-medium">간편 로그인</span>
               </div>
             </div>
             
-            <div className="mt-8">
+            <div className="mt-6">
               <SocialLogin />
             </div>
           </motion.div>
 
           {/* 회원가입 링크 */}
           <motion.div 
-            className="mt-10 text-center"
+            className="mt-6 text-center"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
             <div className="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-xl p-6">
               <p className="text-sm text-gray-600 mb-3">
-                아직 밈징의 회원이 아니신가요? 🤔
+                아직 밈징의 회원이 아니신가요?
               </p>
               <Link 
                 href="/register" 
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-400 text-white font-semibold rounded-lg hover:from-primary-600 hover:to-secondary-500 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg group"
+                className="inline-flex items-center px-6 py-3 bg-secondary text-white font-semibold rounded-lg hover:from-primary-600 hover:to-secondary-500 transform hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg group"
               >
-                <span>🎉 회원가입하고 시작하기</span>
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+                <span>회원가입하고 시작하기</span>
               </Link>
             </div>
           </motion.div>
