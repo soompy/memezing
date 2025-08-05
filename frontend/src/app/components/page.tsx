@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Input, Select, TabGroup, RangeSlider } from '@/components/ui';
+import { Button, Input, Select, TabGroup, RangeSlider, Checkbox } from '@/components/ui';
 
 const fontOptions = [
   { value: 'Arial', label: 'Arial' },
@@ -24,6 +24,10 @@ export default function ComponentsPage() {
   const [rangeValue1, setRangeValue1] = useState(50);
   const [rangeValue2, setRangeValue2] = useState(75);
   const [rangeValue3, setRangeValue3] = useState(25);
+  const [checkboxValue1, setCheckboxValue1] = useState(false);
+  const [checkboxValue2, setCheckboxValue2] = useState(true);
+  const [checkboxValue3, setCheckboxValue3] = useState(false);
+  const [checkboxValue4, setCheckboxValue4] = useState(false);
 
   const handleLoadingTest = () => {
     setIsLoading(true);
@@ -269,6 +273,172 @@ export default function ComponentsPage() {
                                           placeholder="선택할 수 없습니다"
                                           disabled
                                       />
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+
+                      {/* Checkbox Components */}
+                      <section>
+                          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                              Checkbox 컴포넌트
+                          </h2>
+
+                          <div className="space-y-8">
+                              {/* Variants */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      변형 (Variants)
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">Primary</h4>
+                                          <Checkbox
+                                              checked={checkboxValue1}
+                                              onChange={setCheckboxValue1}
+                                              label="Primary 체크박스"
+                                              variant="primary"
+                                          />
+                                      </div>
+                                      
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">Secondary</h4>
+                                          <Checkbox
+                                              checked={checkboxValue2}
+                                              onChange={setCheckboxValue2}
+                                              label="Secondary 체크박스"
+                                              variant="secondary"
+                                          />
+                                      </div>
+                                      
+                                      <div className="space-y-4">
+                                          <h4 className="font-medium text-gray-600">Accent</h4>
+                                          <Checkbox
+                                              checked={checkboxValue3}
+                                              onChange={setCheckboxValue3}
+                                              label="Accent 체크박스"
+                                              variant="accent"
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+
+                              {/* Sizes */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      크기 (Sizes)
+                                  </h3>
+                                  <div className="flex flex-wrap items-center gap-6">
+                                      <div className="space-y-2">
+                                          <Checkbox
+                                              checked={checkboxValue4}
+                                              onChange={setCheckboxValue4}
+                                              label="Small"
+                                              size="sm"
+                                          />
+                                          <p className="text-sm text-gray-500">
+                                              작은 크기
+                                          </p>
+                                      </div>
+                                      <div className="space-y-2">
+                                          <Checkbox
+                                              checked={checkboxValue1}
+                                              onChange={setCheckboxValue1}
+                                              label="Medium"
+                                              size="md"
+                                          />
+                                          <p className="text-sm text-gray-500">
+                                              보통 크기
+                                          </p>
+                                      </div>
+                                      <div className="space-y-2">
+                                          <Checkbox
+                                              checked={checkboxValue2}
+                                              onChange={setCheckboxValue2}
+                                              label="Large"
+                                              size="lg"
+                                          />
+                                          <p className="text-sm text-gray-500">
+                                              큰 크기
+                                          </p>
+                                      </div>
+                                  </div>
+                              </div>
+
+                              {/* States */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      상태 (States)
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div className="space-y-4">
+                                          <div className="space-y-2">
+                                              <h4 className="font-medium text-gray-600">일반 상태</h4>
+                                              <Checkbox
+                                                  checked={false}
+                                                  onChange={() => {}}
+                                                  label="체크되지 않음"
+                                              />
+                                              <Checkbox
+                                                  checked={true}
+                                                  onChange={() => {}}
+                                                  label="체크됨"
+                                              />
+                                          </div>
+                                      </div>
+
+                                      <div className="space-y-4">
+                                          <div className="space-y-2">
+                                              <h4 className="font-medium text-gray-600">비활성화 상태</h4>
+                                              <Checkbox
+                                                  checked={false}
+                                                  onChange={() => {}}
+                                                  label="비활성화됨"
+                                                  disabled
+                                              />
+                                              <Checkbox
+                                                  checked={true}
+                                                  onChange={() => {}}
+                                                  label="체크됨 + 비활성화"
+                                                  disabled
+                                              />
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+
+                              {/* Error State */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      에러 상태
+                                  </h3>
+                                  <div className="space-y-4">
+                                      <Checkbox
+                                          checked={false}
+                                          onChange={() => {}}
+                                          label="필수 약관에 동의해주세요"
+                                          error
+                                      />
+                                  </div>
+                              </div>
+
+                              {/* Usage Example */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      사용 방법
+                                  </h3>
+                                  <div className="bg-gray-100 p-4 rounded-lg">
+                                      <pre className="text-sm text-gray-800 overflow-x-auto">
+{`const [checked, setChecked] = useState(false);
+
+<Checkbox
+  checked={checked}
+  onChange={setChecked}
+  label="동의합니다"
+  variant="primary"
+  size="md"
+/>`}
+                                      </pre>
                                   </div>
                               </div>
                           </div>
