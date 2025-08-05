@@ -85,6 +85,13 @@ NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET="your-cloudinary-upload-preset"
    NEXT_PUBLIC_API_URL="https://your-api-domain.com"
    ```
 
+### 📋 프로덕션 배포 가이드
+상세한 프로덕션 배포 방법은 [PRODUCTION_DEPLOYMENT.md](./PRODUCTION_DEPLOYMENT.md) 문서를 참고하세요:
+- Vercel, Netlify, AWS, GCP 배포 방법
+- 플랫폼별 환경변수 설정
+- 보안 모범 사례
+- 응급 상황 대응 방법
+
 ## 보안 주의사항
 
 ⚠️ **중요**: 
