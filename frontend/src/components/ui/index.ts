@@ -4,6 +4,7 @@ export { default as Input } from './Input';
 export { default as Select, type SelectOption, type SelectGroup } from './Select';
 export { default as TabGroup } from './TabGroup';
 export { default as RangeSlider } from './RangeSlider';
+export { default as Checkbox } from './Checkbox';
 
 // Layout Components
 export { default as Header } from './Header';
