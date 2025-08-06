@@ -41,13 +41,22 @@ const steps = [
 
 const StepContainer = styled.div<{ isActive: boolean; color: string; bgColor: string }>`
   position: relative;
-  border-radius: 32px;
-  padding: 3rem 4rem;
+  border-radius: 24px;
+  padding: 1.5rem 2rem;
   transform: ${props => props.isActive ? 'scale(1.02)' : 'scale(1)'};
   transition: all 0.3s ease;
   cursor: pointer;
   width: 100%;
   max-width: none;
+  
+  @media (min-width: 768px) {
+    border-radius: 32px;
+    padding: 2.5rem 3rem;
+  }
+  
+  @media (min-width: 1024px) {
+    padding: 3rem 4rem;
+  }
 `;
 
 // flicker keyframe 정의
@@ -82,18 +91,32 @@ const pulseRing = keyframes`
 `;
 
 const IconWrapper = styled.div<{ color: string; bgColor: string; isActive: boolean }>`
-  width: 120px;
-  height: 120px;
-  border-radius: 30px;
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
   background: ${props => props.isActive ? props.color : props.bgColor};
   display: flex;
   align-items: center;
   justify-content: center;
   animation: ${props => props.isActive ? css`${pulseRing} 2s infinite, ${flicker} 8s infinite` : css`${flicker} 8s infinite`};
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   transition: all 0.3s ease;
   transform: ${props => props.isActive ? 'rotate(5deg)' : 'rotate(0deg)'};
   position: relative;
+  
+  @media (min-width: 768px) {
+    width: 100px;
+    height: 100px;
+    border-radius: 25px;
+    margin-bottom: 1.75rem;
+  }
+  
+  @media (min-width: 1024px) {
+    width: 120px;
+    height: 120px;
+    border-radius: 30px;
+    margin-bottom: 2rem;
+  }
   
   /* 진행 중인 스텝에만 펄스링 보더 추가 */
   ${props => props.isActive && css`
@@ -108,9 +131,9 @@ export default function HowItWorks() {
   const sections = [
       // 1. 제목 섹션
       <ContentSlide key="title">
-          <div className="w-full px-8 sm:px-12 lg:px-16 h-screen flex items-center justify-center">
+          <div className="w-full px-4 sm:px-8 lg:px-16 h-screen flex items-center justify-center">
               <motion.h2
-                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold text-center w-full"
+                  className="text-2xl sm:text-4xl lg:text-7xl font-bold text-center w-full"
                   style={{ color: 'var(--text-primary)' }}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -123,7 +146,7 @@ export default function HowItWorks() {
 
       // 2. 1단계
       <ContentSlide key="step1">
-          <div className="w-full px-8 sm:px-12 lg:px-16 h-screen flex items-center justify-center">
+          <div className="w-full px-4 sm:px-8 lg:px-16 h-screen flex items-center justify-center">
               <div className="w-full max-w-6xl text-center">
                   <motion.div
                       className="relative"
@@ -144,15 +167,15 @@ export default function HowItWorks() {
                                   isActive={true}
                               >
                                   <Upload
-                                      className="w-20 h-20"
+                                      className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
                                       style={{ color: "white" }}
                                   />
                               </IconWrapper>
 
-                              <div className="space-y-4">
-                                  <div className="flex items-center justify-center space-x-3 mb-4">
+                              <div className="space-y-3 sm:space-y-4">
+                                  <div className="flex flex-col sm:flex-row items-center justify-center sm:space-x-3 mb-3 sm:mb-4">
                                       <span
-                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold"
+                                          className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full text-base sm:text-lg font-bold mb-2 sm:mb-0"
                                           style={{
                                               backgroundColor: steps[0].color,
                                               color: 'white',
@@ -162,17 +185,17 @@ export default function HowItWorks() {
                                       >
                                           1
                                       </span>
-                                      <h3 className="text-4xl lg:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                      <h3 className="text-xl sm:text-2xl lg:text-4xl xl:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                           {steps[0].title}
                                       </h3>
                                   </div>
 
-                                  <p className="text-2xl lg:text-3xl mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                                  <p className="text-sm sm:text-lg lg:text-2xl xl:text-3xl mb-4 sm:mb-6 lg:mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                                       {steps[0].description}
                                   </p>
 
                                   <motion.div
-                                      className="p-6 rounded-lg"
+                                      className="p-4 sm:p-6 rounded-lg"
                                       style={{
                                           backgroundColor: steps[0].bgColor,
                                       }}
@@ -181,8 +204,8 @@ export default function HowItWorks() {
                                       transition={{ duration: 0.3, delay: 0.3 }}
                                   >
                                       <p
-                                          className="text-xl lg:text-2xl font-medium"
-                                          style={{ color: steps[0].color }}
+                                          className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-medium"
+                                          style={{ color: 'var(--text-primary)' }}
                                       >
                                           💡 {steps[0].detail}
                                       </p>
@@ -197,7 +220,7 @@ export default function HowItWorks() {
 
       // 3. 2단계
       <ContentSlide key="step2">
-          <div className="w-full px-8 sm:px-12 lg:px-16 h-screen flex items-center justify-center">
+          <div className="w-full px-4 sm:px-8 lg:px-16 h-screen flex items-center justify-center">
               <div className="w-full max-w-6xl text-center">
                   <motion.div
                       className="relative"
@@ -218,15 +241,15 @@ export default function HowItWorks() {
                                   isActive={true}
                               >
                                   <Edit3
-                                      className="w-20 h-20"
+                                      className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
                                       style={{ color: "white" }}
                                   />
                               </IconWrapper>
 
-                              <div className="space-y-4">
-                                  <div className="flex items-center justify-center space-x-3 mb-4">
+                              <div className="space-y-3 sm:space-y-4">
+                                  <div className="flex flex-col sm:flex-row items-center justify-center sm:space-x-3 mb-3 sm:mb-4">
                                       <span
-                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold"
+                                          className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full text-base sm:text-lg font-bold mb-2 sm:mb-0"
                                           style={{
                                               backgroundColor: steps[1].color,
                                               color: 'white',
@@ -236,17 +259,17 @@ export default function HowItWorks() {
                                       >
                                           2
                                       </span>
-                                      <h3 className="text-4xl lg:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                      <h3 className="text-xl sm:text-2xl lg:text-4xl xl:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                           {steps[1].title}
                                       </h3>
                                   </div>
 
-                                  <p className="text-2xl lg:text-3xl mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                                  <p className="text-sm sm:text-lg lg:text-2xl xl:text-3xl mb-4 sm:mb-6 lg:mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                                       {steps[1].description}
                                   </p>
 
                                   <motion.div
-                                      className="p-6 rounded-lg"
+                                      className="p-4 sm:p-6 rounded-lg"
                                       style={{
                                           backgroundColor: steps[1].bgColor,
                                       }}
@@ -255,10 +278,10 @@ export default function HowItWorks() {
                                       transition={{ duration: 0.3, delay: 0.3 }}
                                   >
                                       <p
-                                          className="text-xl lg:text-2xl font-medium"
-                                          style={{ color: steps[1].color }}
+                                          className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-medium"
+                                          style={{ color: 'var(--text-primary)' }}
                                       >
-                                          💡 {steps[1].detail}
+                                          ⭐️ {steps[1].detail}
                                       </p>
                                   </motion.div>
                               </div>
@@ -271,7 +294,7 @@ export default function HowItWorks() {
 
       // 4. 3단계
       <ContentSlide key="step3">
-          <div className="w-full px-8 sm:px-12 lg:px-16 h-screen flex items-center justify-center">
+          <div className="w-full px-4 sm:px-8 lg:px-16 h-screen flex items-center justify-center">
               <div className="w-full max-w-6xl text-center">
                   <motion.div
                       className="relative"
@@ -292,15 +315,15 @@ export default function HowItWorks() {
                                   isActive={true}
                               >
                                   <Share2
-                                      className="w-20 h-20"
+                                      className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20"
                                       style={{ color: "white" }}
                                   />
                               </IconWrapper>
 
-                              <div className="space-y-4">
-                                  <div className="flex items-center justify-center space-x-3 mb-4">
+                              <div className="space-y-3 sm:space-y-4">
+                                  <div className="flex flex-col sm:flex-row items-center justify-center sm:space-x-3 mb-3 sm:mb-4">
                                       <span
-                                          className="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold"
+                                          className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full text-base sm:text-lg font-bold mb-2 sm:mb-0"
                                           style={{
                                               backgroundColor: steps[2].color,
                                               color: 'white',
@@ -310,17 +333,17 @@ export default function HowItWorks() {
                                       >
                                           3
                                       </span>
-                                      <h3 className="text-4xl lg:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                                      <h3 className="text-xl sm:text-2xl lg:text-4xl xl:text-5xl font-bold" style={{ color: 'var(--text-primary)' }}>
                                           {steps[2].title}
                                       </h3>
                                   </div>
 
-                                  <p className="text-2xl lg:text-3xl mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                                  <p className="text-sm sm:text-lg lg:text-2xl xl:text-3xl mb-4 sm:mb-6 lg:mb-8 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                                       {steps[2].description}
                                   </p>
 
                                   <motion.div
-                                      className="p-6 rounded-lg"
+                                      className="p-4 sm:p-6 rounded-lg"
                                       style={{
                                           backgroundColor: steps[2].bgColor,
                                       }}
@@ -329,8 +352,8 @@ export default function HowItWorks() {
                                       transition={{ duration: 0.3, delay: 0.3 }}
                                   >
                                       <p
-                                          className="text-xl lg:text-2xl font-medium"
-                                          style={{ color: steps[2].color }}
+                                          className="text-sm sm:text-lg lg:text-xl xl:text-2xl font-medium"
+                                          style={{ color: 'var(--text-primary)' }}
                                       >
                                           💡 {steps[2].detail}
                                       </p>
