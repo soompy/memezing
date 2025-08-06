@@ -157,12 +157,6 @@ export default function InterestSelectionPopup({
           </SubButtonContainer>
         </ButtonContainer>
 
-        <InfoBox>
-          <p>
-            <strong>개인화 혜택:</strong> 선택하신 관심사를 바탕으로<br/>
-            인기 템플릿, 트렌드 키워드, 맞춤 스타일을 우선 추천해드려요!
-          </p>
-        </InfoBox>
       </Container>
     </Modal>
   );
@@ -173,15 +167,20 @@ const Container = styled.div`
   margin-bottom: 2rem;
   max-width: 500px;
   margin: 0 auto 2rem auto;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   
   @media (max-width: 640px) {
     max-width: 100%;
     padding: 0;
     margin-bottom: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  }
+  
+  @media (min-width: 641px) {
+    height: auto;
+    max-height: 90vh;
   }
 `;
 
@@ -400,27 +399,3 @@ const SubButtonContainer = styled.div`
   gap: 0.5rem;
 `;
 
-const InfoBox = styled.div`
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: #eff6ff;
-  border-radius: 0.5rem;
-  border: 1px solid #bfdbfe;
-  
-  @media (max-width: 640px) {
-    margin-top: 0.75rem;
-    padding: 0.75rem;
-    flex-shrink: 0;
-  }
-  
-  p {
-    color: #1d4ed8;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    margin: 0;
-    
-    @media (max-width: 640px) {
-      font-size: 0.75rem;
-    }
-  }
-`;
