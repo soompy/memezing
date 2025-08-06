@@ -6,7 +6,6 @@ import { Download, RefreshCw, Type, Image as ImageIcon, Settings, ChevronUp, Che
 import Button from '@/components/ui/Button';
 import MobileFabricCanvas, { MobileFabricCanvasRef, MemeTemplate } from '@/components/meme/MobileFabricCanvas';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
-import AITextGenerator from '@/components/meme/AITextGenerator';
 import { getRandomImageFromPool } from '@/utils/imagePool';
 
 // 템플릿 데이터
@@ -463,16 +462,6 @@ export default function MobileMemeGeneratorPage() {
           </Button>
           
           <Button
-            variant={currentTool === 'ai' ? 'primary' : 'secondary'}
-            size="lg"
-            onClick={() => selectTool('ai')}
-            className="flex flex-col items-center p-2 h-auto"
-          >
-            <RefreshCw size={18} className="mb-1" />
-            <span className="text-xs">AI</span>
-          </Button>
-          
-          <Button
             variant={currentTool === 'upload' ? 'primary' : 'secondary'}
             size="lg"
             onClick={() => selectTool('upload')}
@@ -526,7 +515,6 @@ export default function MobileMemeGeneratorPage() {
             <h3 className="text-lg font-semibold">
               {currentTool === 'templates' && '템플릿 선택'}
               {currentTool === 'text' && '텍스트 도구'}
-              {currentTool === 'ai' && 'AI 텍스트 생성'}
               {currentTool === 'upload' && '이미지 업로드'}
               {currentTool === 'settings' && '설정'}
             </h3>
@@ -679,15 +667,6 @@ export default function MobileMemeGeneratorPage() {
               </div>
             )}
 
-            {currentTool === 'ai' && (
-              <div className="space-y-4">
-                <AITextGenerator
-                  onTextSelect={handleAddText}
-                  existingTexts={canvasRef.current?.getAllTexts() || []}
-                  className="border-0 p-0"
-                />
-              </div>
-            )}
 
             {currentTool === 'upload' && (
               <div className="space-y-4">

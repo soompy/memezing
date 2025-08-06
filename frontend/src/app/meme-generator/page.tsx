@@ -610,8 +610,7 @@ export default function MemeGeneratorPage() {
 
   const tabs = [
     { key: 'images', label: '이미지 선택', icon: ImageIcon },
-    { key: 'text', label: '텍스트', icon: Type },
-    { key: 'ai', label: 'AI 텍스트', icon: RefreshCw }
+    { key: 'text', label: '텍스트', icon: Type }
   ];
 
   // 커뮤니티 페이지 이동
@@ -964,15 +963,6 @@ export default function MemeGeneratorPage() {
                       </div>
                     </div>
                   )}
-                  
-                  {activeTab === 'ai' && (
-                    <div className="space-y-6">
-                      <AITextGenerator
-                        onTextSelect={handleAddText}
-                        existingTexts={canvasRef.current?.getAllTexts() || []}
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -1223,15 +1213,6 @@ export default function MemeGeneratorPage() {
                             onReset={handleStyleReset}
                           />
                         </div>
-                      </div>
-                    )}
-                    
-                    {activeTab === 'ai' && (
-                      <div className="space-y-6">
-                        <AITextGenerator
-                          onTextSelect={handleAddText}
-                          existingTexts={canvasRef.current?.getAllTexts() || []}
-                        />
                       </div>
                     )}
                   </div>
