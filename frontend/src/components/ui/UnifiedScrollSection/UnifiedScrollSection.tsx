@@ -153,30 +153,6 @@ export default function UnifiedScrollSection({
         ))}
       </StickyContent>
       
-      {/* 진행도 인디케이터 */}
-      <motion.div 
-        className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-      >
-        <div className="flex flex-col space-y-2">
-          {children.map((_, index) => (
-            <motion.div
-              key={index}
-              className="w-2 h-8 rounded-full bg-white/30"
-              style={{
-                backgroundColor: currentSection === index ? 'var(--text-inverse)' : 'rgba(255,255,255,0.3)'
-              }}
-              animate={{
-                backgroundColor: currentSection === index ? 'var(--text-inverse)' : 'rgba(255,255,255,0.3)',
-                scale: currentSection === index ? 1.2 : 1
-              }}
-              transition={{ duration: 0.3 }}
-            />
-          ))}
-        </div>
-      </motion.div>
     </SectionContainer>
   );
 }
