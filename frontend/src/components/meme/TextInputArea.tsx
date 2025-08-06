@@ -23,8 +23,7 @@ const TextInputArea: React.FC<TextInputAreaProps> = ({
   className = ''
 }) => {
   const [textInputs, setTextInputs] = useState<TextInput[]>([
-    { id: '1', text: '', placeholder: '상단 텍스트를 입력하세요' },
-    { id: '2', text: '', placeholder: '하단 텍스트를 입력하세요' }
+    { id: '1', text: '', placeholder: '텍스트를 입력하세요' }
   ]);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -115,8 +114,7 @@ const TextInputArea: React.FC<TextInputAreaProps> = ({
   // 초기화 확인
   const handleConfirmReset = useCallback(() => {
     setTextInputs([
-      { id: '1', text: '', placeholder: '상단 텍스트를 입력하세요' },
-      { id: '2', text: '', placeholder: '하단 텍스트를 입력하세요' }
+      { id: '1', text: '', placeholder: '텍스트를 입력하세요' }
     ]);
     setShowAIGenerator(false);
     setShowResetConfirm(false);
