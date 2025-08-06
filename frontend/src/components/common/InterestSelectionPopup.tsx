@@ -176,12 +176,22 @@ const Container = styled.div`
   
   @media (max-width: 640px) {
     max-width: 100%;
-    padding: 0 0.5rem;
+    padding: 0;
+    margin-bottom: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 `;
 
 const Header = styled.div`
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 640px) {
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+  }
 `;
 
 const IconWrapper = styled.div`
@@ -200,6 +210,11 @@ const Title = styled.h2`
   font-weight: bold;
   color: #111827;
   margin: 0 0 0.75rem 0;
+  
+  @media (max-width: 640px) {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+  }
 `;
 
 const Description = styled.p`
@@ -207,6 +222,10 @@ const Description = styled.p`
   font-size: 1.125rem;
   line-height: 1.6;
   margin: 0;
+  
+  @media (max-width: 640px) {
+    font-size: 1rem;
+  }
 `;
 
 const InterestsContainer = styled.div`
@@ -214,7 +233,9 @@ const InterestsContainer = styled.div`
   overflow-y: auto;
   
   @media (max-width: 640px) {
-    max-height: 20rem;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding-right: 0.25rem;
     
     /* 스크롤바 스타일링 */
@@ -241,23 +262,26 @@ const InterestsContainer = styled.div`
 const InterestsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-bottom: 2rem;
+  padding: 0.25rem;
   
   @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
+    padding: 0.5rem;
   }
   
   @media (max-width: 640px) {
-    gap: 0.5rem;
-    padding: 0.25rem;
+    gap: 0.25rem;
+    padding: 0.125rem;
   }
 `;
 
 const InterestButton = styled.button<{ isSelected: boolean; bgColor: string }>`
   position: relative;
   padding: 1rem;
+  margin: 0.25rem;
   border-radius: 0.75rem;
   border: 2px solid ${props => props.isSelected ? '#E65100' : '#e5e7eb'};
   background: ${props => props.isSelected ? '#f3f4f6' : props.bgColor};
@@ -274,6 +298,7 @@ const InterestButton = styled.button<{ isSelected: boolean; bgColor: string }>`
   
   @media (max-width: 640px) {
     padding: 0.75rem 0.5rem;
+    margin: 0.125rem;
     min-height: 100px;
     transform: none;
     
@@ -295,8 +320,8 @@ const InterestButton = styled.button<{ isSelected: boolean; bgColor: string }>`
 
 const SelectedBadge = styled.div`
   position: absolute;
-  top: -0.5rem;
-  right: -0.5rem;
+  top: -0.25rem;
+  right: -0.25rem;
   width: 1.5rem;
   height: 1.5rem;
   background: #E65100;
@@ -304,10 +329,25 @@ const SelectedBadge = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  @media (max-width: 640px) {
+    width: 1.25rem;
+    height: 1.25rem;
+    top: -0.125rem;
+    right: -0.125rem;
+  }
   
   span {
     color: white;
     font-size: 0.75rem;
+    font-weight: bold;
+    
+    @media (max-width: 640px) {
+      font-size: 0.625rem;
+    }
   }
 `;
 
@@ -350,6 +390,8 @@ const ButtonContainer = styled.div`
   @media (max-width: 640px) {
     gap: 0.5rem;
     padding-top: 0.75rem;
+    flex-shrink: 0;
+    margin-top: auto;
   }
 `;
 
@@ -365,10 +407,20 @@ const InfoBox = styled.div`
   border-radius: 0.5rem;
   border: 1px solid #bfdbfe;
   
+  @media (max-width: 640px) {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    flex-shrink: 0;
+  }
+  
   p {
     color: #1d4ed8;
     font-size: 0.875rem;
     line-height: 1.5;
     margin: 0;
+    
+    @media (max-width: 640px) {
+      font-size: 0.75rem;
+    }
   }
 `;
