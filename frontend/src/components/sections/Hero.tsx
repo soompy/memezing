@@ -36,22 +36,16 @@ export default function Hero() {
         ></div>
       </div>
 
-      <div className="relative min-h-screen flex items-center justify-start px-8 sm:px-12 lg:px-16 pt-20">
+      <div className="relative min-h-screen flex items-center px-8 sm:px-12 lg:px-16 pt-20">
         <div className="w-full max-w-none">
           {/* 메인 헤드라인 - 화면 꽉 차게, 좌측 정렬, 세 문단으로 */}
           <motion.h1 
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl mb-6 leading-tight text-left w-full" 
-            style={{ color: '#2C3E50', fontFamily: "'Black Han Sans', sans-serif", fontWeight: 'light' }}
+            className="text-5xl xl:text-9xl leading-tight text-center w-full" 
+            style={{ fontFamily: "'Black Han Sans', sans-serif", fontWeight: 'light' }}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <span 
-              className="text-transparent bg-clip-text block"
-              style={{ backgroundImage: 'linear-gradient(to right, #FF6B47, #4ECDC4)', backgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-            >
-              밈징
-            </span>
             <span className="block">
               누구나 쉽게 밈을 만드는
             </span>
