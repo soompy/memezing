@@ -62,7 +62,13 @@ export default function Features() {
               }}
               transition={{ duration: 0.3 }}
             >
-              <Icon className="w-6 h-6 sm:w-8 sm:h-8" style={{ color: colors.icon }} />
+              <motion.div
+                initial={{ color: colors.icon }}
+                whileHover={{ color: 'white' }}
+                transition={{ duration: 0.3 }}
+              >
+                <Icon className="w-6 h-6 sm:w-8 sm:h-8" />
+              </motion.div>
             </motion.div>
 
             <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4" style={{ color: brandColors.gray[800] }}>
