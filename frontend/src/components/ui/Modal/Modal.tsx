@@ -137,6 +137,14 @@ const ModalWrapper = styled.div`
   justify-content: center;
   padding: 1rem;
   pointer-events: none;
+  overflow-y: auto;
+  
+  @media (max-width: 640px) {
+    align-items: flex-start;
+    padding: 1rem;
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 `;
 
 const ModalContent = styled.div`
@@ -149,6 +157,14 @@ const ModalContent = styled.div`
   transform: scale(1);
   transition: all 0.3s ease;
   pointer-events: auto;
+  max-height: 100%;
+  
+  @media (max-width: 640px) {
+    max-height: calc(100vh - 2rem);
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+  }
 `;
 
 const Header = styled.div`
@@ -185,4 +201,10 @@ const Content = styled.div<{ hasHeader: boolean }>`
   padding: 1.5rem;
   padding-top: ${props => props.hasHeader ? '1.5rem' : '1.5rem'};
   color: var(--text-primary);
+  
+  @media (max-width: 640px) {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+  }
 `;
