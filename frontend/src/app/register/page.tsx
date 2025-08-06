@@ -27,6 +27,13 @@ export default function RegisterPage() {
     password: '',
     confirmPassword: '',
   });
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    username?: string;
+    password?: string;
+    confirmPassword?: string;
+    terms?: string;
+  }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -71,16 +78,81 @@ export default function RegisterPage() {
       ...prev,
       [name]: value,
     }));
+    
+    // 실시간 유효성 검사 - 에러 클리어
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+
+    // 실시간 필드별 validation
+    if (name === 'email' && value && value.length > 0) {
+      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+        setFormErrors(prev => ({ ...prev, email: '올바른 이메일 형식이 아닙니다.' }));
+      }
+    }
+
+    if (name === 'username' && value && value.length > 0) {
+      if (value.length < 2 || value.length > 20) {
+        setFormErrors(prev => ({ ...prev, username: '사용자명은 2-20자 사이여야 합니다.' }));
+      } else if (!/^[가-힣a-zA-Z0-9_]+$/.test(value)) {
+        setFormErrors(prev => ({ ...prev, username: '한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다.' }));
+      }
+    }
+
+    if (name === 'confirmPassword' && value && formData.password) {
+      if (value !== formData.password) {
+        setFormErrors(prev => ({ ...prev, confirmPassword: '비밀번호가 일치하지 않습니다.' }));
+      }
+    }
+  };
+
+  const validateForm = () => {
+    const errors: typeof formErrors = {};
+    
+    // 이메일 검증
+    if (!formData.email) {
+      errors.email = '이메일을 입력해주세요.';
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)) {
+      errors.email = '올바른 이메일 형식이 아닙니다.';
+    }
+    
+    // 사용자명 검증
+    if (!formData.username) {
+      errors.username = '사용자명을 입력해주세요.';
+    } else if (formData.username.length < 2 || formData.username.length > 20) {
+      errors.username = '사용자명은 2-20자 사이여야 합니다.';
+    } else if (!/^[가-힣a-zA-Z0-9_]+$/.test(formData.username)) {
+      errors.username = '한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다.';
+    }
+    
+    // 비밀번호 검증
+    if (!formData.password) {
+      errors.password = '비밀번호를 입력해주세요.';
+    } else if (!passwordStrength.hasLength || !passwordStrength.hasLetter || !passwordStrength.hasNumber) {
+      errors.password = '비밀번호 조건을 만족해주세요.';
+    }
+    
+    // 비밀번호 확인 검증
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = '비밀번호 확인을 입력해주세요.';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+    }
+    
+    // 이용약관 동의 검증
+    if (!agreedToTerms) {
+      errors.terms = '이용약관에 동의해주세요.';
+    }
+    
+    return errors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      return;
-    }
-
-    if (!agreedToTerms) {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
 
@@ -155,12 +227,18 @@ export default function RegisterPage() {
         {/* 회원가입 폼 */}
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
+          {error && !Object.values(formErrors).some(Boolean) && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 animate-shake">
               <div className="flex items-center">
                 <div className="text-red-500 mr-2">⚠️</div>
                 <p className="text-sm text-red-600">{error}</p>
               </div>
+            </div>
+          )}
+
+          {formErrors.terms && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-600">{formErrors.terms}</p>
             </div>
           )}
 
@@ -173,6 +251,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             placeholder="이메일을 입력하세요"
             required
+            error={formErrors.email}
           />
 
           {/* 사용자명 입력 */}
@@ -184,7 +263,8 @@ export default function RegisterPage() {
             onChange={handleChange}
             placeholder="사용자명을 입력하세요 (2-20자)"
             required
-            helperText="한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다"
+            error={formErrors.username}
+            helperText={!formErrors.username ? "한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다" : undefined}
           />
 
           {/* 비밀번호 입력 */}
@@ -197,12 +277,13 @@ export default function RegisterPage() {
               onChange={handleChange}
               placeholder="비밀번호를 입력하세요"
               required
+              error={formErrors.password}
               className="pr-12"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[2.2rem] text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
             >
               {showPassword ? (
                 <EyeOff className="w-5 h-5" />
@@ -262,16 +343,12 @@ export default function RegisterPage() {
               placeholder="비밀번호를 다시 입력하세요"
               required
               className="pr-12"
-              error={
-                formData.confirmPassword && formData.password !== formData.confirmPassword
-                  ? '비밀번호가 일치하지 않습니다'
-                  : undefined
-              }
+              error={formErrors.confirmPassword}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-[2.2rem] text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-10 text-gray-400 hover:text-gray-600"
             >
               {showConfirmPassword ? (
                 <EyeOff className="w-5 h-5" />

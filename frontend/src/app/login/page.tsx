@@ -47,12 +47,19 @@ export default function LoginPage() {
       [name]: value,
     }));
     
-    // 실시간 유효성 검사
+    // 실시간 유효성 검사 - 에러 클리어
     if (name === 'email' && formErrors.email) {
       setFormErrors(prev => ({ ...prev, email: undefined }));
     }
     if (name === 'password' && formErrors.password) {
       setFormErrors(prev => ({ ...prev, password: undefined }));
+    }
+
+    // 이메일 실시간 유효성 검사
+    if (name === 'email' && value && value.length > 0) {
+      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+        setFormErrors(prev => ({ ...prev, email: '올바른 이메일 형식이 아닙니다.' }));
+      }
     }
   };
 
@@ -137,7 +144,7 @@ export default function LoginPage() {
 
         {/* 로그인 폼 */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {error && (
+          {error && !formErrors.email && !formErrors.password && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 animate-shake">
               <div className="flex items-center">
                 <div className="text-red-500 mr-2">⚠️</div>
@@ -189,7 +196,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[2.2rem] text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute right-3 top-10 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { Button, Input } from '@/components/ui';
 import { motion } from 'framer-motion';
 
 export default function ForgotPasswordPage() {
@@ -13,6 +13,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
   
   const validateEmail = (email: string) => {
     return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
@@ -22,17 +23,18 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     
     if (!email) {
-      setError('이메일을 입력해주세요.');
+      setEmailError('이메일을 입력해주세요.');
       return;
     }
     
     if (!validateEmail(email)) {
-      setError('올바른 이메일 형식이 아닙니다.');
+      setEmailError('올바른 이메일 형식이 아닙니다.');
       return;
     }
     
     setIsLoading(true);
     setError('');
+    setEmailError('');
     
     try {
       // TODO: 실제 비밀번호 재설정 API 호출
@@ -47,6 +49,7 @@ export default function ForgotPasswordPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
+    if (emailError) setEmailError('');
     if (error) setError('');
   };
 
@@ -124,7 +127,7 @@ export default function ForgotPasswordPage() {
 
         {/* 폼 */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
+          {error && !emailError && (
             <motion.div 
               className="bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-400 text-red-700 px-5 py-4 rounded-r-lg text-sm shadow-sm"
               initial={{ opacity: 0, x: -20 }}
@@ -144,28 +147,16 @@ export default function ForgotPasswordPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
-              이메일 주소 <span className="text-red-500">*</span>
-            </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Mail className="w-5 h-5 text-gray-400 group-focus-within:text-primary-500 transition-colors duration-300" />
-              </div>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={email}
-                onChange={handleChange}
-                placeholder="your@email.com"
-                required
-                className={`pl-12 pr-4 py-4 w-full border-2 rounded-xl focus:ring-2 focus:ring-primary-100 transition-all duration-300 group-hover:border-gray-300 text-gray-800 placeholder-gray-400 ${
-                  error 
-                    ? 'border-red-400 focus:border-red-500' 
-                    : 'border-gray-200 focus:border-primary-400'
-                }`}
-              />
-            </div>
+            <Input
+              label="이메일 주소"
+              type="email"
+              name="email"
+              value={email}
+              onChange={handleChange}
+              placeholder="your@email.com"
+              required
+              error={emailError}
+            />
           </motion.div>
 
           <motion.div

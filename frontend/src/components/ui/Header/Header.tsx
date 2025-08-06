@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X, User, LogOut, Drama } from 'lucide-react';
 import styled from '@emotion/styled';
@@ -24,6 +24,20 @@ export default function Header() {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // 모바일 메뉴 열림/닫힘에 따른 body 스크롤 제어
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // 컴포넌트 언마운트 시 정리
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
+
   const handleNavigation = (href: string) => {
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
@@ -32,6 +46,7 @@ export default function Header() {
       router.push(href);
     }
     setIsMenuOpen(false);
+    document.body.style.overflow = 'unset';
   };
 
   const handleLogin = () => {
@@ -414,8 +429,15 @@ const MobileMenuButton = styled.button`
 `;
 
 const MobileMenu = styled.div`
-  display: block;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100vh - 64px);
+  background: var(--background);
   border-top: 1px solid var(--border-light);
+  z-index: 40;
 
   ${mediaQuery.md} {
     display: none;
@@ -423,8 +445,9 @@ const MobileMenu = styled.div`
 `;
 
 const MobileMenuContent = styled.div`
+  height: 100%;
+  overflow-y: auto;
   padding: 8px;
-  background: var(--surface);
   display: flex;
   flex-direction: column;
   gap: 4px;
