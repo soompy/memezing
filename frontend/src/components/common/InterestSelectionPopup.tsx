@@ -167,7 +167,7 @@ const Container = styled.div`
   margin-bottom: 2rem;
   max-width: 500px;
   margin: 0 auto 2rem auto;
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
