@@ -15,8 +15,8 @@
 - ⚡ **배포 프로세스** 단순화
 
 ### 🌐 배포된 사이트
-- **Production**: [https://memezing-6nn2g8yhr-suris-projects.vercel.app/](https://memezing-6nn2g8yhr-suris-projects.vercel.app/)
-- **Components Demo**: [/components](https://memezing-6nn2g8yhr-suris-projects.vercel.app/components)
+- **Production**: [https://frontend-1hyc3niej-suris-projects.vercel.app/](https://frontend-1hyc3niej-suris-projects.vercel.app/)
+- **Components Demo**: [/components](https://frontend-1hyc3niej-suris-projects.vercel.app/components)
 
 ## 🚀 프로젝트 구조
 
@@ -214,7 +214,7 @@ GET/POST /api/auth/[...nextauth]  # 소셜 로그인
 ### 컴포넌트 사용법
 프로젝트의 모든 UI 컴포넌트는 `/components` 페이지에서 확인할 수 있습니다:
 ```
-https://memezing-6nn2g8yhr-suris-projects.vercel.app/components
+https://frontend-1hyc3niej-suris-projects.vercel.app/components
 ```
 
 ### 디자인 시스템
@@ -228,9 +228,9 @@ MIT License
 
 ---
 
-> 🚀 **프로덕션 사이트**: [https://memezing-6nn2g8yhr-suris-projects.vercel.app](https://memezing-6nn2g8yhr-suris-projects.vercel.app)  
-> 📚 **컴포넌트 데모**: [/components](https://memezing-6nn2g8yhr-suris-projects.vercel.app/components)  
-> 📅 **마지막 업데이트**: 2025.08.05
+> 🚀 **프로덕션 사이트**: [https://frontend-1hyc3niej-suris-projects.vercel.app](https://frontend-1hyc3niej-suris-projects.vercel.app)  
+> 📚 **컴포넌트 데모**: [/components](https://frontend-1hyc3niej-suris-projects.vercel.app/components)  
+> 📅 **마지막 업데이트**: 2025.08.06
 
 ## 🔧 통합 배포 아키텍처
 
