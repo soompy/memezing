@@ -70,19 +70,64 @@ class ApiClient {
     });
   }
 
-  async logout(): Promise<void> {
-    return this.request<void>('/api/auth/logout', {
+  async logout(): Promise<{ success: boolean; message: string }> {
+    const result = await this.request<{ success: boolean; message: string }>('/api/auth/logout', {
       method: 'POST',
     });
+    
+    // 로그아웃 성공 시 로컬 토큰 제거
+    if (result.success) {
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
+    }
+    
+    return result;
   }
 
-  async getMe(): Promise<{ success: boolean; data: { user: User } }> {
-    return this.request<{ success: boolean; data: { user: User } }>('/api/auth/me');
+  async getMe(): Promise<{
+    success: boolean;
+    data: {
+      user: User;
+      session: {
+        expires: string;
+      };
+    };
+    message: string;
+  }> {
+    return this.request<any>('/api/auth/me');
   }
 
-  async refreshToken(): Promise<{ success: boolean; data: { token: string } }> {
-    return this.request<{ success: boolean; data: { token: string } }>('/api/auth/refresh', {
+  async refreshToken(): Promise<{
+    success: boolean;
+    data: {
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+      tokenType: string;
+      user: User;
+    };
+    message: string;
+  }> {
+    const result = await this.request<any>('/api/auth/refresh', {
       method: 'POST',
+    });
+    
+    // 토큰 갱신 성공 시 새로운 토큰 저장
+    if (result.success && result.data.accessToken) {
+      localStorage.setItem('token', result.data.accessToken);
+    }
+    
+    return result;
+  }
+
+  async updateMe(data: { name?: string; image?: string }): Promise<{
+    success: boolean;
+    data: { user: User };
+    message: string;
+  }> {
+    return this.request<any>('/api/auth/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
     });
   }
 
