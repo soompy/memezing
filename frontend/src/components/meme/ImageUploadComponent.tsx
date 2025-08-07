@@ -4,6 +4,7 @@ import { useRef, useCallback, useState } from 'react';
 import { Upload, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { validateImageFile, uploadImageWithProgress, UploadProgress, UploadError } from '@/lib/upload';
+import { useToastContext } from '@/context/ToastContext';
 
 interface ImageUploadComponentProps {
   onImageSelect: (file: File) => void;
@@ -32,6 +33,7 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const { showError, showSuccess } = useToastContext();
 
   // 상태 초기화
   const resetStates = useCallback(() => {
@@ -119,7 +121,7 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
       setUrlInput('');
       setIsUrlMode(false);
     } catch {
-      alert('유효하지 않은 URL입니다.');
+      showError('유효하지 않은 URL입니다.');
     }
   }, [urlInput, onImageUrl]);
 
