@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
@@ -15,10 +15,10 @@ const generateToken = (userId: string) => {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, username, password } = await request.json();
+    const { email, name, password } = await request.json();
 
     // 유효성 검사
-    if (!email || !username || !password) {
+    if (!email || !name || !password) {
       return NextResponse.json({
         success: false,
         message: '모든 필드를 입력해주세요.',
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 사용자명 검사
-    if (username.length < 2 || username.length > 20) {
+    if (name.length < 2 || name.length > 20) {
       return NextResponse.json({
         success: false,
         message: '사용자명은 2-20자 사이여야 합니다.',
@@ -62,17 +62,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // 사용자명 중복 확인
-    const existingUserByUsername = await prisma.user.findUnique({
-      where: { username },
-    });
-
-    if (existingUserByUsername) {
-      return NextResponse.json({
-        success: false,
-        message: '이미 사용 중인 사용자명입니다.',
-      }, { status: 400 });
-    }
+    // 이미 해당 이름으로 가입한 사용자가 있는지 확인 (선택사항 - name은 중복 가능)
+    // Prisma 스키마에서 name 필드가 unique가 아니므로 이 검사는 제거합니다.
 
     // 비밀번호 해싱
     const saltRounds = 10;
@@ -82,7 +73,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         email,
-        username,
+        name,
         password: hashedPassword,
       },
     });
@@ -96,7 +87,7 @@ export async function POST(request: NextRequest) {
         user: {
           id: user.id,
           email: user.email,
-          username: user.username,
+          name: user.name,
           createdAt: user.createdAt.toISOString(),
         },
         token,
