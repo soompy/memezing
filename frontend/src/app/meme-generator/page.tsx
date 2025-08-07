@@ -8,6 +8,7 @@ import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
 import FabricCanvas, { FabricCanvasRef, MemeTemplate } from '@/components/meme/FabricCanvas';
 import ImageUploadComponent from '@/components/meme/ImageUploadComponent';
+import ImageSelectorTabs from '@/components/meme/ImageSelectorTabs';
 import TextInputArea from '@/components/meme/TextInputArea';
 import AITextGenerator from '@/components/meme/AITextGenerator';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
@@ -732,10 +733,10 @@ export default function MemeGeneratorPage() {
                 <div className="p-4">
                   {activeTab === 'images' && (
                     <div className="space-y-6">
-                      {/* 이미지 업로드 섹션 */}
+                      {/* 이미지 선택 섹션 */}
                       <div>
-                        <h3 className="text-lg font-semibold mb-4">직접 업로드</h3>
-                        <ImageUploadComponent
+                        <h3 className="text-lg font-semibold mb-4">이미지 선택</h3>
+                        <ImageSelectorTabs
                           onImageSelect={handleImageUpload}
                           onImageUrl={handleImageUrl}
                         />
@@ -1032,10 +1033,10 @@ export default function MemeGeneratorPage() {
                   <div className="p-4">
                     {activeTab === 'images' && (
                       <div className="space-y-6">
-                        {/* 이미지 업로드 섹션 */}
+                        {/* 이미지 선택 섹션 */}
                         <div>
-                          <h3 className="text-lg font-semibold mb-4">직접 업로드</h3>
-                          <ImageUploadComponent
+                          <h3 className="text-lg font-semibold mb-4">이미지 선택</h3>
+                          <ImageSelectorTabs
                             onImageSelect={handleImageUpload}
                             onImageUrl={handleImageUrl}
                           />
