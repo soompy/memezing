@@ -2,11 +2,13 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Download, RefreshCw, Type, Image as ImageIcon, Settings, ChevronUp, ChevronDown, X, Plus, Users } from 'lucide-react';
+import { Download, RefreshCw, Type, Image as ImageIcon, Settings, ChevronUp, ChevronDown, X, Plus, Users, Sparkles } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import MobileFabricCanvas, { MobileFabricCanvasRef, MemeTemplate } from '@/components/meme/MobileFabricCanvas';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
+import MobileAIImageModal from '@/components/meme/MobileAIImageModal';
 import { getRandomImageFromPool } from '@/utils/imagePool';
+import { useToastContext } from '@/context/ToastContext';
 
 // 템플릿 데이터
 const popularTemplates: MemeTemplate[] = [
@@ -202,6 +204,8 @@ export default function MobileMemeGeneratorPage() {
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [quickTexts] = useState<string[]>(['상단 텍스트', '하단 텍스트']);
   const [newText, setNewText] = useState('');
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const { showError, showSuccess } = useToastContext();
 
   // 데스크톱 감지 및 리디렉션
   useEffect(() => {
@@ -273,7 +277,27 @@ export default function MobileMemeGeneratorPage() {
       })
       .catch((error) => {
         console.error('Image upload failed:', error);
-        // TODO: 토스트 알림으로 교체 예정 - 이미지 업로드 실패 알림
+        showError('이미지 업로드에 실패했습니다.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
+  // AI 이미지 생성 핸들러
+  const handleAIImageGenerated = useCallback((imageUrl: string) => {
+    if (!canvasRef.current) return;
+    
+    setIsLoading(true);
+    canvasRef.current.addImageFromUrl(imageUrl)
+      .then(() => {
+        setCurrentTool('none');
+        setIsBottomSheetExpanded(false);
+        showSuccess('이미지가 성공적으로 추가되었습니다!');
+      })
+      .catch((error) => {
+        console.error('AI image add failed:', error);
+        showError('AI 이미지 추가에 실패했습니다.');
       })
       .finally(() => {
         setIsLoading(false);
@@ -286,7 +310,7 @@ export default function MobileMemeGeneratorPage() {
     
     const dataURL = canvasRef.current.exportAsImage();
     if (!dataURL) {
-      // TODO: 토스트 알림으로 교체 예정 - 이미지 생성 실패 알림
+      showError('이미지 생성에 실패했습니다.');
       return;
     }
     
@@ -505,24 +529,36 @@ export default function MobileMemeGeneratorPage() {
       {/* 하단 시트 */}
       {currentTool !== 'none' && (
         <div
-          className={`fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 transition-transform duration-300 z-50 ${
-            isBottomSheetExpanded ? 'translate-y-0' : 'translate-y-full'
+          className={`fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 transition-all duration-300 z-50 ${
+            isBottomSheetExpanded ? 'translate-y-0' : ''
           }`}
-          style={{ height: '60vh' }}
+          style={{ 
+            height: isBottomSheetExpanded ? '70vh' : '200px',
+            transform: !isBottomSheetExpanded && currentTool !== 'none' ? 'translateY(calc(100% - 200px))' : 'translateY(0)'
+          }}
         >
           {/* 시트 헤더 */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold">
-              {currentTool === 'templates' && '템플릿 선택'}
-              {currentTool === 'text' && '텍스트 도구'}
-              {currentTool === 'upload' && '이미지 업로드'}
-              {currentTool === 'settings' && '설정'}
-            </h3>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
+              <h3 className="text-lg font-semibold">
+                {currentTool === 'templates' && '템플릿 선택'}
+                {currentTool === 'text' && '텍스트 도구'}
+                {currentTool === 'upload' && '이미지 업로드'}
+                {currentTool === 'settings' && '설정'}
+              </h3>
+              {!isBottomSheetExpanded && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  ↑ 확장 | × 닫기
+                </span>
+              )}
+            </div>
+            <div className="flex items-center space-x-1">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsBottomSheetExpanded(!isBottomSheetExpanded)}
+                className="p-2"
+                title={isBottomSheetExpanded ? '축소하기' : '확장하기'}
               >
                 {isBottomSheetExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
               </Button>
@@ -533,19 +569,52 @@ export default function MobileMemeGeneratorPage() {
                   setCurrentTool('none');
                   setIsBottomSheetExpanded(false);
                 }}
+                className="p-2 text-red-400 hover:text-red-600"
+                title="완전히 닫기"
               >
-                <X size={20} />
+                <X size={18} />
               </Button>
             </div>
           </div>
 
           {/* 시트 콘텐츠 */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className={`flex-1 p-4 ${isBottomSheetExpanded ? 'overflow-y-auto' : 'overflow-hidden'}`}>
             {currentTool === 'templates' && (
               <div className="space-y-6">
-                <div>
-                  <h4 className="text-sm font-medium mb-3">🔥 인기 템플릿</h4>
-                  <div className="grid grid-cols-2 gap-3">
+                {!isBottomSheetExpanded && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium">🔥 인기 템플릿</h4>
+                      <span className="text-xs text-blue-500 font-medium">↑ 더보기</span>
+                    </div>
+                    <div className="flex space-x-3 overflow-x-auto pb-2 px-1">
+                      {popularTemplates.slice(0, 4).map((template) => (
+                        <div key={template.id} className="flex-shrink-0 w-20">
+                          <button
+                            className="w-20 h-20 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors shadow-sm"
+                            onClick={() => handleTemplateSelect(template)}
+                            disabled={isLoading}
+                          >
+                            <img
+                              src={template.url}
+                              alt={template.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                          <p className="text-xs text-gray-600 text-center mt-1 truncate w-20">
+                            {template.name}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {isBottomSheetExpanded && (
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">🔥 인기 템플릿</h4>
+                      <div className="grid grid-cols-2 gap-3">
                     {popularTemplates.map((template) => (
                       <button
                         key={template.id}
@@ -563,155 +632,251 @@ export default function MobileMemeGeneratorPage() {
                         </div>
                       </button>
                     ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">🐾 동물</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {animalTemplates.map((template) => (
+                        <button
+                          key={template.id}
+                          className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors"
+                          onClick={() => handleTemplateSelect(template)}
+                          disabled={isLoading}
+                        >
+                          <img
+                            src={template.url}
+                            alt={template.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                            <p className="text-xs font-medium truncate">{template.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">🔥 트렌딩</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {trendingTemplates.map((template) => (
+                        <button
+                          key={template.id}
+                          className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors"
+                          onClick={() => handleTemplateSelect(template)}
+                          disabled={isLoading}
+                        >
+                          <img
+                            src={template.url}
+                            alt={template.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                            <p className="text-xs font-medium truncate">{template.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">😭 감정표현</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {emotionTemplates.map((template) => (
+                        <button
+                          key={template.id}
+                          className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors"
+                          onClick={() => handleTemplateSelect(template)}
+                          disabled={isLoading}
+                        >
+                          <img
+                            src={template.url}
+                            alt={template.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
+                            <p className="text-xs font-medium truncate">{template.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-3">🐾 동물</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {animalTemplates.map((template) => (
-                      <button
-                        key={template.id}
-                        className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors"
-                        onClick={() => handleTemplateSelect(template)}
-                        disabled={isLoading}
-                      >
-                        <img
-                          src={template.url}
-                          alt={template.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                          <p className="text-xs font-medium truncate">{template.name}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-3">🔥 트렌딩</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {trendingTemplates.map((template) => (
-                      <button
-                        key={template.id}
-                        className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors"
-                        onClick={() => handleTemplateSelect(template)}
-                        disabled={isLoading}
-                      >
-                        <img
-                          src={template.url}
-                          alt={template.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                          <p className="text-xs font-medium truncate">{template.name}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-3">😭 감정표현</h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {emotionTemplates.map((template) => (
-                      <button
-                        key={template.id}
-                        className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-primary-500 transition-colors"
-                        onClick={() => handleTemplateSelect(template)}
-                        disabled={isLoading}
-                      >
-                        <img
-                          src={template.url}
-                          alt={template.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                          <p className="text-xs font-medium truncate">{template.name}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
             {currentTool === 'text' && (
               <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium mb-3">빠른 텍스트</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {quickTexts.map((text, index) => (
-                      <Button
-                        key={index}
-                        variant="secondary"
-                        onClick={() => handleAddText(text)}
-                        className="text-sm"
-                      >
-                        {text}
-                      </Button>
-                    ))}
+                {!isBottomSheetExpanded && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium">✏️ 빠른 텍스트 추가</h4>
+                      <span className="text-xs text-blue-500 font-medium">↑ 더보기</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {quickTexts.map((text, index) => (
+                        <Button
+                          key={index}
+                          variant="secondary"
+                          onClick={() => handleAddText(text)}
+                          className="text-sm py-2"
+                        >
+                          {text}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
                 
-                <div>
-                  <h4 className="text-sm font-medium mb-3">사용법</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• 위의 버튼을 눌러 미리 설정된 텍스트 추가</li>
-                    <li>• 하단 입력창에서 원하는 텍스트 입력</li>
-                    <li>• 캔버스에서 텍스트를 터치하여 편집</li>
-                    <li>• 드래그하여 위치 이동</li>
-                  </ul>
-                </div>
+                {isBottomSheetExpanded && (
+                  <>
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">빠른 텍스트</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {quickTexts.map((text, index) => (
+                          <Button
+                            key={index}
+                            variant="secondary"
+                            onClick={() => handleAddText(text)}
+                            className="text-sm"
+                          >
+                            {text}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">사용법</h4>
+                      <ul className="text-xs text-gray-600 space-y-1">
+                        <li>• 위의 버튼을 눌러 미리 설정된 텍스트 추가</li>
+                        <li>• 하단 입력창에서 원하는 텍스트 입력</li>
+                        <li>• 캔버스에서 텍스트를 터치하여 편집</li>
+                        <li>• 드래그하여 위치 이동</li>
+                      </ul>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
 
             {currentTool === 'upload' && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="mobile-file-upload"
-                  />
-                  <label htmlFor="mobile-file-upload" className="cursor-pointer">
-                    <Plus size={32} className="mx-auto mb-2 text-gray-400" />
-                    <p className="text-sm text-gray-600">이미지를 선택하세요</p>
-                    <p className="text-xs text-gray-400 mt-1">JPG, PNG 파일 지원</p>
-                  </label>
-                </div>
+                {!isBottomSheetExpanded && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium">📁 이미지 추가</h4>
+                      <span className="text-xs text-blue-500 font-medium">↑ 더보기</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          id="mobile-file-upload-preview"
+                        />
+                        <label htmlFor="mobile-file-upload-preview" className="cursor-pointer block">
+                          <Plus size={20} className="mx-auto mb-1 text-gray-400" />
+                          <p className="text-xs text-gray-600">파일 선택</p>
+                        </label>
+                      </div>
+                      <button
+                        onClick={() => setIsAIModalOpen(true)}
+                        className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg flex flex-col items-center justify-center space-y-1 hover:from-purple-600 hover:to-pink-600 transition-colors"
+                      >
+                        <Sparkles className="w-5 h-5" />
+                        <span className="text-xs font-medium">AI 생성</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 
-                <div className="text-xs text-gray-500 space-y-1">
-                  <p>• 이미지를 터치하여 선택</p>
-                  <p>• 드래그하여 위치 이동</p>
-                  <p>• 핀치로 크기 조정</p>
-                  <p>• 회전 버튼으로 각도 조정</p>
-                </div>
+                {isBottomSheetExpanded && (
+                  <>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="mobile-file-upload"
+                      />
+                      <label htmlFor="mobile-file-upload" className="cursor-pointer">
+                        <Plus size={32} className="mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600">이미지를 선택하세요</p>
+                        <p className="text-xs text-gray-400 mt-1">JPG, PNG 파일 지원</p>
+                      </label>
+                    </div>
+                    
+                    {/* AI 이미지 생성 버튼 */}
+                    <div className="mt-4">
+                      <button
+                        onClick={() => setIsAIModalOpen(true)}
+                        className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg flex items-center justify-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-colors"
+                      >
+                        <Sparkles className="w-5 h-5" />
+                        <span className="font-medium">AI로 이미지 생성</span>
+                      </button>
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        프롬프트로 원하는 이미지를 생성해보세요
+                      </p>
+                    </div>
+                    
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>• 이미지를 터치하여 선택</p>
+                      <p>• 드래그하여 위치 이동</p>
+                      <p>• 핀치로 크기 조정</p>
+                      <p>• 회전 버튼으로 각도 조정</p>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
             {currentTool === 'settings' && (
               <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium mb-3">단축키</h4>
-                  <div className="text-xs text-gray-600 space-y-1">
-                    <p>• Ctrl+Z: 실행 취소</p>
-                    <p>• Ctrl+Y: 다시 실행</p>
+                {!isBottomSheetExpanded && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-medium">⚙️ 도움말 & 설정</h4>
+                      <span className="text-xs text-blue-500 font-medium">↑ 더보기</span>
+                    </div>
+                    <div className="bg-blue-50 rounded-lg p-3">
+                      <div className="text-xs text-blue-800 space-y-1">
+                        <p>• 객체 터치로 편집</p>
+                        <p>• 두 손가락으로 확대/축소</p>
+                        <p>• Ctrl+Z로 실행 취소</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
                 
-                <div>
-                  <h4 className="text-sm font-medium mb-3">도움말</h4>
-                  <div className="text-xs text-gray-600 space-y-1">
-                    <p>• 객체를 터치하면 편집 버튼이 나타납니다</p>
-                    <p>• 두 손가락으로 캔버스를 확대/축소할 수 있습니다</p>
-                    <p>• 완성된 밈은 다운로드 버튼으로 저장하세요</p>
-                  </div>
-                </div>
+                {isBottomSheetExpanded && (
+                  <>
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">단축키</h4>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p>• Ctrl+Z: 실행 취소</p>
+                        <p>• Ctrl+Y: 다시 실행</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-sm font-medium mb-3">도움말</h4>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p>• 객체를 터치하면 편집 버튼이 나타납니다</p>
+                        <p>• 두 손가락으로 캔버스를 확대/축소할 수 있습니다</p>
+                        <p>• 완성된 밈은 다운로드 버튼으로 저장하세요</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -729,6 +894,13 @@ export default function MobileMemeGeneratorPage() {
           }}
         />
       )}
+      
+      {/* AI 이미지 생성 모달 */}
+      <MobileAIImageModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onImageGenerated={handleAIImageGenerated}
+      />
     </div>
   );
 }
