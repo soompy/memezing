@@ -3,6 +3,7 @@ export { default as Button } from './Button';
 export { default as Input } from './Input';
 export { default as Select, type SelectOption, type SelectGroup } from './Select';
 export { default as TabGroup } from './TabGroup';
+export { SecondaryTabGroup, type SecondaryTabItem } from './SecondaryTabGroup';
 export { default as RangeSlider } from './RangeSlider';
 export { default as Checkbox } from './Checkbox';
 

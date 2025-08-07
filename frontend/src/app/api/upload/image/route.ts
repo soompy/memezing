@@ -7,6 +7,13 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Cloudinary 설정 확인 및 폴백
+const isCloudinaryConfigured = () => {
+  return !!(process.env.CLOUDINARY_CLOUD_NAME && 
+           process.env.CLOUDINARY_API_KEY && 
+           process.env.CLOUDINARY_API_SECRET);
+};
+
 const uploadImageToCloudinary = async (
   buffer: Buffer,
   folder: string = 'memezing'
@@ -49,7 +56,7 @@ const uploadImageToCloudinary = async (
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('image') as File;
 
     if (!file) {
       return NextResponse.json({
@@ -72,6 +79,28 @@ export async function POST(request: NextRequest) {
         success: false,
         message: '파일 크기는 10MB 이하여야 합니다.',
       }, { status: 400 });
+    }
+
+    // Cloudinary 설정 확인
+    if (!isCloudinaryConfigured()) {
+      // 폴백: Base64 데이터 URL 반환
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const base64 = buffer.toString('base64');
+      const mimeType = file.type;
+      const dataUrl = `data:${mimeType};base64,${base64}`;
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          url: dataUrl,
+          publicId: `local-${Date.now()}`,
+          width: 800,
+          height: 600,
+          format: file.type.split('/')[1],
+        },
+        message: '로컬 이미지가 업로드되었습니다. (Cloudinary 미설정)',
+      });
     }
 
     const bytes = await file.arrayBuffer();

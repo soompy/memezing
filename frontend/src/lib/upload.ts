@@ -160,7 +160,7 @@ export async function uploadImageWithProgress(
 
       // 요청 전송
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      xhr.open('POST', `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload/image`);
+      xhr.open('POST', `/api/upload/image`);
       
       if (token) {
         xhr.setRequestHeader('Authorization', `Bearer ${token}`);

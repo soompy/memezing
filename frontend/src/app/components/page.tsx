@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Input, Select, TabGroup, RangeSlider, Checkbox } from '@/components/ui';
+import { Upload, Sparkles } from 'lucide-react';
+import { Button, Input, Select, TabGroup, SecondaryTabGroup, RangeSlider, Checkbox } from '@/components/ui';
 import { useToastContext } from '@/context/ToastContext';
 
 const fontOptions = [
@@ -16,12 +17,18 @@ const tabItems = [
   { key: 'tab3', label: '세 번째 탭', content: '세 번째 탭의 내용입니다.' },
 ];
 
+const secondaryTabs = [
+  { key: 'upload', label: '파일 업로드', icon: Upload },
+  { key: 'ai', label: 'AI 생성', icon: Sparkles },
+];
+
 export default function ComponentsPage() {
   const [inputValue, setInputValue] = useState('');
   const [selectValue, setSelectValue] = useState('');
   const [errorInput, setErrorInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('tab1');
+  const [secondaryActiveTab, setSecondaryActiveTab] = useState('upload');
   const [rangeValue1, setRangeValue1] = useState(50);
   const [rangeValue2, setRangeValue2] = useState(75);
   const [rangeValue3, setRangeValue3] = useState(25);
@@ -488,6 +495,132 @@ export default function ComponentsPage() {
   items={tabItems}
   activeKey={activeTab}
   onChange={setActiveTab}
+/>`}
+                                      </pre>
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+
+                      {/* SecondaryTabGroup 컴포넌트 */}
+                      <section>
+                          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                              SecondaryTabGroup 컴포넌트
+                          </h2>
+                          
+                          <div className="space-y-8">
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      Secondary Color Tab (Medium)
+                                  </h3>
+                                  <div className="p-6 bg-gray-50 rounded-lg">
+                                      <SecondaryTabGroup
+                                          items={secondaryTabs}
+                                          activeKey={secondaryActiveTab}
+                                          onChange={setSecondaryActiveTab}
+                                          size="md"
+                                      />
+                                      <div className="mt-4 p-4 bg-white rounded border">
+                                          <p>현재 선택된 탭: <strong>{secondaryActiveTab}</strong></p>
+                                          <p className="text-sm text-gray-600 mt-2">
+                                              {secondaryActiveTab === 'upload' && '파일을 드래그 앤 드롭하거나 클릭하여 업로드할 수 있습니다.'}
+                                              {secondaryActiveTab === 'ai' && 'AI를 활용하여 창의적인 이미지를 생성할 수 있습니다.'}
+                                          </p>
+                                      </div>
+                                  </div>
+                              </div>
+                              
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      Size Variants
+                                  </h3>
+                                  <div className="space-y-6">
+                                      <div className="p-6 bg-gray-50 rounded-lg">
+                                          <h4 className="text-md font-medium mb-3">Small Size</h4>
+                                          <SecondaryTabGroup
+                                              items={secondaryTabs}
+                                              activeKey={secondaryActiveTab}
+                                              onChange={setSecondaryActiveTab}
+                                              size="sm"
+                                          />
+                                      </div>
+                                      
+                                      <div className="p-6 bg-gray-50 rounded-lg">
+                                          <h4 className="text-md font-medium mb-3">Large Size</h4>
+                                          <SecondaryTabGroup
+                                              items={secondaryTabs}
+                                              activeKey={secondaryActiveTab}
+                                              onChange={setSecondaryActiveTab}
+                                              size="lg"
+                                          />
+                                      </div>
+                                  </div>
+                              </div>
+
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      컬러 스펙
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div className="p-4 bg-gray-50 rounded-lg">
+                                          <h4 className="font-medium mb-3">Active State</h4>
+                                          <div className="space-y-2 text-sm">
+                                              <div className="flex items-center space-x-2">
+                                                  <div className="w-4 h-4 rounded bg-[#4ECDC4]"></div>
+                                                  <span>Border: #4ECDC4 (Secondary 400)</span>
+                                              </div>
+                                              <div className="flex items-center space-x-2">
+                                                  <div className="w-4 h-4 rounded bg-[#1F9B92]"></div>
+                                                  <span>Text: #1F9B92 (Secondary 500)</span>
+                                              </div>
+                                              <div className="flex items-center space-x-2">
+                                                  <div className="w-4 h-4 rounded bg-[#F0FDFC]"></div>
+                                                  <span>Background: #F0FDFC (Secondary 50)</span>
+                                              </div>
+                                          </div>
+                                      </div>
+                                      
+                                      <div className="p-4 bg-gray-50 rounded-lg">
+                                          <h4 className="font-medium mb-3">Hover State</h4>
+                                          <div className="space-y-2 text-sm">
+                                              <div className="flex items-center space-x-2">
+                                                  <div className="w-4 h-4 rounded bg-[#B8F2ED]"></div>
+                                                  <span>Border: #B8F2ED (Secondary 200)</span>
+                                              </div>
+                                              <div className="flex items-center space-x-2">
+                                                  <div className="w-4 h-4 rounded bg-[#4ECDC4]"></div>
+                                                  <span>Text: #4ECDC4 (Secondary 400)</span>
+                                              </div>
+                                              <div className="flex items-center space-x-2">
+                                                  <div className="w-4 h-4 rounded bg-[#F0FDFC]"></div>
+                                                  <span>Background: #F0FDFC (Secondary 50)</span>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      사용 방법
+                                  </h3>
+                                  <div className="bg-gray-100 p-4 rounded-lg">
+                                      <pre className="text-sm text-gray-800 overflow-x-auto">
+{`import { SecondaryTabGroup } from '@/components/ui';
+import { Upload, Sparkles } from 'lucide-react';
+
+const tabs = [
+  { key: 'upload', label: '파일 업로드', icon: Upload },
+  { key: 'ai', label: 'AI 생성', icon: Sparkles },
+];
+
+const [activeTab, setActiveTab] = useState('upload');
+
+<SecondaryTabGroup
+  items={tabs}
+  activeKey={activeTab}
+  onChange={setActiveTab}
+  size="md"
 />`}
                                       </pre>
                                   </div>

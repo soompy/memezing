@@ -61,22 +61,54 @@ const NaverProvider: Provider = {
 };
 
 const authOptions: NextAuthOptions = {
-  // 최소한의 설정으로 시작
+  // 데이터베이스 URL이 있을 때만 PrismaAdapter 사용
+  ...(process.env.DATABASE_URL && process.env.DATABASE_URL !== 'your-database-connection-string' ? {
+    adapter: PrismaAdapter(prisma),
+  } : {}),
   providers: [
-    // 환경변수가 있을 때만 Google 제공자 활성화
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET ? [
+    // 환경변수가 있을 때만 각 제공자 활성화
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && 
+        process.env.GOOGLE_CLIENT_ID !== 'your-google-client-id' ? [
       GoogleProvider({
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       })
     ] : []),
+    ...(process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET &&
+        process.env.KAKAO_CLIENT_ID !== 'your-kakao-client-id' ? [
+      KakaoProvider
+    ] : []),
+    ...(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET &&
+        process.env.NAVER_CLIENT_ID !== 'your-naver-client-id' ? [
+      NaverProvider
+    ] : []),
   ],
   session: {
-    strategy: 'jwt', // JWT 사용
+    strategy: 'jwt', // JWT 세션 사용
+  },
+  callbacks: {
+    async session({ session, user }) {
+      // 세션에 사용자 ID 추가
+      if (session.user && user) {
+        session.user.id = user.id;
+      }
+      return session;
+    },
+    async jwt({ token, user }) {
+      // JWT에 사용자 ID 추가
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+  },
+  pages: {
+    signIn: '/login',
+    error: '/auth/error',
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
+export { handler as GET, handler as POST, authOptions };
