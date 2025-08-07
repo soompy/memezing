@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button, Input, Select, TabGroup, RangeSlider, Checkbox } from '@/components/ui';
+import { useToastContext } from '@/context/ToastContext';
 
 const fontOptions = [
   { value: 'Arial', label: 'Arial' },
@@ -28,6 +29,8 @@ export default function ComponentsPage() {
   const [checkboxValue2, setCheckboxValue2] = useState(true);
   const [checkboxValue3, setCheckboxValue3] = useState(false);
   const [checkboxValue4, setCheckboxValue4] = useState(false);
+  
+  const { showSuccess, showError, showWarning, showInfo } = useToastContext();
 
   const handleLoadingTest = () => {
     setIsLoading(true);
@@ -873,6 +876,81 @@ export default function ComponentsPage() {
                                       <p className="text-xs text-gray-500">
                                           #1B7F78
                                       </p>
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+
+                      {/* Toast System */}
+                      <section>
+                          <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                              Toast 알림 시스템
+                          </h2>
+                          <div className="space-y-8">
+                              {/* Toast Examples */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      토스트 타입들
+                                  </h3>
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                      <Button
+                                          onClick={() => showSuccess('성공적으로 처리되었습니다!')}
+                                          variant="primary"
+                                          size="sm"
+                                      >
+                                          Success Toast
+                                      </Button>
+                                      <Button
+                                          onClick={() => showError('오류가 발생했습니다!')}
+                                          variant="danger"
+                                          size="sm"
+                                      >
+                                          Error Toast
+                                      </Button>
+                                      <Button
+                                          onClick={() => showWarning('주의가 필요합니다!')}
+                                          variant="accent"
+                                          size="sm"
+                                      >
+                                          Warning Toast
+                                      </Button>
+                                      <Button
+                                          onClick={() => showInfo('정보를 확인해주세요.')}
+                                          variant="secondary"
+                                          size="sm"
+                                      >
+                                          Info Toast
+                                      </Button>
+                                  </div>
+                              </div>
+
+                              {/* Multiple Toasts */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      여러 토스트 테스트
+                                  </h3>
+                                  <div className="space-x-4">
+                                      <Button
+                                          onClick={() => {
+                                              showSuccess('첫 번째 성공 메시지');
+                                              setTimeout(() => showInfo('두 번째 정보 메시지'), 500);
+                                              setTimeout(() => showWarning('세 번째 경고 메시지'), 1000);
+                                          }}
+                                          variant="primary"
+                                      >
+                                          연속 토스트 테스트
+                                      </Button>
+                                  </div>
+                              </div>
+
+                              {/* Usage Info */}
+                              <div className="bg-gray-50 rounded-lg p-4">
+                                  <h4 className="font-medium text-gray-700 mb-2">사용법</h4>
+                                  <div className="text-sm text-gray-600 space-y-2">
+                                      <p>1. <code className="bg-white px-2 py-1 rounded text-xs">useToastContext()</code> 훅을 사용하여 토스트 함수들을 가져옵니다.</p>
+                                      <p>2. <code className="bg-white px-2 py-1 rounded text-xs">showSuccess()</code>, <code className="bg-white px-2 py-1 rounded text-xs">showError()</code>, <code className="bg-white px-2 py-1 rounded text-xs">showWarning()</code>, <code className="bg-white px-2 py-1 rounded text-xs">showInfo()</code> 함수를 호출합니다.</p>
+                                      <p>3. 토스트는 자동으로 5초 후에 사라지며, 수동으로 닫을 수도 있습니다.</p>
+                                      <p>4. 모든 <code className="bg-white px-2 py-1 rounded text-xs">alert()</code> 호출이 토스트로 교체되었습니다.</p>
                                   </div>
                               </div>
                           </div>
