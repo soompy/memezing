@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Heart, Share2, Download, Send, MessageCircle, MoreHorizontal, Flag } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import { useToastContext } from '@/context/ToastContext';
 
 interface MemePost {
   id: string;
@@ -56,6 +57,7 @@ export default function MemeDetailPage() {
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const { showSuccess } = useToastContext();
 
   // API에서 데이터 가져오기
   useEffect(() => {
@@ -91,6 +93,8 @@ export default function MemeDetailPage() {
   }, [meme]);
 
   const handleShare = useCallback(async () => {
+    if (!meme || !meme.title) return;
+    
     if (navigator.share) {
       try {
         await navigator.share({
@@ -103,18 +107,20 @@ export default function MemeDetailPage() {
       }
     } else {
       navigator.clipboard.writeText(window.location.href);
-      // TODO: 토스트 알림으로 교체
+      showSuccess('링크가 복사되었습니다!');
     }
-  }, [meme.title]);
+  }, [meme]);
 
   const handleDownload = useCallback(() => {
+    if (!meme || !meme.title || !meme.imageUrl) return;
+    
     const link = document.createElement('a');
     link.download = `${meme.title}.jpg`;
     link.href = meme.imageUrl;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [meme.title, meme.imageUrl]);
+  }, [meme]);
 
   const handleCommentLike = useCallback((commentId: string) => {
     setComments(prev => prev.map(comment => {
@@ -187,8 +193,10 @@ export default function MemeDetailPage() {
 
   // 조회수 증가 (실제 구현에서는 API 호출)
   useEffect(() => {
-    setMeme(prev => ({ ...prev, views: prev.views + 1 }));
-  }, []);
+    if (meme) {
+      setMeme(prev => prev ? ({ ...prev, views: prev.views + 1 }) : null);
+    }
+  }, [meme?.id]);
 
   return (
     <div className="min-h-screen bg-gray-50">
