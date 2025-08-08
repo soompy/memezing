@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, Sparkles } from 'lucide-react';
-import { Button, Input, Select, TabGroup, SecondaryTabGroup, RangeSlider, Checkbox } from '@/components/ui';
+import { Upload, Sparkles, Globe, Lock, Users, Eye, Settings, Heart, Shield, Zap } from 'lucide-react';
+import { Button, Input, Select, TabGroup, SecondaryTabGroup, RangeSlider, Checkbox, RadioBox, Tag } from '@/components/ui';
 import { useToastContext } from '@/context/ToastContext';
 
 const fontOptions = [
@@ -36,6 +36,10 @@ export default function ComponentsPage() {
   const [checkboxValue2, setCheckboxValue2] = useState(true);
   const [checkboxValue3, setCheckboxValue3] = useState(false);
   const [checkboxValue4, setCheckboxValue4] = useState(false);
+  const [visibility, setVisibility] = useState('public');
+  const [privacy, setPrivacy] = useState('friends');
+  const [theme, setTheme] = useState('light');
+  const [plan, setPlan] = useState('basic');
   
   const { showSuccess, showError, showWarning, showInfo } = useToastContext();
 
@@ -796,6 +800,333 @@ const [activeTab, setActiveTab] = useState('upload');
   variant="primary"
   showValueOnHover
 />`}
+                                      </pre>
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+
+                      {/* RadioBox Components */}
+                      <section>
+                          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                              RadioBox 컴포넌트
+                          </h2>
+
+                          <div className="space-y-8">
+                              {/* Card Variant */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      카드 변형 (Card Variant)
+                                  </h3>
+                                  <div className="space-y-3 max-w-2xl">
+                                      <RadioBox
+                                          name="visibility"
+                                          value="public"
+                                          checked={visibility === 'public'}
+                                          onChange={() => setVisibility('public')}
+                                          label="전체 공개"
+                                          description="모든 사용자가 콘텐츠를 볼 수 있습니다"
+                                          icon={<Globe size={20} />}
+                                          variant="card"
+                                      />
+                                      
+                                      <RadioBox
+                                          name="visibility"
+                                          value="private"
+                                          checked={visibility === 'private'}
+                                          onChange={() => setVisibility('private')}
+                                          label="비공개"
+                                          description="본인만 콘텐츠를 볼 수 있습니다"
+                                          icon={<Lock size={20} />}
+                                          variant="card"
+                                      />
+                                      
+                                      <RadioBox
+                                          name="visibility"
+                                          value="friends"
+                                          checked={visibility === 'friends'}
+                                          onChange={() => setVisibility('friends')}
+                                          label="친구 공개"
+                                          description="팔로워들만 콘텐츠를 볼 수 있습니다"
+                                          icon={<Users size={20} />}
+                                          variant="card"
+                                      />
+                                  </div>
+                                  
+                                  <div className="mt-4 p-3 bg-blue-50 rounded-lg max-w-2xl">
+                                      <p className="text-sm text-blue-800">
+                                          <strong>선택된 값:</strong> {visibility}
+                                      </p>
+                                  </div>
+                              </div>
+
+                              {/* Default Variant */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      기본 변형 (Default Variant)
+                                  </h3>
+                                  <div className="space-y-2 max-w-xl">
+                                      <RadioBox
+                                          name="theme"
+                                          value="light"
+                                          checked={theme === 'light'}
+                                          onChange={() => setTheme('light')}
+                                          label="라이트 모드"
+                                          description="밝은 테마를 사용합니다"
+                                          icon={<Eye size={18} />}
+                                          variant="default"
+                                      />
+                                      
+                                      <RadioBox
+                                          name="theme"
+                                          value="dark"
+                                          checked={theme === 'dark'}
+                                          onChange={() => setTheme('dark')}
+                                          label="다크 모드"
+                                          description="어두운 테마를 사용합니다"
+                                          icon={<Settings size={18} />}
+                                          variant="default"
+                                      />
+                                  </div>
+                                  
+                                  <div className="mt-4 p-3 bg-gray-100 rounded-lg max-w-xl">
+                                      <p className="text-sm text-gray-700">
+                                          <strong>선택된 테마:</strong> {theme}
+                                      </p>
+                                  </div>
+                              </div>
+
+                              {/* Mixed Example */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      프리미엄 플랜 선택 (실제 사용 예시)
+                                  </h3>
+                                  <div className="space-y-3 max-w-3xl">
+                                      <RadioBox
+                                          name="plan"
+                                          value="basic"
+                                          checked={plan === 'basic'}
+                                          onChange={() => setPlan('basic')}
+                                          label="Basic Plan"
+                                          description="월 5개 밈 생성, 기본 템플릿 제공 - 무료"
+                                          icon={<Heart size={20} />}
+                                          variant="card"
+                                      />
+                                      
+                                      <RadioBox
+                                          name="plan"
+                                          value="pro"
+                                          checked={plan === 'pro'}
+                                          onChange={() => setPlan('pro')}
+                                          label="Pro Plan"
+                                          description="무제한 밈 생성, 모든 템플릿 + AI 기능 - $9.99/월"
+                                          icon={<Zap size={20} />}
+                                          variant="card"
+                                      />
+                                      
+                                      <RadioBox
+                                          name="plan"
+                                          value="premium"
+                                          checked={plan === 'premium'}
+                                          onChange={() => setPlan('premium')}
+                                          label="Premium Plan"
+                                          description="Pro 기능 + 우선 지원, 고급 편집 도구 - $19.99/월"
+                                          icon={<Shield size={20} />}
+                                          variant="card"
+                                      />
+                                  </div>
+                                  
+                                  <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-teal-50 rounded-lg max-w-3xl">
+                                      <p className="text-sm text-gray-700">
+                                          <strong>선택된 플랜:</strong> {plan}
+                                      </p>
+                                      <p className="text-xs text-gray-600 mt-1">
+                                          {plan === 'basic' && '🆓 무료 플랜으로 시작하기'}
+                                          {plan === 'pro' && '⚡ 프로 기능으로 업그레이드'}
+                                          {plan === 'premium' && '👑 프리미엄으로 모든 기능 해제'}
+                                      </p>
+                                  </div>
+                              </div>
+
+                              {/* Disabled State */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      비활성화 상태
+                                  </h3>
+                                  <div className="space-y-3 max-w-2xl">
+                                      <RadioBox
+                                          name="disabled-demo"
+                                          value="option1"
+                                          checked={false}
+                                          onChange={() => {}}
+                                          label="활성화된 옵션"
+                                          description="정상적으로 선택 가능한 옵션입니다"
+                                          icon={<Eye size={18} />}
+                                          variant="card"
+                                      />
+                                      
+                                      <RadioBox
+                                          name="disabled-demo"
+                                          value="option2"
+                                          checked={false}
+                                          onChange={() => {}}
+                                          label="비활성화된 옵션"
+                                          description="현재 선택할 수 없는 옵션입니다"
+                                          icon={<Lock size={18} />}
+                                          variant="card"
+                                          disabled
+                                      />
+                                  </div>
+                              </div>
+
+                              {/* Usage Example */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      사용 방법
+                                  </h3>
+                                  <div className="bg-gray-100 p-4 rounded-lg">
+                                      <pre className="text-sm text-gray-800 overflow-x-auto">
+{`import { RadioBox } from '@/components/ui';
+import { Globe, Lock } from 'lucide-react';
+
+const [visibility, setVisibility] = useState('public');
+
+<RadioBox
+  name="visibility"
+  value="public"
+  checked={visibility === 'public'}
+  onChange={() => setVisibility('public')}
+  label="전체 공개"
+  description="모든 사용자가 볼 수 있습니다"
+  icon={<Globe size={20} />}
+  variant="card"
+/>`}
+                                      </pre>
+                                  </div>
+                              </div>
+                          </div>
+                      </section>
+
+                      {/* Tag Components */}
+                      <section>
+                          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                              Tag 컴포넌트
+                          </h2>
+
+                          <div className="space-y-8">
+                              {/* Color Variants */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      색상 변형 (Color Variants)
+                                  </h3>
+                                  <div className="flex flex-wrap gap-3">
+                                      <Tag variant="primary">Primary Tag</Tag>
+                                      <Tag variant="secondary">Secondary Tag</Tag>
+                                      <Tag variant="accent">Accent Tag</Tag>
+                                      <Tag variant="neutral">Neutral Tag</Tag>
+                                  </div>
+                              </div>
+
+                              {/* Size Variants */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      크기 변형 (Size Variants)
+                                  </h3>
+                                  <div className="flex items-center flex-wrap gap-3">
+                                      <Tag variant="accent" size="sm">Small</Tag>
+                                      <Tag variant="accent" size="md">Medium</Tag>
+                                      <Tag variant="accent" size="lg">Large</Tag>
+                                  </div>
+                              </div>
+
+                              {/* Removable Tags */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      제거 가능한 태그 (Removable Tags)
+                                  </h3>
+                                  <div className="flex flex-wrap gap-2">
+                                      <Tag 
+                                          variant="accent" 
+                                          removable 
+                                          onRemove={() => showSuccess('태그가 제거되었습니다!')}
+                                      >
+                                          #개발
+                                      </Tag>
+                                      <Tag 
+                                          variant="secondary" 
+                                          removable 
+                                          onRemove={() => showInfo('디자인 태그 제거')}
+                                      >
+                                          #디자인
+                                      </Tag>
+                                      <Tag 
+                                          variant="primary" 
+                                          removable 
+                                          onRemove={() => showWarning('밈 태그 제거됨')}
+                                      >
+                                          #밈
+                                      </Tag>
+                                      <Tag 
+                                          variant="neutral" 
+                                          removable 
+                                          onRemove={() => showError('재미 태그 삭제!')}
+                                      >
+                                          #재미
+                                      </Tag>
+                                  </div>
+                                  <p className="text-sm text-gray-500 mt-2">
+                                      각 태그의 X 버튼을 클릭하면 토스트 메시지가 표시됩니다.
+                                  </p>
+                              </div>
+
+                              {/* Interactive Example */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      아이콘과 함께 사용
+                                  </h3>
+                                  <div className="flex flex-wrap gap-2">
+                                      <Tag variant="accent" size="lg">
+                                          <Heart size={14} className="mr-1" />
+                                          좋아요 {Math.floor(Math.random() * 100)}
+                                      </Tag>
+                                      <Tag variant="secondary" size="lg">
+                                          <Users size={14} className="mr-1" />
+                                          팔로워 {Math.floor(Math.random() * 500)}
+                                      </Tag>
+                                      <Tag variant="primary" size="lg">
+                                          <Eye size={14} className="mr-1" />
+                                          조회 {Math.floor(Math.random() * 1000)}
+                                      </Tag>
+                                  </div>
+                              </div>
+
+                              {/* Usage Example */}
+                              <div>
+                                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                                      사용 방법
+                                  </h3>
+                                  <div className="bg-gray-100 p-4 rounded-lg">
+                                      <pre className="text-sm text-gray-800 overflow-x-auto">
+{`import { Tag } from '@/components/ui';
+import { Heart } from 'lucide-react';
+
+// 기본 사용법
+<Tag variant="accent">태그 텍스트</Tag>
+
+// 제거 가능한 태그
+<Tag 
+  variant="primary" 
+  removable 
+  onRemove={() => console.log('제거됨')}
+>
+  제거 가능한 태그
+</Tag>
+
+// 아이콘과 함께
+<Tag variant="secondary">
+  <Heart size={14} className="mr-1" />
+  좋아요
+</Tag>`}
                                       </pre>
                                   </div>
                               </div>
