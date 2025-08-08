@@ -1,7 +1,9 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import type { Provider } from 'next-auth/providers';
 
 const prisma = new PrismaClient();
@@ -66,6 +68,62 @@ const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma),
   } : {}),
   providers: [
+    // 이메일/비밀번호 로그인
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        try {
+          // 테스트 계정
+          if (credentials.email === 'test@memezing.com' && credentials.password === 'test123') {
+            return {
+              id: 'test-user',
+              email: 'test@memezing.com',
+              name: '테스트 사용자',
+              image: null,
+            };
+          }
+
+          // 데이터베이스에서 사용자 찾기 (프로덕션에서는 활성화)
+          if (process.env.DATABASE_URL && process.env.DATABASE_URL !== 'your-database-connection-string') {
+            const user = await prisma.user.findUnique({
+              where: {
+                email: credentials.email
+              }
+            });
+
+            if (!user || !user.password) {
+              return null;
+            }
+
+            const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+
+            if (!isPasswordValid) {
+              return null;
+            }
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+            };
+          }
+
+          return null;
+        } catch (error) {
+          console.error('Auth error:', error);
+          return null;
+        }
+      }
+    }),
     // 환경변수가 있을 때만 각 제공자 활성화
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && 
         process.env.GOOGLE_CLIENT_ID !== 'your-google-client-id' ? [
@@ -103,7 +161,7 @@ const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/login',
+    signIn: '/auth/signin',
     error: '/auth/error',
   },
   secret: process.env.NEXTAUTH_SECRET,
