@@ -6,6 +6,8 @@ export { default as TabGroup } from './TabGroup';
 export { SecondaryTabGroup, type SecondaryTabItem } from './SecondaryTabGroup';
 export { default as RangeSlider } from './RangeSlider';
 export { default as Checkbox } from './Checkbox';
+export { default as RadioBox } from './RadioBox';
+export { default as Tag } from './Tag';
 
 // Layout Components
 export { default as Header } from './Header';
