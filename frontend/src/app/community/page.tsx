@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Heart, Share2, Download, TrendingUp, Clock, Users, Eye } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { ArrowLeft, Heart, Share2, Download, TrendingUp, Clock, Users, Eye, Plus, ImageIcon, LogIn, User } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useToastContext } from '@/context/ToastContext';
 
@@ -17,98 +19,184 @@ interface MemePost {
   views: number;
   createdAt: string;
   isLiked?: boolean;
+  commentsCount?: number;
 }
 
-const popularMemes: MemePost[] = [
-  {
-    id: '1',
-    title: '월요일 오전의 현실',
-    imageUrl: 'https://i.imgflip.com/30b1gx.jpg',
-    author: '밈마스터',
-    likes: 1247,
-    shares: 342,
-    views: 15632,
-    createdAt: '2시간 전',
-    isLiked: false
-  },
-  {
-    id: '2',
-    title: '개발자의 일상',
-    imageUrl: 'https://i.imgflip.com/1ur9b0.jpg',
-    author: '코딩왕',
-    likes: 2156,
-    shares: 578,
-    views: 23481,
-    createdAt: '5시간 전',
-    isLiked: true
-  },
-  {
-    id: '3',
-    title: '금요일 퇴근시간',
-    imageUrl: 'https://i.imgflip.com/345v97.jpg',
-    author: '직장인24',
-    likes: 3421,
-    shares: 892,
-    views: 41253,
-    createdAt: '1일 전',
-    isLiked: false
-  },
-  {
-    id: '4',
-    title: '시험 기간의 현실',
-    imageUrl: 'https://i.imgflip.com/1g8my4.jpg',
-    author: '대학생라이프',
-    likes: 876,
-    shares: 234,
-    views: 12456,
-    createdAt: '3일 전',
-    isLiked: false
-  },
-  {
-    id: '5',
-    title: '연말정산 시즌',
-    imageUrl: 'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=400&h=400&fit=crop&crop=face',
-    author: '세금고민러',
-    likes: 1987,
-    shares: 445,
-    views: 18734,
-    createdAt: '1주 전',
-    isLiked: true
-  },
-  {
-    id: '6',
-    title: '다이어트 다짐 vs 현실',
-    imageUrl: 'https://images.unsplash.com/photo-1569913486515-b74bf7751574?w=400&h=400&fit=crop&crop=face',
-    author: '운동러버',
-    likes: 2543,
-    shares: 667,
-    views: 29876,
-    createdAt: '2주 전',
-    isLiked: false
+interface CommunityStats {
+  totalMembers: number;
+  todayLikes: number;
+  todayShares: number;
+  totalMemes: number;
+}
+
+interface CommunityResponse {
+  success: boolean;
+  data: {
+    memes: MemePost[];
+    stats: CommunityStats;
+    pagination: {
+      page: number;
+      limit: number;
+      totalCount: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  };
+  error?: string;
+}
+
+// API에서 커뮤니티 데이터를 가져오는 함수
+async function fetchCommunityData(sortBy: 'popular' | 'recent' = 'popular', page: number = 1): Promise<CommunityResponse | null> {
+  try {
+    const response = await fetch(`/api/community?sortBy=${sortBy}&page=${page}`);
+    const data = await response.json();
+    
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.error || 'Failed to fetch community data');
+    }
+  } catch (error) {
+    console.error('Error fetching community data:', error);
+    return null;
   }
-];
+}
 
 export default function CommunityPage() {
   const router = useRouter();
-  const [memes, setMemes] = useState<MemePost[]>(popularMemes);
+  const { data: session, status } = useSession();
+  const searchParams = useSearchParams();
+  const [memes, setMemes] = useState<MemePost[]>([]);
+  const [stats, setStats] = useState<CommunityStats>({
+    totalMembers: 0,
+    todayLikes: 0,
+    todayShares: 0,
+    totalMemes: 0
+  });
   const [sortBy, setSortBy] = useState<'popular' | 'recent'>('popular');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const { showSuccess } = useToastContext();
+
+  // 데이터 로드 함수
+  const loadCommunityData = useCallback(async (newSortBy?: 'popular' | 'recent', reset: boolean = false) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const currentPage = reset ? 1 : page;
+      const currentSortBy = newSortBy || sortBy;
+      
+      const data = await fetchCommunityData(currentSortBy, currentPage);
+      
+      if (data) {
+        if (reset) {
+          setMemes(data.data.memes);
+          setPage(1);
+        } else {
+          setMemes(prev => [...prev, ...data.data.memes]);
+        }
+        setStats(data.data.stats);
+        setHasMore(data.data.pagination.hasNext);
+      } else {
+        setError('커뮤니티 데이터를 불러올 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('Community data loading error:', error);
+      setError('데이터 로딩 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  }, [sortBy, page]);
+
+  // 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    loadCommunityData(undefined, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // refresh 파라미터 감지하여 데이터 새로고침
+  useEffect(() => {
+    const refresh = searchParams.get('refresh');
+    if (refresh === 'true') {
+      loadCommunityData(undefined, true);
+      // URL에서 refresh 파라미터 제거
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('refresh');
+      router.replace(newUrl.pathname + newUrl.search, { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // 정렬 변경 시 데이터 재로드
+  const handleSortChange = useCallback((newSortBy: 'popular' | 'recent') => {
+    setSortBy(newSortBy);
+    setPage(1);
+    loadCommunityData(newSortBy, true);
+  }, [loadCommunityData]);
 
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
 
-  const handleLike = useCallback((memeId: string) => {
-    setMemes(prev => prev.map(meme => 
-      meme.id === memeId 
-        ? { 
-            ...meme, 
-            isLiked: !meme.isLiked,
-            likes: meme.isLiked ? meme.likes - 1 : meme.likes + 1
-          }
-        : meme
-    ));
-  }, []);
+  // 업로드 페이지로 이동
+  const handleUpload = useCallback(() => {
+    router.push('/community/upload');
+  }, [router]);
+
+  // 로그인 페이지로 이동
+  const goToLogin = useCallback(() => {
+    router.push('/auth/signin');
+  }, [router]);
+
+  const handleLike = useCallback(async (memeId: string) => {
+    try {
+      // 낙관적 업데이트
+      setMemes(prev => prev.map(meme => 
+        meme.id === memeId 
+          ? { 
+              ...meme, 
+              isLiked: !meme.isLiked,
+              likes: meme.isLiked ? meme.likes - 1 : meme.likes + 1
+            }
+          : meme
+      ));
+
+      // API 호출
+      const response = await fetch(`/api/memes/${memeId}/like`, {
+        method: 'POST'
+      });
+
+      if (!response.ok) {
+        // 실패시 되돌리기
+        setMemes(prev => prev.map(meme => 
+          meme.id === memeId 
+            ? { 
+                ...meme, 
+                isLiked: !meme.isLiked,
+                likes: meme.isLiked ? meme.likes - 1 : meme.likes + 1
+              }
+            : meme
+        ));
+        showSuccess('좋아요 처리 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('Like error:', error);
+      // 실패시 되돌리기
+      setMemes(prev => prev.map(meme => 
+        meme.id === memeId 
+          ? { 
+              ...meme, 
+              isLiked: !meme.isLiked,
+              likes: meme.isLiked ? meme.likes - 1 : meme.likes + 1
+            }
+          : meme
+      ));
+    }
+  }, [showSuccess]);
 
   const handleShare = useCallback(async (meme: MemePost) => {
     if (!meme || !meme.title) return;
@@ -120,20 +208,19 @@ export default function CommunityPage() {
           text: `${meme.title} - 밈징에서 만든 재미있는 밈!`,
           url: window.location.href
         });
-      } catch (error) {
-        console.log('공유 취소됨');
+      } catch (shareError) {
+        console.log('공유 취소됨:', shareError);
       }
     } else {
       // 폴백: 클립보드에 복사
       navigator.clipboard.writeText(window.location.href);
       showSuccess('링크가 복사되었습니다!');
     }
-  }, []);
+  }, [showSuccess]);
 
   const handleDownload = useCallback((meme: MemePost) => {
     if (!meme || !meme.title || !meme.imageUrl) return;
     
-    // 실제 구현에서는 이미지를 다운로드하는 로직이 필요
     const link = document.createElement('a');
     link.download = `${meme.title}.jpg`;
     link.href = meme.imageUrl;
@@ -142,14 +229,13 @@ export default function CommunityPage() {
     document.body.removeChild(link);
   }, []);
 
-  const sortedMemes = [...memes].filter(meme => meme && meme.title).sort((a, b) => {
-    if (sortBy === 'popular') {
-      return b.likes - a.likes;
-    } else {
-      // 최신순 (간단한 예시로 ID 역순)
-      return b.id.localeCompare(a.id);
+  // 더 보기 버튼 클릭
+  const handleLoadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      setPage(prev => prev + 1);
+      loadCommunityData(sortBy, false);
     }
-  });
+  }, [loading, hasMore, sortBy, loadCommunityData]);
 
   return (
     <div className="min-h-screen bg-gray-50 md:pt-0">
@@ -166,12 +252,27 @@ export default function CommunityPage() {
                 밈징 커뮤니티
               </h1>
             </div>
+            <div className="flex items-center space-x-2">
+              {session ? (
+                <Button variant="outline" size="sm" onClick={() => router.push('/profile')} className="px-2 py-2">
+                  <User size={16} />
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={goToLogin} className="px-2 py-2">
+                  <LogIn size={16} />
+                </Button>
+              )}
+              <Button variant="primary" size="sm" onClick={handleUpload} className="px-3 py-2">
+                <Plus size={16} className="mr-1" />
+                업로드
+              </Button>
+            </div>
           </div>
           
           {/* 모바일 정렬 탭 */}
           <div className="flex border-t border-gray-100">
             <button
-              onClick={() => setSortBy('popular')}
+              onClick={() => handleSortChange('popular')}
               className={`flex-1 flex items-center justify-center py-3 text-sm font-medium transition-colors ${
                 sortBy === 'popular'
                   ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
@@ -182,7 +283,7 @@ export default function CommunityPage() {
               인기순
             </button>
             <button
-              onClick={() => setSortBy('recent')}
+              onClick={() => handleSortChange('recent')}
               className={`flex-1 flex items-center justify-center py-3 text-sm font-medium transition-colors ${
                 sortBy === 'recent'
                   ? 'text-blue-600 bg-blue-50 border-b-2 border-blue-600'
@@ -212,7 +313,7 @@ export default function CommunityPage() {
               <Button
                 variant={sortBy === 'popular' ? 'primary' : 'secondary'}
                 size="sm"
-                onClick={() => setSortBy('popular')}
+                onClick={() => handleSortChange('popular')}
               >
                 <TrendingUp size={16} className="mr-1" />
                 인기순
@@ -220,10 +321,26 @@ export default function CommunityPage() {
               <Button
                 variant={sortBy === 'recent' ? 'primary' : 'secondary'}
                 size="sm"
-                onClick={() => setSortBy('recent')}
+                onClick={() => handleSortChange('recent')}
               >
                 <Clock size={16} className="mr-1" />
                 최신순
+              </Button>
+              <div className="w-px h-6 bg-gray-300 mx-2"></div>
+              {session ? (
+                <Button variant="outline" size="sm" onClick={() => router.push('/profile')}>
+                  <User size={16} className="mr-1" />
+                  {session.user?.name || '프로필'}
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={goToLogin}>
+                  <LogIn size={16} className="mr-1" />
+                  로그인
+                </Button>
+              )}
+              <Button variant="primary" size="sm" onClick={handleUpload}>
+                <Plus size={16} className="mr-1" />
+                업로드
               </Button>
             </div>
           </div>
@@ -241,7 +358,7 @@ export default function CommunityPage() {
               </div>
               <div>
                 <p className="text-xs md:text-sm text-gray-600">총 멤버</p>
-                <p className="text-lg md:text-2xl font-bold text-gray-900">12,487</p>
+                <p className="text-lg md:text-2xl font-bold text-gray-900">{stats.totalMembers.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -253,7 +370,7 @@ export default function CommunityPage() {
               </div>
               <div>
                 <p className="text-xs md:text-sm text-gray-600">오늘의 좋아요</p>
-                <p className="text-lg md:text-2xl font-bold text-gray-900">3,251</p>
+                <p className="text-lg md:text-2xl font-bold text-gray-900">{stats.todayLikes.toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -265,25 +382,50 @@ export default function CommunityPage() {
               </div>
               <div>
                 <p className="text-xs md:text-sm text-gray-600">오늘의 공유</p>
-                <p className="text-lg md:text-2xl font-bold text-gray-900">892</p>
+                <p className="text-lg md:text-2xl font-bold text-gray-900">{stats.todayShares.toLocaleString()}</p>
               </div>
             </div>
           </div>
         </div>
 
+        {/* 로딩 상태 */}
+        {loading && memes.length === 0 && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">커뮤니티 데이터를 불러오는 중...</p>
+            </div>
+          </div>
+        )}
+
+        {/* 에러 상태 */}
+        {error && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-red-600 mb-4">{error}</p>
+              <Button onClick={() => loadCommunityData(undefined, true)}>
+                다시 시도
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* 밈 그리드 - 모바일 최적화 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {sortedMemes.length > 0 ? sortedMemes.map((meme) => meme ? (
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {memes.length > 0 ? memes.map((meme) => meme ? (
             <div key={meme.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
               {/* 밈 이미지 */}
               <div 
                 className="aspect-square relative cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => router.push(`/community/${meme.id}`)}
               >
-                <img
+                <Image
                   src={meme.imageUrl}
                   alt={meme.title}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
                 />
               </div>
               
@@ -356,18 +498,34 @@ export default function CommunityPage() {
               </div>
             </div>
           ) : null) : (
-            <div className="col-span-full text-center py-8 text-gray-500">
-              불러오는 밈이 없습니다.
-            </div>
-          )}
-        </div>
+              <div className="col-span-full text-center py-12">
+                <div className="text-gray-500 mb-4">
+                  <ImageIcon size={48} className="mx-auto mb-2" />
+                  <p className="text-lg">아직 공유된 밈이 없습니다.</p>
+                  <p className="text-sm">첫 번째 밈을 업로드해보세요!</p>
+                </div>
+                <Button onClick={handleUpload} size="lg">
+                  <Plus size={16} className="mr-2" />
+                  첫 밈 업로드하기
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
         
         {/* 더 보기 버튼 */}
-        <div className="text-center mt-8">
-          <Button variant="secondary" size="lg">
-            더 많은 밈 보기
-          </Button>
-        </div>
+        {!loading && !error && hasMore && memes.length > 0 && (
+          <div className="text-center mt-8">
+            <Button 
+              variant="secondary" 
+              size="lg" 
+              onClick={handleLoadMore}
+              disabled={loading}
+            >
+              {loading ? '로딩 중...' : '더 많은 밈 보기'}
+            </Button>
+          </div>
+        )}
       </main>
     </div>
   );

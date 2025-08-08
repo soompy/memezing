@@ -2,7 +2,8 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users, Sparkles } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users, Sparkles, LogIn, User } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
@@ -272,6 +273,7 @@ const emotionTemplates: MemeTemplate[] = [
 
 export default function MemeGeneratorPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
   const canvasRef = useRef<FabricCanvasRef>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MemeTemplate | null>(null);
@@ -619,6 +621,11 @@ export default function MemeGeneratorPage() {
     router.push('/community');
   }, [router]);
 
+  // 로그인 페이지 이동
+  const goToLogin = useCallback(() => {
+    router.push('/auth/signin');
+  }, [router]);
+
   // 템플릿 새로고침 함수들
   const refreshTemplateImages = useCallback((templateArray: MemeTemplate[]) => {
     return templateArray.map(template => ({
@@ -695,6 +702,26 @@ export default function MemeGeneratorPage() {
               <Users size={16} className="mr-1 md:mr-2" />
               <span className="hidden sm:inline">커뮤니티</span>
             </Button>
+            {session ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/profile')}
+              >
+                <User size={16} className="mr-1 md:mr-2" />
+                <span className="hidden sm:inline">{session.user?.name || '프로필'}</span>
+                <span className="sm:hidden">프로필</span>
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToLogin}
+              >
+                <LogIn size={16} className="mr-1 md:mr-2" />
+                <span className="hidden sm:inline">로그인</span>
+              </Button>
+            )}
             <Button
               variant="primary"
               size="sm"
