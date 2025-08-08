@@ -12,10 +12,9 @@ export default function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <ThemeProvider>
       <ToastProvider>
-        {/* 임시로 SessionProvider 비활성화 */}
-        {/* <SessionProvider> */}
+        <SessionProvider>
           {children}
-        {/* </SessionProvider> */}
+        </SessionProvider>
       </ToastProvider>
     </ThemeProvider>
   );
