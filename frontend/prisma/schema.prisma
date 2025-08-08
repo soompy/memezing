@@ -88,7 +88,7 @@ model Meme {
   title         String?
   imageUrl      String
   templateId    String?
-  textBoxes     Json     // Array of text boxes with positions and content
+  textBoxes     Json?     // Array of text boxes with positions and content (nullable for uploaded images)
   isPublic      Boolean  @default(true)
   likesCount    Int      @default(0)
   viewsCount    Int      @default(0)
@@ -97,6 +97,7 @@ model Meme {
   tags          String[] // Meme tags for categorization
   description   String?  // Optional description
   isAiGenerated Boolean  @default(false)
+  cloudinaryPublicId String? // Cloudinary public ID for image management
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
