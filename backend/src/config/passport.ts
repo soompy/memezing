@@ -3,7 +3,7 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as KakaoStrategy } from 'passport-kakao';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -76,53 +76,76 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        let user = await prisma.user.findFirst({
+        let user;
+        // OAuth 계정 조회
+        let account = await prisma.account.findFirst({
           where: {
-            OR: [
-              { providerId: profile.id, provider: 'google' },
-              { email: profile.emails?.[0]?.value },
-            ],
+            provider: 'google',
+            providerAccountId: profile.id,
           },
+          include: { user: true },
         });
 
-        if (user) {
-          // 기존 사용자 업데이트
-          if (user.provider === 'email') {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                provider: 'google',
-                providerId: profile.id,
-                avatar: profile.photos?.[0]?.value,
-                displayName: profile.displayName,
-              },
-            });
-          }
+        if (account) {
+          user = account.user;
+          // 사용자 정보 업데이트
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              image: profile.photos?.[0]?.value,
+              lastLoginAt: new Date(),
+            },
+          });
         } else {
-          // 새 사용자 생성
+          // 이메일로 기존 사용자 확인
           const email = profile.emails?.[0]?.value;
           if (!email) {
             return done(new Error('이메일 정보를 가져올 수 없습니다.'), false);
           }
 
-          // 사용자명 생성 (중복 방지)
-          let username = profile.displayName?.replace(/\s+/g, '').toLowerCase() || 'user';
-          let counter = 1;
-          while (await prisma.user.findUnique({ where: { username } })) {
-            username = `${profile.displayName?.replace(/\s+/g, '').toLowerCase() || 'user'}${counter}`;
-            counter++;
-          }
-
-          user = await prisma.user.create({
-            data: {
-              email,
-              username,
-              provider: 'google',
-              providerId: profile.id,
-              avatar: profile.photos?.[0]?.value,
-              displayName: profile.displayName,
-            },
+          user = await prisma.user.findUnique({
+            where: { email },
           });
+
+          if (user) {
+            // 기존 사용자에 Google 계정 연결
+            await prisma.account.create({
+              data: {
+                userId: user.id,
+                type: 'oauth',
+                provider: 'google',
+                providerAccountId: profile.id,
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              },
+            });
+          } else {
+            // 새 사용자 생성
+            let name = profile.displayName?.replace(/\s+/g, '').toLowerCase() || 'user';
+            let counter = 1;
+            while (await prisma.user.findFirst({ where: { name } })) {
+              name = `${profile.displayName?.replace(/\s+/g, '').toLowerCase() || 'user'}${counter}`;
+              counter++;
+            }
+
+            user = await prisma.user.create({
+              data: {
+                email,
+                name,
+                provider: 'google',
+                image: profile.photos?.[0]?.value,
+                accounts: {
+                  create: {
+                    type: 'oauth',
+                    provider: 'google',
+                    providerAccountId: profile.id,
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                  },
+                },
+              },
+            });
+          }
         }
 
         return done(null, user);
@@ -140,55 +163,78 @@ passport.use(
       clientID: process.env.KAKAO_CLIENT_ID!,
       callbackURL: '/api/auth/kakao/callback',
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (accessToken: any, refreshToken: any, profile: any, done: any) => {
       try {
-        let user = await prisma.user.findFirst({
+        let user;
+        // OAuth 계정 조회
+        let account = await prisma.account.findFirst({
           where: {
-            OR: [
-              { providerId: profile.id, provider: 'kakao' },
-              { email: profile._json.kakao_account?.email },
-            ],
+            provider: 'kakao',
+            providerAccountId: profile.id,
           },
+          include: { user: true },
         });
 
-        if (user) {
-          // 기존 사용자 업데이트
-          if (user.provider === 'email') {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                provider: 'kakao',
-                providerId: profile.id,
-                avatar: profile._json.kakao_account?.profile?.profile_image_url,
-                displayName: profile._json.kakao_account?.profile?.nickname,
-              },
-            });
-          }
+        if (account) {
+          user = account.user;
+          // 사용자 정보 업데이트
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              image: profile._json.kakao_account?.profile?.profile_image_url,
+              lastLoginAt: new Date(),
+            },
+          });
         } else {
-          // 새 사용자 생성
+          // 이메일로 기존 사용자 확인
           const email = profile._json.kakao_account?.email;
           if (!email) {
             return done(new Error('이메일 정보를 가져올 수 없습니다.'), false);
           }
 
-          // 사용자명 생성 (중복 방지)
-          let username = profile._json.kakao_account?.profile?.nickname?.replace(/\s+/g, '').toLowerCase() || 'user';
-          let counter = 1;
-          while (await prisma.user.findUnique({ where: { username } })) {
-            username = `${profile._json.kakao_account?.profile?.nickname?.replace(/\s+/g, '').toLowerCase() || 'user'}${counter}`;
-            counter++;
-          }
-
-          user = await prisma.user.create({
-            data: {
-              email,
-              username,
-              provider: 'kakao',
-              providerId: profile.id,
-              avatar: profile._json.kakao_account?.profile?.profile_image_url,
-              displayName: profile._json.kakao_account?.profile?.nickname,
-            },
+          user = await prisma.user.findUnique({
+            where: { email },
           });
+
+          if (user) {
+            // 기존 사용자에 Kakao 계정 연결
+            await prisma.account.create({
+              data: {
+                userId: user.id,
+                type: 'oauth',
+                provider: 'kakao',
+                providerAccountId: profile.id,
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              },
+            });
+          } else {
+            // 새 사용자 생성
+            let name = profile._json.kakao_account?.profile?.nickname?.replace(/\s+/g, '').toLowerCase() || 'user';
+            let counter = 1;
+            while (await prisma.user.findFirst({ where: { name } })) {
+              name = `${profile._json.kakao_account?.profile?.nickname?.replace(/\s+/g, '').toLowerCase() || 'user'}${counter}`;
+              counter++;
+            }
+
+            user = await prisma.user.create({
+              data: {
+                email,
+                name,
+                provider: 'kakao',
+                image: profile._json.kakao_account?.profile?.profile_image_url,
+                accounts: {
+                  create: {
+                    type: 'oauth',
+                    provider: 'kakao',
+                    providerAccountId: profile.id,
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                  },
+                },
+              },
+            });
+          }
         }
 
         return done(null, user);

@@ -20,12 +20,12 @@ export class AuthService {
         };
       }
 
-      // 사용자명 중복 확인
-      const existingUserByUsername = await prisma.user.findUnique({
-        where: { username: data.username },
+      // 사용자명 중복 확인 (name 필드로 변경)
+      const existingUserByName = await prisma.user.findFirst({
+        where: { name: data.username },
       });
 
-      if (existingUserByUsername) {
+      if (existingUserByName) {
         return {
           success: false,
           message: '이미 사용 중인 사용자명입니다.',
@@ -40,8 +40,9 @@ export class AuthService {
       const user = await prisma.user.create({
         data: {
           email: data.email,
-          username: data.username,
+          name: data.username,
           password: hashedPassword,
+          provider: 'email',
         },
       });
 
@@ -49,7 +50,7 @@ export class AuthService {
       const token = generateToken({
         userId: user.id,
         email: user.email,
-        username: user.username,
+        username: user.name || '',
       });
 
       return {
@@ -58,7 +59,7 @@ export class AuthService {
           user: {
             id: user.id,
             email: user.email,
-            username: user.username,
+            username: user.name || '',
             createdAt: user.createdAt.toISOString(),
           },
           token,
@@ -102,7 +103,13 @@ export class AuthService {
       const token = generateToken({
         userId: user.id,
         email: user.email,
-        username: user.username,
+        username: user.name || '',
+      });
+
+      // 마지막 로그인 시간 업데이트
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { lastLoginAt: new Date() },
       });
 
       return {
@@ -111,7 +118,7 @@ export class AuthService {
           user: {
             id: user.id,
             email: user.email,
-            username: user.username,
+            username: user.name || '',
             createdAt: user.createdAt.toISOString(),
           },
           token,
@@ -134,12 +141,28 @@ export class AuthService {
         select: {
           id: true,
           email: true,
-          username: true,
+          name: true,
+          bio: true,
+          image: true,
+          provider: true,
+          interests: true,
+          isVerified: true,
+          isActive: true,
+          role: true,
           createdAt: true,
+          updatedAt: true,
+          lastLoginAt: true,
         },
       });
 
-      return user;
+      if (user) {
+        return {
+          ...user,
+          username: user.name || '',
+        };
+      }
+
+      return null;
     } catch (error) {
       console.error('Get user error:', error);
       return null;

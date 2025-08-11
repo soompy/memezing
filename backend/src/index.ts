@@ -7,6 +7,15 @@ import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 import uploadRoutes from './routes/upload';
 import authRoutes from './routes/auth';
+import memeRoutes from './routes/memes';
+import commentRoutes from './routes/comments';
+import templateRoutes from './routes/templates';
+import socialRoutes from './routes/social';
+import userRoutes from './routes/users';
+import aiRoutes from './routes/ai';
+import analyticsRoutes from './routes/analytics';
+import searchRoutes from './routes/search';
+import feedRoutes from './routes/feed';
 import passport from './config/passport';
 
 dotenv.config();
@@ -48,6 +57,15 @@ app.use(passport.session());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/memes', memeRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/templates', templateRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/feed', feedRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: '밈징 API 서버가 정상 작동 중입니다!' });

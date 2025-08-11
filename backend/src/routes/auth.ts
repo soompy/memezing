@@ -47,7 +47,7 @@ const loginValidation = [
 ];
 
 // 회원가입
-router.post('/register', registerValidation, async (req, res) => {
+router.post('/register', registerValidation, async (req: any, res: any) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -73,7 +73,7 @@ router.post('/register', registerValidation, async (req, res) => {
 });
 
 // 로그인
-router.post('/login', loginValidation, async (req, res) => {
+router.post('/login', loginValidation, async (req: any, res: any) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -99,7 +99,7 @@ router.post('/login', loginValidation, async (req, res) => {
 });
 
 // 현재 사용자 정보 조회
-router.get('/me', authenticateToken, async (req: AuthenticatedRequest, res) => {
+router.get('/me', authenticateToken as any, async (req: AuthenticatedRequest, res: any) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -147,7 +147,7 @@ router.get('/google', passport.authenticate('google', {
 // Google OAuth 콜백
 router.get('/google/callback', 
   passport.authenticate('google', { session: false, failureRedirect: '/login?error=google' }),
-  (req, res) => {
+  (req: any, res: any) => {
     try {
       const user = req.user as any;
       const token = generateToken(user.id);
@@ -167,7 +167,7 @@ router.get('/kakao', passport.authenticate('kakao'));
 // Kakao OAuth 콜백
 router.get('/kakao/callback',
   passport.authenticate('kakao', { session: false, failureRedirect: '/login?error=kakao' }),
-  (req, res) => {
+  (req: any, res: any) => {
     try {
       const user = req.user as any;
       const token = generateToken(user.id);
