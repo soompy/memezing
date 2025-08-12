@@ -6,7 +6,6 @@ import { Download, RefreshCw, Type, Image as ImageIcon, Settings, ChevronUp, Che
 import Button from '@/components/ui/Button';
 import MobileFabricCanvas, { MobileFabricCanvasRef, MemeTemplate } from '@/components/meme/MobileFabricCanvas';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
-import MobileAIImageModal from '@/components/meme/MobileAIImageModal';
 import { getRandomImageFromPool } from '@/utils/imagePool';
 import { useToastContext } from '@/context/ToastContext';
 
@@ -204,7 +203,6 @@ export default function MobileMemeGeneratorPage() {
   const [isBottomSheetExpanded, setIsBottomSheetExpanded] = useState(false);
   const [quickTexts] = useState<string[]>(['상단 텍스트', '하단 텍스트']);
   const [newText, setNewText] = useState('');
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const { showError, showSuccess } = useToastContext();
 
   // 데스크톱 감지 및 리디렉션
@@ -284,25 +282,6 @@ export default function MobileMemeGeneratorPage() {
       });
   }, []);
 
-  // AI 이미지 생성 핸들러
-  const handleAIImageGenerated = useCallback((imageUrl: string) => {
-    if (!canvasRef.current) return;
-    
-    setIsLoading(true);
-    canvasRef.current.addImageFromUrl(imageUrl)
-      .then(() => {
-        setCurrentTool('none');
-        setIsBottomSheetExpanded(false);
-        showSuccess('이미지가 성공적으로 추가되었습니다!');
-      })
-      .catch((error) => {
-        console.error('AI image add failed:', error);
-        showError('AI 이미지 추가에 실패했습니다.');
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
 
   // 다운로드
   const handleDownload = useCallback(() => {
@@ -786,13 +765,6 @@ export default function MobileMemeGeneratorPage() {
                           <p className="text-xs text-gray-600">파일 선택</p>
                         </label>
                       </div>
-                      <button
-                        onClick={() => setIsAIModalOpen(true)}
-                        className="p-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg flex flex-col items-center justify-center space-y-1 hover:from-purple-600 hover:to-pink-600 transition-colors"
-                      >
-                        <Sparkles className="w-5 h-5" />
-                        <span className="text-xs font-medium">AI 생성</span>
-                      </button>
                     </div>
                   </div>
                 )}
@@ -814,19 +786,6 @@ export default function MobileMemeGeneratorPage() {
                       </label>
                     </div>
                     
-                    {/* AI 이미지 생성 버튼 */}
-                    <div className="mt-4">
-                      <button
-                        onClick={() => setIsAIModalOpen(true)}
-                        className="w-full p-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg flex items-center justify-center space-x-2 hover:from-purple-600 hover:to-pink-600 transition-colors"
-                      >
-                        <Sparkles className="w-5 h-5" />
-                        <span className="font-medium">AI로 이미지 생성</span>
-                      </button>
-                      <p className="text-xs text-gray-500 text-center mt-2">
-                        프롬프트로 원하는 이미지를 생성해보세요
-                      </p>
-                    </div>
                     
                     <div className="text-xs text-gray-500 space-y-1">
                       <p>• 이미지를 터치하여 선택</p>
@@ -895,12 +854,6 @@ export default function MobileMemeGeneratorPage() {
         />
       )}
       
-      {/* AI 이미지 생성 모달 */}
-      <MobileAIImageModal
-        isOpen={isAIModalOpen}
-        onClose={() => setIsAIModalOpen(false)}
-        onImageGenerated={handleAIImageGenerated}
-      />
     </div>
   );
 }

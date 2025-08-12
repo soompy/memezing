@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -63,7 +63,7 @@ async function fetchCommunityData(sortBy: 'popular' | 'recent' = 'popular', page
   }
 }
 
-export default function CommunityPage() {
+function CommunityPageContent() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
@@ -528,5 +528,13 @@ export default function CommunityPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function CommunityPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">로딩 중...</div>}>
+      <CommunityPageContent />
+    </Suspense>
   );
 }

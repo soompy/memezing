@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-<parameter name="content">import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { requireAuth, logAdminAction, permissions } from '@/lib/auth';
 
