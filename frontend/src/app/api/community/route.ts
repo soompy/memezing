@@ -15,6 +15,33 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '12');
     const offset = (page - 1) * limit;
 
+    // 데이터베이스가 설정되지 않은 경우 테스트 응답
+    if (!process.env.DATABASE_URL || 
+        process.env.DATABASE_URL === 'your-database-connection-string' ||
+        process.env.DATABASE_URL.includes('username:password@localhost')) {
+      console.log('Database not configured, returning test community data');
+      return NextResponse.json({
+        success: true,
+        data: {
+          memes: [],
+          stats: {
+            totalMembers: 0,
+            todayLikes: 0,
+            todayShares: 0,
+            totalMemes: 0
+          },
+          pagination: {
+            page: 1,
+            limit: 12,
+            totalCount: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false
+          }
+        }
+      });
+    }
+
     // 정렬 조건 설정
     let orderBy: any = {};
     if (sortBy === 'popular') {
