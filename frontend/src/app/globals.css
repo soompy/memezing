@@ -3,6 +3,36 @@
 /* 컬러 변수 import */
 @import '../styles/colorVariables.css';
 
+/* Color input 스타일 */
+.color-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
+.color-input::-moz-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
 /* 라이트 모드 CSS 변수 */
 :root,
 .light {

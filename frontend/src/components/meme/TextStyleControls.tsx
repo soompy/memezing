@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button';
 import Select, { SelectGroup } from '@/components/ui/Select';
 import TabGroup from '@/components/ui/TabGroup';
 import RangeSlider from '@/components/ui/RangeSlider';
+import CustomColorPicker from '@/components/ui/ColorPicker';
 
 export interface TextStyle {
   fontSize: number;
@@ -22,6 +23,7 @@ export interface TextStyle {
 interface TextStyleControlsProps {
   style: TextStyle;
   onChange: (style: TextStyle) => void;
+  onPreviewChange?: (style: Partial<TextStyle>) => void;
   onReset: () => void;
 }
 
@@ -72,31 +74,54 @@ const fontGroups: SelectGroup[] = [
 ];
 
 const colors = [
+  // 기본 색상
   '#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00',
+  // 보조 색상
   '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A',
-  '#808080', '#ADD8E6', '#90EE90', '#FFB6C1', '#DDA0DD', '#F0E68C'
+  // 회색 계열
+  '#808080', '#C0C0C0', '#696969', '#2F2F2F', '#F5F5F5', '#DCDCDC',
+  // 파스텔 색상
+  '#FFB6C1', '#ADD8E6', '#90EE90', '#F0E68C', '#DDA0DD', '#FFA07A',
+  // 진한 색상
+  '#8B0000', '#006400', '#000080', '#8B008B', '#FF4500', '#4B0082',
+  // 자연 색상
+  '#228B22', '#CD853F', '#D2691E', '#B22222', '#5F9EA0', '#9932CC'
 ];
 
-export default function TextStyleControls({ style, onChange, onReset }: TextStyleControlsProps) {
+export default function TextStyleControls({ style, onChange, onPreviewChange, onReset }: TextStyleControlsProps) {
   const [activeTab, setActiveTab] = useState<'font' | 'color' | 'align'>('font');
 
   const updateStyle = (updates: Partial<TextStyle>) => {
     onChange({ ...style, ...updates });
   };
 
-  const ColorPicker = ({ value, onChange: onColorChange, label }: { 
+  const ColorPicker = ({ value, onChange: onColorChange, label, showNoneOption = false }: { 
     value: string; 
     onChange: (color: string) => void; 
     label: string;
+    showNoneOption?: boolean;
   }) => (
     <div className="space-y-2">
       <label className="text-sm font-medium text-gray-700">{label}</label>
-      <div className="grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-8 gap-1.5">
+        {showNoneOption && (
+          <button
+            onClick={() => onColorChange('transparent')}
+            className={`w-7 h-7 rounded border-2 transition-all flex items-center justify-center relative overflow-hidden ${
+              value === 'transparent' ? 'border-primary scale-110 bg-white' : 'border-gray-300 hover:border-gray-400 bg-white'
+            }`}
+            title="사용 안함"
+          >
+            <div className="absolute inset-0 bg-white"></div>
+            <div className="absolute top-0 left-0 w-full h-0.5 bg-red-500 transform rotate-45 origin-top-left" style={{transformOrigin: '0 0', width: '141%'}}></div>
+            <span className="relative z-10 text-[8px] font-medium text-gray-600">없음</span>
+          </button>
+        )}
         {colors.map((color) => (
           <button
             key={color}
             onClick={() => onColorChange(color)}
-            className={`w-8 h-8 rounded border-2 transition-all ${
+            className={`w-7 h-7 rounded border-2 transition-all ${
               value === color ? 'border-primary scale-110' : 'border-gray-300 hover:border-gray-400'
             }`}
             style={{ backgroundColor: color }}
@@ -104,26 +129,56 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
           />
         ))}
       </div>
-      <div className="flex items-center space-x-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onColorChange(e.target.value)}
-          className="w-8 h-8 border border-gray-300 rounded cursor-pointer"
-        />
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onColorChange(e.target.value)}
-          className="flex-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-primary-500"
-          placeholder="#FFFFFF"
-        />
+      <div className="mt-3 p-3 bg-gray-50 rounded-lg" 
+           onMouseDown={(e) => e.stopPropagation()}
+           onMouseUp={(e) => e.stopPropagation()}
+           onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center space-x-2 mb-2">
+          <span className="text-xs font-medium text-gray-600">사용자 정의:</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <CustomColorPicker
+            value={value}
+            onChange={onColorChange}
+            onPreviewChange={(color) => {
+              // 실시간 미리보기
+              if (onPreviewChange) {
+                if (label === '텍스트 색상') {
+                  onPreviewChange({ color });
+                } else if (label === '테두리 색상') {
+                  onPreviewChange({ strokeColor: color });
+                }
+              }
+            }}
+            disabled={value === 'transparent'}
+            className="shrink-0"
+          />
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => {
+              e.stopPropagation();
+              onColorChange(e.target.value);
+            }}
+            onFocus={(e) => e.stopPropagation()}
+            onBlur={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-primary-500"
+            placeholder="#FFFFFF"
+            title="직접 색상 코드 입력"
+          />
+        </div>
       </div>
     </div>
   );
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+    <div 
+      className="bg-white rounded-lg border border-gray-200 p-4 space-y-4"
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
@@ -160,7 +215,13 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
             label="폰트"
             groups={fontGroups}
             value={style.fontFamily}
-            onChange={(value) => updateStyle({ fontFamily: value })}
+            onChange={(value) => {
+              updateStyle({ fontFamily: value });
+              // 실시간 미리보기
+              if (onPreviewChange) {
+                onPreviewChange({ fontFamily: value });
+              }
+            }}
             placeholder="폰트를 선택하세요"
           />
 
@@ -241,6 +302,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
             value={style.strokeColor}
             onChange={(strokeColor) => updateStyle({ strokeColor })}
             label="테두리 색상"
+            showNoneOption={true}
           />
 
           <RangeSlider
@@ -296,7 +358,7 @@ export default function TextStyleControls({ style, onChange, onReset }: TextStyl
               fontStyle: style.fontStyle,
               color: style.color,
               textAlign: style.textAlign,
-              textShadow: `
+              textShadow: style.strokeColor === 'transparent' ? 'none' : `
                 -${style.strokeWidth}px -${style.strokeWidth}px 0 ${style.strokeColor},
                 ${style.strokeWidth}px -${style.strokeWidth}px 0 ${style.strokeColor},
                 -${style.strokeWidth}px ${style.strokeWidth}px 0 ${style.strokeColor},

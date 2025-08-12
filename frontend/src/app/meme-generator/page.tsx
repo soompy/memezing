@@ -11,7 +11,6 @@ import FabricCanvas, { FabricCanvasRef, MemeTemplate } from '@/components/meme/F
 import ImageUploadComponent from '@/components/meme/ImageUploadComponent';
 import ImageSelectorTabs from '@/components/meme/ImageSelectorTabs';
 import TextInputArea from '@/components/meme/TextInputArea';
-import AITextGenerator from '@/components/meme/AITextGenerator';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
 import ResizablePanel from '@/components/ui/ResizablePanel';
 import { AlertDialog, ConfirmDialog } from '@/components/ui/Modal';
@@ -463,6 +462,14 @@ export default function MemeGeneratorPage() {
     // 선택된 객체가 있으면 스타일 적용
     if (selectedObject && canvasRef.current) {
       canvasRef.current.updateTextStyle(newStyle);
+    }
+  }, [selectedObject]);
+
+  // 텍스트 스타일 미리보기 (실시간 변경)
+  const handleStylePreview = useCallback((previewStyle: Partial<TextStyle>) => {
+    // 선택된 객체가 있으면 미리보기 스타일 적용
+    if (selectedObject && canvasRef.current) {
+      canvasRef.current.updateTextStyle(previewStyle);
     }
   }, [selectedObject]);
 
@@ -986,6 +993,7 @@ export default function MemeGeneratorPage() {
                         <TextStyleControls
                           style={textStyle}
                           onChange={handleStyleChange}
+                          onPreviewChange={handleStylePreview}
                           onReset={handleStyleReset}
                         />
                       </div>
@@ -1238,6 +1246,7 @@ export default function MemeGeneratorPage() {
                           <TextStyleControls
                             style={textStyle}
                             onChange={handleStyleChange}
+                            onPreviewChange={handleStylePreview}
                             onReset={handleStyleReset}
                           />
                         </div>

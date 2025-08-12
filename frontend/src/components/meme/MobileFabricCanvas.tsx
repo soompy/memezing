@@ -499,8 +499,17 @@ const MobileFabricCanvas = forwardRef<MobileFabricCanvasRef, MobileFabricCanvasP
     if (style.fontFamily !== undefined) textObj.set('fontFamily', style.fontFamily);
     if (style.fontWeight !== undefined) textObj.set('fontWeight', style.fontWeight);
     if (style.color !== undefined) textObj.set('fill', style.color);
-    if (style.strokeColor !== undefined) textObj.set('stroke', style.strokeColor);
-    if (style.strokeWidth !== undefined) textObj.set('strokeWidth', style.strokeWidth);
+    if (style.strokeColor !== undefined) {
+      if (style.strokeColor === 'transparent') {
+        textObj.set('stroke', '');
+        textObj.set('strokeWidth', 0);
+      } else {
+        textObj.set('stroke', style.strokeColor);
+      }
+    }
+    if (style.strokeWidth !== undefined && style.strokeColor !== 'transparent') {
+      textObj.set('strokeWidth', style.strokeWidth);
+    }
     if (style.textAlign !== undefined) textObj.set('textAlign', style.textAlign);
     if (style.backgroundColor !== undefined) textObj.set('backgroundColor', style.backgroundColor);
     if (style.opacity !== undefined) textObj.set('opacity', style.opacity);
