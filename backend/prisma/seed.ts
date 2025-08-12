@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -49,7 +49,6 @@ async function main() {
       name: '소셜러',
       password: hashedPassword,
       provider: 'google',
-      providerId: 'google_test_123',
       bio: '소셜 미디어를 사랑하는 사용자입니다.',
       interests: ['여행', '음식', '일상'],
       isVerified: false,
@@ -73,15 +72,12 @@ async function main() {
   console.log('✅ 팔로우 관계 생성 완료');
 
   // 밈 템플릿 생성
-  const template1 = await prisma.template.upsert({
-    where: { name: '드레이크 포인팅' },
-    update: {},
-    create: {
+  const template1 = await prisma.template.create({
+    data: {
       name: '드레이크 포인팅',
-      description: '드레이크가 위를 거부하고 아래를 가리키는 밈',
       imageUrl: 'https://i.imgflip.com/30b1gx.jpg',
       category: '반응',
-      textAreas: [
+      textBoxes: [
         { x: 250, y: 130, width: 300, height: 100 },
         { x: 250, y: 380, width: 300, height: 100 },
       ],
@@ -90,33 +86,27 @@ async function main() {
     },
   });
 
-  const template2 = await prisma.template.upsert({
-    where: { name: '디스트랙티드 보이프렌드' },
-    update: {},
-    create: {
+  const template2 = await prisma.template.create({
+    data: {
       name: '디스트랙티드 보이프렌드',
-      description: '남자친구가 다른 여자를 보는 밈',
       imageUrl: 'https://i.imgflip.com/1ur9b0.jpg',
       category: '상황',
-      textAreas: [
-        { x: 180, y: 20, width: 150, height: 50 },  // 남자친구
-        { x: 370, y: 20, width: 150, height: 50 },  // 다른 여자
-        { x: 50, y: 20, width: 150, height: 50 },   // 여자친구
+      textBoxes: [
+        { x: 180, y: 20, width: 150, height: 50 },
+        { x: 370, y: 20, width: 150, height: 50 },
+        { x: 50, y: 20, width: 150, height: 50 },
       ],
       isActive: true,
       usageCount: 89,
     },
   });
 
-  const template3 = await prisma.template.upsert({
-    where: { name: '체인지 마이 마인드' },
-    update: {},
-    create: {
+  const template3 = await prisma.template.create({
+    data: {
       name: '체인지 마이 마인드',
-      description: '의견을 바꿔보라고 하는 밈',
       imageUrl: 'https://i.imgflip.com/24y43o.jpg',
       category: '의견',
-      textAreas: [
+      textBoxes: [
         { x: 100, y: 100, width: 200, height: 80 },
       ],
       isActive: true,
@@ -134,7 +124,7 @@ async function main() {
       imageUrl: 'https://example.com/meme1.jpg',
       templateId: template1.id,
       userId: testUser1.id,
-      textOverlays: [
+      textBoxes: [
         { text: '기존 코드 리팩토링', x: 250, y: 130, fontSize: 24 },
         { text: '새 프로젝트 시작', x: 250, y: 380, fontSize: 24 },
       ],
@@ -154,7 +144,7 @@ async function main() {
       imageUrl: 'https://example.com/meme2.jpg',
       templateId: template2.id,
       userId: testUser2.id,
-      textOverlays: [
+      textBoxes: [
         { text: '나', x: 180, y: 20, fontSize: 20 },
         { text: '새로운 맛집', x: 370, y: 20, fontSize: 20 },
         { text: '집밥', x: 50, y: 20, fontSize: 20 },
@@ -175,7 +165,7 @@ async function main() {
       imageUrl: 'https://example.com/meme3.jpg',
       templateId: template3.id,
       userId: testUser3.id,
-      textOverlays: [
+      textBoxes: [
         { text: '주말에는 잠자는 게 최고다\\nChange my mind', x: 100, y: 100, fontSize: 22 },
       ],
       tags: ['주말', '운동', '현실'],
@@ -251,7 +241,12 @@ async function main() {
       description: '직장인들이 공감할 만한 밈들을 모았습니다.',
       userId: testUser1.id,
       isPublic: true,
-      memeIds: [meme1.id, meme2.id],
+      items: {
+        create: [
+          { memeId: meme1.id, order: 1 },
+          { memeId: meme2.id, order: 2 },
+        ],
+      },
     },
   });
 
@@ -261,7 +256,12 @@ async function main() {
       description: '일상에서 벌어지는 재미있는 상황들',
       userId: testUser2.id,
       isPublic: true,
-      memeIds: [meme2.id, meme3.id],
+      items: {
+        create: [
+          { memeId: meme2.id, order: 1 },
+          { memeId: meme3.id, order: 2 },
+        ],
+      },
     },
   });
 
