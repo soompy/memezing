@@ -32,7 +32,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 데이터베이스가 설정되지 않은 경우 테스트 응답
-    if (!process.env.DATABASE_URL || process.env.DATABASE_URL === 'your-database-connection-string') {
+    if (!process.env.DATABASE_URL || 
+        process.env.DATABASE_URL === 'your-database-connection-string' ||
+        process.env.DATABASE_URL.includes('username:password@localhost')) {
       console.log('Database not configured, returning test response');
       return NextResponse.json({
         success: true,
