@@ -3,7 +3,7 @@
 import { useRef, useCallback, useState } from 'react';
 import { Upload, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-react';
 import Button from '@/components/ui/Button';
-import { validateImageFile, uploadImageWithProgress, UploadProgress, UploadError } from '@/lib/upload';
+import { validateImageFile } from '@/lib/upload';
 import { useToastContext } from '@/context/ToastContext';
 
 interface ImageUploadComponentProps {
@@ -29,69 +29,38 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
   const [dragOver, setDragOver] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [isUrlMode, setIsUrlMode] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
   const { showError, showSuccess } = useToastContext();
 
   // 상태 초기화
   const resetStates = useCallback(() => {
-    setUploadProgress(null);
     setUploadError(null);
     setUploadSuccess(null);
   }, []);
 
-  // 파일 업로드 핸들러
-  const handleUpload = useCallback(async (file: File) => {
-    // 파일 검증
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      setUploadError(validation.error!);
-      return;
-    }
-
-    setIsUploading(true);
-    resetStates();
-
-    try {
-      const result = await uploadImageWithProgress(
-        file,
-        uploadType,
-        (progress) => {
-          setUploadProgress(progress);
-        }
-      );
-
-      setUploadSuccess('업로드가 완료되었습니다!');
-      setUploadProgress(null);
-      
-      // 로컬 파일 선택과 업로드된 URL 모두 전달
-      onImageSelect(file);
-      if (onImageUpload) {
-        onImageUpload(result.url);
-      }
-      
-      // 3초 후 성공 메시지 제거
-      setTimeout(() => setUploadSuccess(null), 3000);
-    } catch (error) {
-      const errorMessage = error instanceof UploadError 
-        ? error.message 
-        : '업로드 중 오류가 발생했습니다.';
-      setUploadError(errorMessage);
-      setUploadProgress(null);
-    } finally {
-      setIsUploading(false);
-    }
-  }, [uploadType, onImageSelect, onImageUpload, resetStates]);
 
   // 파일 선택 핸들러
   const handleFileSelect = useCallback((files: FileList | null) => {
     if (!files || files.length === 0) return;
 
     const file = files[0];
-    handleUpload(file);
-  }, [handleUpload]);
+    
+    // 파일 검증
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setUploadError(validation.error!);
+      showError(validation.error!);
+      return;
+    }
+
+    // 서버 업로드 없이 바로 로컬 파일 전달
+    onImageSelect(file);
+    setUploadSuccess('이미지가 추가되었습니다!');
+    
+    // 3초 후 성공 메시지 제거
+    setTimeout(() => setUploadSuccess(null), 3000);
+  }, [onImageSelect, showError]);
 
   // 드래그 앤 드롭 핸들러
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -126,8 +95,17 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
   }, [urlInput, onImageUrl]);
 
   // 파일 입력 클릭
-  const handleFileInputClick = useCallback(() => {
-    fileInputRef.current?.click();
+  const handleFileInputClick = useCallback((e: React.MouseEvent) => {
+    console.log('클릭 이벤트 발생:', e);
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (fileInputRef.current) {
+      console.log('파일 인풋 클릭 시도');
+      fileInputRef.current.click();
+    } else {
+      console.error('파일 인풋 참조가 없습니다');
+    }
   }, []);
 
   return (
@@ -146,44 +124,40 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={handleFileInputClick}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleFileInputClick(e as any);
+            }
+          }}
         >
           <div className="flex flex-col items-center space-y-3">
             <Upload 
               size={48} 
-              className={`${dragOver ? 'text-blue-500' : 'text-gray-400'} ${isUploading ? 'animate-pulse' : ''}`} 
+              className={`${dragOver ? 'text-blue-500' : 'text-gray-400'}`} 
             />
             <div>
               <p className="text-lg font-medium text-gray-700">
-                {isUploading ? '업로드 중...' : '이미지를 드래그하거나 클릭하여 업로드'}
+                이미지를 드래그하거나 클릭하여 추가
               </p>
               <p className="text-sm text-gray-500 mt-1">
                 PNG, JPG, GIF, WebP 파일 지원 (최대 {maxSize}MB)
               </p>
             </div>
-            
-            {/* 업로드 진행률 */}
-            {uploadProgress && (
-              <div className="w-full max-w-sm">
-                <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>업로드 중...</span>
-                  <span>{uploadProgress.percentage}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress.percentage}%` }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
           
           <input
             ref={fileInputRef}
             type="file"
             accept={accept}
-            onChange={(e) => handleFileSelect(e.target.files)}
+            onChange={(e) => {
+              handleFileSelect(e.target.files);
+              e.target.value = ''; // 같은 파일을 다시 선택할 수 있도록 초기화
+            }}
             className="hidden"
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
       ) : (
@@ -243,17 +217,22 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
         <Button
           variant={!isUrlMode ? 'primary' : 'secondary'}
           size="sm"
-          onClick={() => setIsUrlMode(false)}
-          disabled={isUploading}
+          onClick={(e) => {
+            if (isUrlMode) {
+              setIsUrlMode(false);
+            } else {
+              // 이미 파일 모드인 경우 파일 선택 창 열기
+              handleFileInputClick(e as any);
+            }
+          }}
         >
           <Upload size={16} className="mr-2" />
-          파일 업로드
+          파일 선택
         </Button>
         <Button
           variant={isUrlMode ? 'primary' : 'secondary'}
           size="sm"
           onClick={() => setIsUrlMode(true)}
-          disabled={isUploading}
         >
           <ImageIcon size={16} className="mr-2" />
           URL로 추가
