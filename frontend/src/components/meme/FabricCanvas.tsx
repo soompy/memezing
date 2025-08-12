@@ -33,6 +33,7 @@ export interface FabricCanvasRef {
   exportAsImage: () => string | null;
   addText: (text: string, options?: any) => void;
   updateTextStyle: (style: Partial<TextStyle>) => void;
+  resetSelectedTextStyle: (defaultStyle: TextStyle) => boolean;
   loadTemplate: (template: MemeTemplate) => Promise<void>;
   addImageFromUrl: (url: string) => Promise<void>;
   addImageFromFile: (file: File) => Promise<void>;
@@ -445,6 +446,48 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     setTimeout(saveCanvasState, 100);
   }, [saveCanvasState]);
 
+  // 선택된 텍스트 스타일 초기화
+  const resetSelectedTextStyle = useCallback((defaultStyle: TextStyle): boolean => {
+    if (!fabricCanvasRef.current) return false;
+
+    // 현재 선택된 객체를 확인
+    const activeObject = fabricCanvasRef.current.getActiveObject();
+    
+    if (activeObject && activeObject.type === 'i-text') {
+      // 선택된 객체가 텍스트인 경우
+      const textObj = activeObject as fabric.IText;
+      
+      textObj.set('fontSize', defaultStyle.fontSize);
+      textObj.set('fontFamily', defaultStyle.fontFamily);
+      textObj.set('fontWeight', defaultStyle.fontWeight);
+      textObj.set('fontStyle', defaultStyle.fontStyle);
+      textObj.set('fill', defaultStyle.color);
+      
+      if (defaultStyle.strokeColor === 'transparent') {
+        textObj.set('stroke', '');
+        textObj.set('strokeWidth', 0);
+      } else {
+        textObj.set('stroke', defaultStyle.strokeColor);
+        textObj.set('strokeWidth', defaultStyle.strokeWidth);
+      }
+      
+      textObj.set('textAlign', defaultStyle.textAlign);
+      textObj.set('opacity', defaultStyle.opacity);
+      
+      // activeTextRef도 업데이트
+      activeTextRef.current = textObj;
+      
+      fabricCanvasRef.current.renderAll();
+      
+      // 히스토리 저장
+      setTimeout(saveCanvasState, 100);
+      
+      return true;
+    }
+    
+    return false;
+  }, [saveCanvasState]);
+
   // 템플릿 로드
   const loadTemplate = useCallback(async (template: MemeTemplate): Promise<void> => {
     if (!fabricCanvasRef.current) return;
@@ -622,6 +665,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     exportAsImage,
     addText,
     updateTextStyle,
+    resetSelectedTextStyle,
     loadTemplate,
     addImageFromUrl,
     addImageFromFile,
@@ -634,7 +678,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     getCanvas,
     getCanvasContainer,
     getAllTexts
-  }), [exportAsImage, addText, updateTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts]);
+  }), [exportAsImage, addText, updateTextStyle, resetSelectedTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts]);
 
   return (
     <div 
