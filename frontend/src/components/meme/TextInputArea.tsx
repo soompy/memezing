@@ -45,25 +45,10 @@ const TextInputArea: React.FC<TextInputAreaProps> = ({
   return (
     <div className={`text-input-area ${className}`}>
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold flex items-center">
-            <Type size={20} className="mr-2" />
-            텍스트 입력
-          </h3>
-        </div>
-        
-        {/* 버튼 그룹 */}
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleResetText}
-            className="flex items-center text-gray-600 hover:text-red-600 hover:border-red-300"
-          >
-            <RotateCcw size={16} className="mr-1" />
-            초기화
-          </Button>
-        </div>
+        <h3 className="text-lg font-semibold flex items-center mb-3">
+          <Type size={20} className="mr-2" />
+          텍스트 입력
+        </h3>
       </div>
 
       <div className="space-y-3">
