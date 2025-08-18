@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users, Sparkles, LogIn, User } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users, Sparkles, LogIn, User, Coins } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
@@ -16,9 +16,12 @@ import ResizablePanel from '@/components/ui/ResizablePanel';
 import { AlertDialog, ConfirmDialog } from '@/components/ui/Modal';
 import { getRandomImageFromPool } from '@/utils/imagePool';
 import RecommendedMemesModal from '@/components/meme/RecommendedMemesModal';
+import MemeCoinSelector from '@/components/meme/MemeCoinSelector';
+import MemeCoinTextSuggestions from '@/components/meme/MemeCoinTextSuggestions';
+import { memeCoinTemplates } from '@/data/memeCoinTemplates';
 
-// 인기 밈 템플릿 - 가장 많이 사용되는 클래식 밈들
-const popularTemplates: MemeTemplate[] = [
+// 클래식 밈 템플릿 - 전통적으로 유명한 밈들
+const classicTemplates: MemeTemplate[] = [
   {
     id: 'drake',
     name: '드레이크 밈',
@@ -633,28 +636,8 @@ export default function MemeGeneratorPage() {
     router.push('/auth/signin');
   }, [router]);
 
-  // 템플릿 새로고침 함수들
-  const refreshTemplateImages = useCallback((templateArray: MemeTemplate[]) => {
-    return templateArray.map(template => ({
-      ...template,
-      url: getRandomImageFromPool(template.id)
-    }));
-  }, []);
-
-  const refreshPopularTemplates = useCallback(() => {
-    // 인기 템플릿 이미지 새로고침
-    const refreshed = refreshTemplateImages(popularTemplates);
-    // 실제로는 상태를 업데이트해야 하지만, 현재는 페이지 새로고침으로 대체
-    window.location.reload();
-  }, [refreshTemplateImages]);
-
-  const refreshAnimalTemplates = useCallback(() => {
-    // 동물 템플릿 이미지 새로고침
-    window.location.reload();
-  }, []);
-
-  const refreshKoreanTemplates = useCallback(() => {
-    // 한국 드라마 템플릿 이미지 새로고침
+  // 템플릿 새로고침 함수들 (현재는 페이지 리로드로 처리)
+  const refreshTemplates = useCallback(() => {
     window.location.reload();
   }, []);
 
@@ -680,6 +663,18 @@ export default function MemeGeneratorPage() {
     setShowRecommendationsModal(true);
     setIsWelcome(false); // 헤더에서 열 때는 웰컴 메시지 없음
   }, []);
+
+  // 선택된 템플릿이 밈코인인지 확인
+  const isMemeCoinTemplate = useCallback((template: MemeTemplate | null) => {
+    if (!template) return false;
+    return memeCoinTemplates.some(coin => coin.id === template.id);
+  }, []);
+
+  // 선택된 밈코인 정보 가져오기
+  const getSelectedMemeCoin = useCallback(() => {
+    if (!selectedTemplate) return null;
+    return memeCoinTemplates.find(coin => coin.id === selectedTemplate.id) || null;
+  }, [selectedTemplate]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -779,193 +774,289 @@ export default function MemeGeneratorPage() {
                       {/* 구분선 */}
                       <div className="border-t border-gray-200"></div>
 
-                      {/* 인기 템플릿 섹션 */}
+                      {/* 클래식 템플릿 섹션 */}
                       <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold">🔥 인기 템플릿</h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={refreshPopularTemplates}
-                            className="text-gray-500 hover:text-gray-700"
-                            title="새로운 이미지로 바꾸기"
-                          >
-                            <RefreshCw size={16} />
-                          </Button>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                          {popularTemplates.map((template) => (
-                            <button
-                              key={template.id}
-                              className={`
-                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                ${selectedTemplate?.id === template.id 
-                                  ? 'border-blue-500 ring-2 ring-blue-200' 
-                                  : 'border-gray-200 hover:border-gray-300'
-                                }
-                              `}
-                              onClick={() => {
-                                handleTemplateSelect(template);
-                                setIsSidebarOpen(false);
-                              }}
-                              disabled={isLoading}
-                            >
-                              <img
-                                src={template.url}
-                                alt={template.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                <p className="text-xs font-medium truncate">{template.name}</p>
-                              </div>
-                            </button>
-                          ))}
+                        <h3 className="text-lg font-semibold mb-4">🎭 클래식</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                          {classicTemplates.map((template) => {
+                            const isSelected = selectedTemplate?.id === template.id;
+                            
+                            return (
+                              <button
+                                key={template.id}
+                                onClick={() => {
+                                  handleTemplateSelect(template);
+                                  setIsSidebarOpen(false);
+                                }}
+                                disabled={isLoading}
+                                className={`
+                                  group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                  ${isSelected 
+                                    ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                  }
+                                  bg-white
+                                `}
+                              >
+                                {/* 템플릿 이미지 */}
+                                <div className="absolute inset-0 flex items-center justify-center p-4">
+                                  <img
+                                    src={template.url}
+                                    alt={template.name}
+                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                </div>
+
+                                {/* 선택 표시 */}
+                                {isSelected && (
+                                  <div className="absolute top-2 right-2">
+                                    <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* 템플릿 정보 */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                  <p className="text-xs font-bold truncate">{template.name}</p>
+                                </div>
+
+                                {/* 호버 효과 */}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                              </button>
+                            );
+                          })}
                         </div>
                         
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold">🐾 동물</h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={refreshAnimalTemplates}
-                            className="text-gray-500 hover:text-gray-700"
-                            title="새로운 이미지로 바꾸기"
-                          >
-                            <RefreshCw size={16} />
-                          </Button>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                          {animalTemplates.map((template) => (
-                            <button
-                              key={template.id}
-                              className={`
-                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                ${selectedTemplate?.id === template.id 
-                                  ? 'border-blue-500 ring-2 ring-blue-200' 
-                                  : 'border-gray-200 hover:border-gray-300'
-                                }
-                              `}
-                              onClick={() => {
-                                handleTemplateSelect(template);
-                                setIsSidebarOpen(false);
-                              }}
-                              disabled={isLoading}
-                            >
-                              <img
-                                src={template.url}
-                                alt={template.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                <p className="text-xs font-medium truncate">{template.name}</p>
-                              </div>
-                            </button>
-                          ))}
+                        <h3 className="text-lg font-semibold mb-4">🐾 동물</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                          {animalTemplates.map((template) => {
+                            const isSelected = selectedTemplate?.id === template.id;
+                            
+                            return (
+                              <button
+                                key={template.id}
+                                onClick={() => {
+                                  handleTemplateSelect(template);
+                                  setIsSidebarOpen(false);
+                                }}
+                                disabled={isLoading}
+                                className={`
+                                  group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                  ${isSelected 
+                                    ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                  }
+                                  bg-white
+                                `}
+                              >
+                                {/* 템플릿 이미지 */}
+                                <div className="absolute inset-0 flex items-center justify-center p-4">
+                                  <img
+                                    src={template.url}
+                                    alt={template.name}
+                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                </div>
+
+                                {/* 선택 표시 */}
+                                {isSelected && (
+                                  <div className="absolute top-2 right-2">
+                                    <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* 템플릿 정보 */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                  <p className="text-xs font-bold truncate">{template.name}</p>
+                                </div>
+
+                                {/* 호버 효과 */}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                              </button>
+                            );
+                          })}
                         </div>
                         
                         <h3 className="text-lg font-semibold mb-4">🔥 트렌드</h3>
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                          {trendingTemplates.map((template) => (
-                            <button
-                              key={template.id}
-                              className={`
-                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                ${selectedTemplate?.id === template.id 
-                                  ? 'border-blue-500 ring-2 ring-blue-200' 
-                                  : 'border-gray-200 hover:border-gray-300'
-                                }
-                              `}
-                              onClick={() => {
-                                handleTemplateSelect(template);
-                                setIsSidebarOpen(false);
-                              }}
-                              disabled={isLoading}
-                            >
-                              <img
-                                src={template.url}
-                                alt={template.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                <p className="text-xs font-medium truncate">{template.name}</p>
-                              </div>
-                            </button>
-                          ))}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                          {trendingTemplates.map((template) => {
+                            const isSelected = selectedTemplate?.id === template.id;
+                            
+                            return (
+                              <button
+                                key={template.id}
+                                onClick={() => {
+                                  handleTemplateSelect(template);
+                                  setIsSidebarOpen(false);
+                                }}
+                                disabled={isLoading}
+                                className={`
+                                  group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                  ${isSelected 
+                                    ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                  }
+                                  bg-white
+                                `}
+                              >
+                                {/* 템플릿 이미지 */}
+                                <div className="absolute inset-0 flex items-center justify-center p-4">
+                                  <img
+                                    src={template.url}
+                                    alt={template.name}
+                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                </div>
+
+                                {/* 선택 표시 */}
+                                {isSelected && (
+                                  <div className="absolute top-2 right-2">
+                                    <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* 템플릿 정보 */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                  <p className="text-xs font-bold truncate">{template.name}</p>
+                                  <div className="absolute top-2 left-2">
+                                    <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                                      HOT
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* 호버 효과 */}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                              </button>
+                            );
+                          })}
                         </div>
                         
                         <h3 className="text-lg font-semibold mb-4">😭 감정 표현</h3>
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                          {emotionTemplates.map((template) => (
-                            <button
-                              key={template.id}
-                              className={`
-                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                ${selectedTemplate?.id === template.id 
-                                  ? 'border-blue-500 ring-2 ring-blue-200' 
-                                  : 'border-gray-200 hover:border-gray-300'
-                                }
-                              `}
-                              onClick={() => {
-                                handleTemplateSelect(template);
-                                setIsSidebarOpen(false);
-                              }}
-                              disabled={isLoading}
-                            >
-                              <img
-                                src={template.url}
-                                alt={template.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                <p className="text-xs font-medium truncate">{template.name}</p>
-                              </div>
-                            </button>
-                          ))}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                          {emotionTemplates.map((template) => {
+                            const isSelected = selectedTemplate?.id === template.id;
+                            
+                            return (
+                              <button
+                                key={template.id}
+                                onClick={() => {
+                                  handleTemplateSelect(template);
+                                  setIsSidebarOpen(false);
+                                }}
+                                disabled={isLoading}
+                                className={`
+                                  group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                  ${isSelected 
+                                    ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                  }
+                                  bg-white
+                                `}
+                              >
+                                {/* 템플릿 이미지 */}
+                                <div className="absolute inset-0 flex items-center justify-center p-4">
+                                  <img
+                                    src={template.url}
+                                    alt={template.name}
+                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                </div>
+
+                                {/* 선택 표시 */}
+                                {isSelected && (
+                                  <div className="absolute top-2 right-2">
+                                    <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* 템플릿 정보 */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                  <p className="text-xs font-bold truncate">{template.name}</p>
+                                </div>
+
+                                {/* 호버 효과 */}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                              </button>
+                            );
+                          })}
                         </div>
                         
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold">🎬 한국 드라마 스타일</h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={refreshKoreanTemplates}
-                            className="text-gray-500 hover:text-gray-700"
-                            title="새로운 이미지로 바꾸기"
-                          >
-                            <RefreshCw size={16} />
-                          </Button>
+                        <h3 className="text-lg font-semibold mb-4">🎬 한국 드라마 스타일</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                          {koreanDramaTemplates.map((template) => {
+                            const isSelected = selectedTemplate?.id === template.id;
+                            
+                            return (
+                              <button
+                                key={template.id}
+                                onClick={() => {
+                                  handleTemplateSelect(template);
+                                  setIsSidebarOpen(false);
+                                }}
+                                disabled={isLoading}
+                                className={`
+                                  group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                  ${isSelected 
+                                    ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                    : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                  }
+                                  bg-white
+                                `}
+                              >
+                                {/* 템플릿 이미지 */}
+                                <div className="absolute inset-0 flex items-center justify-center p-4">
+                                  <img
+                                    src={template.url}
+                                    alt={template.name}
+                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                  />
+                                </div>
+
+                                {/* 선택 표시 */}
+                                {isSelected && (
+                                  <div className="absolute top-2 right-2">
+                                    <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* 템플릿 정보 */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                  <p className="text-xs font-bold truncate">{template.name}</p>
+                                </div>
+
+                                {/* 호버 효과 */}
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                              </button>
+                            );
+                          })}
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
-                          {koreanDramaTemplates.map((template) => (
-                            <button
-                              key={template.id}
-                              className={`
-                                relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                ${selectedTemplate?.id === template.id 
-                                  ? 'border-blue-500 ring-2 ring-blue-200' 
-                                  : 'border-gray-200 hover:border-gray-300'
-                                }
-                              `}
-                              onClick={() => {
-                                handleTemplateSelect(template);
-                                setIsSidebarOpen(false);
-                              }}
-                              disabled={isLoading}
-                            >
-                              <img
-                                src={template.url}
-                                alt={template.name}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                <p className="text-xs font-medium truncate">{template.name}</p>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
+
+                        {/* 밈코인 템플릿 섹션 */}
+                        <h3 className="text-lg font-semibold mb-4">🪙 밈코인</h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          인기 밈코인들로 밈을 만들어보세요! 암호화폐 커뮤니티에서 인기 있는 템플릿들입니다.
+                        </p>
+                        <MemeCoinSelector
+                          onCoinSelect={(template) => {
+                            handleTemplateSelect(template);
+                            setIsSidebarOpen(false);
+                          }}
+                          selectedCoin={selectedTemplate}
+                        />
                       </div>
                     </div>
                   )}
+
                   
                   {activeTab === 'text' && (
                     <div className="space-y-6">
@@ -975,6 +1066,21 @@ export default function MemeGeneratorPage() {
                           onTextAdd={handleAddText}
                         />
                       </div>
+
+                      {/* 밈코인 텍스트 제안 (밈코인 템플릿이 선택되었을 때만 표시) */}
+                      {isMemeCoinTemplate(selectedTemplate) && getSelectedMemeCoin() && (
+                        <>
+                          <div className="border-t border-gray-200"></div>
+                          <div>
+                            <h3 className="text-lg font-semibold mb-4">🪙 밈코인 텍스트 제안</h3>
+                            <MemeCoinTextSuggestions
+                              coinId={getSelectedMemeCoin()!.id}
+                              coinName={getSelectedMemeCoin()!.name}
+                              onTextSelect={handleAddText}
+                            />
+                          </div>
+                        </>
+                      )}
 
                       {/* 구분선 */}
                       <div className="border-t border-gray-200"></div>
@@ -1080,145 +1186,243 @@ export default function MemeGeneratorPage() {
                         {/* 구분선 */}
                         <div className="border-t border-gray-200"></div>
 
-                        {/* 인기 템플릿 섹션 */}
+                        {/* 클래식 템플릿 섹션 */}
                         <div>
-                          <h3 className="text-lg font-semibold mb-4">인기 템플릿</h3>
-                          <div className="grid grid-cols-2 gap-3 mb-6">
-                            {popularTemplates.map((template) => (
-                              <button
-                                key={template.id}
-                                className={`
-                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                  ${selectedTemplate?.id === template.id 
-                                    ? 'border-blue-500 ring-2 ring-blue-200' 
-                                    : 'border-gray-200 hover:border-gray-300'
-                                  }
-                                `}
-                                onClick={() => handleTemplateSelect(template)}
-                                disabled={isLoading}
-                              >
-                                <img
-                                  src={template.url}
-                                  alt={template.name}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                  <p className="text-xs font-medium truncate">{template.name}</p>
-                                </div>
-                              </button>
-                            ))}
+                          <h3 className="text-lg font-semibold mb-4">🎭 클래식</h3>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                            {classicTemplates.map((template) => {
+                              const isSelected = selectedTemplate?.id === template.id;
+                              
+                              return (
+                                <button
+                                  key={template.id}
+                                  onClick={() => handleTemplateSelect(template)}
+                                  disabled={isLoading}
+                                  className={`
+                                    group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                    ${isSelected 
+                                      ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                    }
+                                    bg-white
+                                  `}
+                                >
+                                  {/* 템플릿 이미지 */}
+                                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                                    <img
+                                      src={template.url}
+                                      alt={template.name}
+                                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                  </div>
+
+                                  {/* 선택 표시 */}
+                                  {isSelected && (
+                                    <div className="absolute top-2 right-2">
+                                      <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* 템플릿 정보 */}
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                    <p className="text-xs font-bold truncate">{template.name}</p>
+                                  </div>
+
+                                  {/* 호버 효과 */}
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                                </button>
+                              );
+                            })}
                           </div>
                           
                           <h3 className="text-lg font-semibold mb-4">🐾 동물</h3>
-                          <div className="grid grid-cols-2 gap-3 mb-6">
-                            {animalTemplates.map((template) => (
-                              <button
-                                key={template.id}
-                                className={`
-                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                  ${selectedTemplate?.id === template.id 
-                                    ? 'border-blue-500 ring-2 ring-blue-200' 
-                                    : 'border-gray-200 hover:border-gray-300'
-                                  }
-                                `}
-                                onClick={() => handleTemplateSelect(template)}
-                                disabled={isLoading}
-                              >
-                                <img
-                                  src={template.url}
-                                  alt={template.name}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                  <p className="text-xs font-medium truncate">{template.name}</p>
-                                </div>
-                              </button>
-                            ))}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                            {animalTemplates.map((template) => {
+                              const isSelected = selectedTemplate?.id === template.id;
+                              
+                              return (
+                                <button
+                                  key={template.id}
+                                  onClick={() => handleTemplateSelect(template)}
+                                  disabled={isLoading}
+                                  className={`
+                                    group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                    ${isSelected 
+                                      ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                    }
+                                    bg-white
+                                  `}
+                                >
+                                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                                    <img
+                                      src={template.url}
+                                      alt={template.name}
+                                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                  </div>
+                                  {isSelected && (
+                                    <div className="absolute top-2 right-2">
+                                      <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                    <p className="text-xs font-bold truncate">{template.name}</p>
+                                  </div>
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                                </button>
+                              );
+                            })}
                           </div>
                           
                           <h3 className="text-lg font-semibold mb-4">🔥 트렌드</h3>
-                          <div className="grid grid-cols-2 gap-3 mb-6">
-                            {trendingTemplates.map((template) => (
-                              <button
-                                key={template.id}
-                                className={`
-                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                  ${selectedTemplate?.id === template.id 
-                                    ? 'border-blue-500 ring-2 ring-blue-200' 
-                                    : 'border-gray-200 hover:border-gray-300'
-                                  }
-                                `}
-                                onClick={() => handleTemplateSelect(template)}
-                                disabled={isLoading}
-                              >
-                                <img
-                                  src={template.url}
-                                  alt={template.name}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                  <p className="text-xs font-medium truncate">{template.name}</p>
-                                </div>
-                              </button>
-                            ))}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                            {trendingTemplates.map((template) => {
+                              const isSelected = selectedTemplate?.id === template.id;
+                              
+                              return (
+                                <button
+                                  key={template.id}
+                                  onClick={() => handleTemplateSelect(template)}
+                                  disabled={isLoading}
+                                  className={`
+                                    group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                    ${isSelected 
+                                      ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                    }
+                                    bg-white
+                                  `}
+                                >
+                                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                                    <img
+                                      src={template.url}
+                                      alt={template.name}
+                                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                  </div>
+                                  {isSelected && (
+                                    <div className="absolute top-2 right-2">
+                                      <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                    <p className="text-xs font-bold truncate">{template.name}</p>
+                                    <div className="absolute top-2 left-2">
+                                      <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                                        HOT
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                                </button>
+                              );
+                            })}
                           </div>
                           
                           <h3 className="text-lg font-semibold mb-4">😭 감정 표현</h3>
-                          <div className="grid grid-cols-2 gap-3 mb-6">
-                            {emotionTemplates.map((template) => (
-                              <button
-                                key={template.id}
-                                className={`
-                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                  ${selectedTemplate?.id === template.id 
-                                    ? 'border-blue-500 ring-2 ring-blue-200' 
-                                    : 'border-gray-200 hover:border-gray-300'
-                                  }
-                                `}
-                                onClick={() => handleTemplateSelect(template)}
-                                disabled={isLoading}
-                              >
-                                <img
-                                  src={template.url}
-                                  alt={template.name}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                  <p className="text-xs font-medium truncate">{template.name}</p>
-                                </div>
-                              </button>
-                            ))}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                            {emotionTemplates.map((template) => {
+                              const isSelected = selectedTemplate?.id === template.id;
+                              
+                              return (
+                                <button
+                                  key={template.id}
+                                  onClick={() => handleTemplateSelect(template)}
+                                  disabled={isLoading}
+                                  className={`
+                                    group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                    ${isSelected 
+                                      ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                    }
+                                    bg-white
+                                  `}
+                                >
+                                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                                    <img
+                                      src={template.url}
+                                      alt={template.name}
+                                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                  </div>
+                                  {isSelected && (
+                                    <div className="absolute top-2 right-2">
+                                      <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                    <p className="text-xs font-bold truncate">{template.name}</p>
+                                  </div>
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                                </button>
+                              );
+                            })}
                           </div>
                           
                           <h3 className="text-lg font-semibold mb-4">🎬 한국 드라마 스타일</h3>
-                          <div className="grid grid-cols-2 gap-3">
-                            {koreanDramaTemplates.map((template) => (
-                              <button
-                                key={template.id}
-                                className={`
-                                  relative aspect-square rounded-lg overflow-hidden border-2 transition-all
-                                  ${selectedTemplate?.id === template.id 
-                                    ? 'border-blue-500 ring-2 ring-blue-200' 
-                                    : 'border-gray-200 hover:border-gray-300'
-                                  }
-                                `}
-                                onClick={() => handleTemplateSelect(template)}
-                                disabled={isLoading}
-                              >
-                                <img
-                                  src={template.url}
-                                  alt={template.name}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-2">
-                                  <p className="text-xs font-medium truncate">{template.name}</p>
-                                </div>
-                              </button>
-                            ))}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                            {koreanDramaTemplates.map((template) => {
+                              const isSelected = selectedTemplate?.id === template.id;
+                              
+                              return (
+                                <button
+                                  key={template.id}
+                                  onClick={() => handleTemplateSelect(template)}
+                                  disabled={isLoading}
+                                  className={`
+                                    group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
+                                    ${isSelected 
+                                      ? 'border-primary-500 ring-2 ring-primary-200 scale-105 shadow-lg' 
+                                      : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:scale-102'
+                                    }
+                                    bg-white
+                                  `}
+                                >
+                                  <div className="absolute inset-0 flex items-center justify-center p-4">
+                                    <img
+                                      src={template.url}
+                                      alt={template.name}
+                                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                                    />
+                                  </div>
+                                  {isSelected && (
+                                    <div className="absolute top-2 right-2">
+                                      <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
+                                    <p className="text-xs font-bold truncate">{template.name}</p>
+                                  </div>
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                                </button>
+                              );
+                            })}
                           </div>
+
+                          {/* 밈코인 템플릿 섹션 */}
+                          <h3 className="text-lg font-semibold mb-4">🪙 밈코인</h3>
+                          <p className="text-sm text-gray-600 mb-4">
+                            인기 밈코인들로 밈을 만들어보세요! 암호화폐 커뮤니티에서 인기 있는 템플릿들입니다.
+                          </p>
+                          <MemeCoinSelector
+                            onCoinSelect={handleTemplateSelect}
+                            selectedCoin={selectedTemplate}
+                          />
                         </div>
                       </div>
                     )}
+
                     
                     {activeTab === 'text' && (
                       <div className="space-y-6">
@@ -1228,6 +1432,21 @@ export default function MemeGeneratorPage() {
                             onTextAdd={handleAddText}
                           />
                         </div>
+
+                        {/* 밈코인 텍스트 제안 (밈코인 템플릿이 선택되었을 때만 표시) */}
+                        {isMemeCoinTemplate(selectedTemplate) && getSelectedMemeCoin() && (
+                          <>
+                            <div className="border-t border-gray-200"></div>
+                            <div>
+                              <h3 className="text-lg font-semibold mb-4">🪙 밈코인 텍스트 제안</h3>
+                              <MemeCoinTextSuggestions
+                                coinId={getSelectedMemeCoin()!.id}
+                                coinName={getSelectedMemeCoin()!.name}
+                                onTextSelect={handleAddText}
+                              />
+                            </div>
+                          </>
+                        )}
 
                         {/* 구분선 */}
                         <div className="border-t border-gray-200"></div>
