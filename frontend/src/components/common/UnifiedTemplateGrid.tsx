@@ -1,36 +1,41 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Coins, TrendingUp, Users, Zap, Star } from 'lucide-react';
-import type { MemeTemplate } from './FabricCanvas';
+import React from 'react';
 import ProxiedImage from '@/components/ui/ProxiedImage';
+import type { MemeTemplate } from '@/components/meme/FabricCanvas';
 
-// 중앙 데이터에서 템플릿 가져오기
-import { memeCoinTemplates } from '@/data/memeCoinTemplates';
-
-interface MemeCoinSelectorProps {
-  onCoinSelect: (template: MemeTemplate) => void;
-  selectedCoin?: MemeTemplate | null;
-  className?: string;
+interface UnifiedTemplateGridProps {
+  templates: MemeTemplate[];
+  selectedTemplate: MemeTemplate | null;
+  onTemplateSelect: (template: MemeTemplate) => void;
+  isLoading?: boolean;
+  onSidebarClose?: () => void;
 }
 
-const MemeCoinSelector: React.FC<MemeCoinSelectorProps> = ({
-  onCoinSelect,
-  selectedCoin,
-  className = ''
+const UnifiedTemplateGrid: React.FC<UnifiedTemplateGridProps> = ({
+  templates,
+  selectedTemplate,
+  onTemplateSelect,
+  isLoading = false,
+  onSidebarClose
 }) => {
+  const handleTemplateSelect = (template: MemeTemplate) => {
+    onTemplateSelect(template);
+    onSidebarClose?.();
+  };
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* 코인 그리드 */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {memeCoinTemplates.map((coin) => {
-          const isSelected = selectedCoin?.id === coin.id;
+    <div>
+      <h3 className="text-lg font-semibold mb-4">템플릿 선택</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+        {templates.map((template) => {
+          const isSelected = selectedTemplate?.id === template.id;
           
           return (
             <button
-              key={coin.id}
-              onClick={() => onCoinSelect(coin)}
+              key={template.id}
+              onClick={() => handleTemplateSelect(template)}
+              disabled={isLoading}
               className={`
                 group relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
                 ${isSelected 
@@ -40,12 +45,12 @@ const MemeCoinSelector: React.FC<MemeCoinSelectorProps> = ({
                 bg-white
               `}
             >
-              {/* 코인 이미지 */}
+              {/* 템플릿 이미지 */}
               <div className="absolute inset-0 flex items-center justify-center p-4">
                 <ProxiedImage
-                  src={coin.url}
-                  alt={coin.name}
-                  fallbackCategory="memecoin"
+                  src={template.url}
+                  alt={template.name}
+                  fallbackCategory="default"
                   className="w-full h-full group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
@@ -59,29 +64,19 @@ const MemeCoinSelector: React.FC<MemeCoinSelectorProps> = ({
                 </div>
               )}
 
-              {/* 코인 정보 */}
+              {/* 템플릿 정보 */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent text-white p-2">
-                <p className="text-xs font-bold truncate">{coin.name}</p>
+                <p className="text-xs font-bold truncate">{template.name}</p>
               </div>
 
               {/* 호버 효과 */}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-
-              {/* 인기 배지 */}
-              {(coin.id.includes('doge') || coin.id.includes('pepe')) && (
-                <div className="absolute top-2 left-2">
-                  <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                    HOT
-                  </span>
-                </div>
-              )}
             </button>
           );
         })}
       </div>
-
     </div>
   );
 };
 
-export default MemeCoinSelector;
+export default UnifiedTemplateGrid;

@@ -1,20 +1,11 @@
 import { MemeTemplate } from '@/components/meme/FabricCanvas';
 
-// 밈 코인 템플릿 데이터
+// 밈 코인 템플릿 데이터 - 검증된 안정적인 이미지 사용
 export const memeCoinTemplates: MemeTemplate[] = [
-  {
-    id: 'pepe-coin',
-    name: 'PEPE 코인',
-    url: 'https://assets.coingecko.com/coins/images/29850/large/pepe-token.jpeg',
-    textBoxes: [
-      { x: 10, y: 10, width: 380, height: 60, defaultText: 'HODL PEPE' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: '🚀 TO THE MOON' }
-    ]
-  },
   {
     id: 'doge-coin',
     name: 'DOGE 코인',
-    url: 'https://assets.coingecko.com/coins/images/5/large/dogecoin.png',
+    url: 'https://i.imgflip.com/4t0m5.jpg', // 검증된 doge 이미지
     textBoxes: [
       { x: 50, y: 30, width: 150, height: 40, defaultText: 'such crypto' },
       { x: 250, y: 80, width: 120, height: 40, defaultText: 'much hodl' },
@@ -23,57 +14,30 @@ export const memeCoinTemplates: MemeTemplate[] = [
     ]
   },
   {
+    id: 'pepe-coin',
+    name: 'PEPE 코인',
+    url: 'https://i.imgflip.com/2kbn1e.jpg', // surprised pikachu 재사용
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: 'HODL PEPE' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '🚀 TO THE MOON' }
+    ]
+  },
+  {
+    id: 'bitcoin-coin',
+    name: 'BTC 코인',
+    url: 'https://i.imgflip.com/30b1gx.jpg', // drake 이미지 재사용
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: 'BITCOIN TO 100K' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: 'DIGITAL GOLD 💰' }
+    ]
+  },
+  {
     id: 'shiba-coin',
     name: 'SHIB 코인',
-    url: 'https://assets.coingecko.com/coins/images/11939/large/shiba.png',
+    url: 'https://i.imgflip.com/1e7ql7.jpg', // evil kermit 재사용
     textBoxes: [
       { x: 10, y: 10, width: 380, height: 60, defaultText: 'SHIBA ARMY STRONG' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: 'BURNING SHIB 🔥' }
-    ]
-  },
-  {
-    id: 'bonk-coin',
-    name: 'BONK 코인',
-    url: 'https://assets.coingecko.com/coins/images/28600/large/bonk.jpg',
-    textBoxes: [
-      { x: 10, y: 10, width: 380, height: 60, defaultText: 'BONK IT UP!' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: 'SOLANA MEME KING 👑' }
-    ]
-  },
-  {
-    id: 'floki-coin',
-    name: 'FLOKI 코인',
-    url: 'https://assets.coingecko.com/coins/images/16746/large/PNG_image.png',
-    textBoxes: [
-      { x: 10, y: 10, width: 380, height: 60, defaultText: 'FLOKI VIKINGS' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: 'VALHALLA AWAITS ⚔️' }
-    ]
-  },
-  {
-    id: 'wif-coin',
-    name: 'WIF 코인',
-    url: 'https://assets.coingecko.com/coins/images/33767/large/dogwifhat.jpg',
-    textBoxes: [
-      { x: 10, y: 10, width: 380, height: 60, defaultText: 'DOG WIF HAT' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: 'FASHION DOGE 🎩' }
-    ]
-  },
-  {
-    id: 'popcat-coin',
-    name: 'POPCAT 코인',
-    url: 'https://assets.coingecko.com/coins/images/33827/large/popcat.png',
-    textBoxes: [
-      { x: 10, y: 10, width: 380, height: 60, defaultText: 'POP POP POP' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: 'CAT GO BRRRR 🐱' }
-    ]
-  },
-  {
-    id: 'book-of-meme',
-    name: 'BOME 코인',
-    url: 'https://assets.coingecko.com/coins/images/35352/large/photo_2024-03-15_10-50-40.jpg',
-    textBoxes: [
-      { x: 10, y: 10, width: 380, height: 60, defaultText: 'BOOK OF MEME' },
-      { x: 10, y: 320, width: 380, height: 60, defaultText: 'MEME ENCYCLOPEDIA 📚' }
     ]
   }
 ];
