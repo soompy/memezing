@@ -125,6 +125,25 @@ export const validatedKoreanDramaTemplates: MemeTemplate[] = [
       { x: 10, y: 20, width: 380, height: 60, defaultText: '괜찮다고 했는데' },
       { x: 10, y: 320, width: 380, height: 60, defaultText: '괜찮지 않아...' }
     ]
+  },
+  {
+    id: 'korean-thinking',
+    name: '생각하는 사람',
+    url: 'https://i.imgflip.com/1g7q4.jpg',
+    textBoxes: [
+      { x: 10, y: 10, width: 380, height: 60, defaultText: '이것도 해야 하고' },
+      { x: 10, y: 320, width: 380, height: 60, defaultText: '저것도 해야 하고...' }
+    ]
+  },
+  {
+    id: 'korean-workplace',
+    name: '직장인 고충',
+    url: 'https://i.imgflip.com/1ur9b0.jpg', // distracted boyfriend 재사용
+    textBoxes: [
+      { x: 50, y: 50, width: 150, height: 40, defaultText: '야근' },
+      { x: 250, y: 100, width: 120, height: 40, defaultText: '나' },
+      { x: 400, y: 80, width: 120, height: 40, defaultText: '퇴근' }
+    ]
   }
 ];
 

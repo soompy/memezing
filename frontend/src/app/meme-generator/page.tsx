@@ -18,7 +18,7 @@ import { getRandomImageFromPool } from '@/utils/imagePool';
 import RecommendedMemesModal from '@/components/meme/RecommendedMemesModal';
 import MemeCoinTextSuggestions from '@/components/meme/MemeCoinTextSuggestions';
 import { memeCoinTemplates } from '@/data/memeCoinTemplates';
-import { popularTemplates } from '@/data/popularTemplates';
+import { useTemplates } from '@/hooks/useTemplates';
 import UnifiedTemplateGrid from '@/components/common/UnifiedTemplateGrid';
 
 export default function MemeGeneratorPage() {
@@ -43,6 +43,18 @@ export default function MemeGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(null);
+  
+  // 새로운 템플릿 시스템 사용
+  const {
+    templates: availableTemplates,
+    isLoading: templatesLoading,
+    error: templatesError,
+    loadRandomTemplates,
+    refreshTemplates: refreshAllTemplates,
+  } = useTemplates({
+    autoLoad: false, // 수동으로 로드
+    fallbackToCurated: true,
+  });
   
   // 추천 밈 모달 관련 상태
   const [showRecommendationsModal, setShowRecommendationsModal] = useState(false);
@@ -70,6 +82,16 @@ export default function MemeGeneratorPage() {
       }
     }
   }, []);
+
+  // 템플릿 초기 로드
+  useEffect(() => {
+    loadRandomTemplates(20); // 랜덤 20개 템플릿 로드
+  }, [loadRandomTemplates]);
+
+  // 템플릿 새로고침 함수
+  const refreshTemplates = useCallback(async () => {
+    await loadRandomTemplates(20);
+  }, [loadRandomTemplates]);
   
   // 모달 상태들
   const [alertModal, setAlertModal] = useState<{
@@ -384,10 +406,6 @@ export default function MemeGeneratorPage() {
     router.push('/auth/signin');
   }, [router]);
 
-  // 템플릿 새로고침 함수들 (현재는 페이지 리로드로 처리)
-  const refreshTemplates = useCallback(() => {
-    window.location.reload();
-  }, []);
 
   // 추천 밈 템플릿 선택 핸들러
   const handleRecommendedTemplateSelect = useCallback((template: any) => {
@@ -522,13 +540,15 @@ export default function MemeGeneratorPage() {
                       {/* 구분선 */}
                       <div className="border-t border-gray-200"></div>
 
-                      {/* 인기 템플릿 그리드 (20개 선별) */}
+                      {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
                       <UnifiedTemplateGrid
-                        templates={popularTemplates}
+                        templates={availableTemplates}
                         selectedTemplate={selectedTemplate}
                         onTemplateSelect={handleTemplateSelect}
-                        isLoading={isLoading}
+                        isLoading={isLoading || templatesLoading}
                         onSidebarClose={() => setIsSidebarOpen(false)}
+                        onRefreshTemplates={refreshTemplates}
+                        error={templatesError}
                       />
                     </div>
                   )}
@@ -662,12 +682,14 @@ export default function MemeGeneratorPage() {
                         {/* 구분선 */}
                         <div className="border-t border-gray-200"></div>
 
-                        {/* 인기 템플릿 그리드 (20개 선별) */}
+                        {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
                         <UnifiedTemplateGrid
-                          templates={popularTemplates}
+                          templates={availableTemplates}
                           selectedTemplate={selectedTemplate}
                           onTemplateSelect={handleTemplateSelect}
-                          isLoading={isLoading}
+                          isLoading={isLoading || templatesLoading}
+                          onRefreshTemplates={refreshTemplates}
+                          error={templatesError}
                         />
                       </div>
                     )}

@@ -27,6 +27,11 @@ export interface MemeTemplate {
     height: number;
     defaultText: string;
   }[];
+  source?: string; // 템플릿 출처 ('curated', 'imgflip', 'memecoin', etc.)
+  width?: number; // 원본 이미지 너비
+  height?: number; // 원본 이미지 높이
+  popularity?: number; // 인기도 점수
+  tags?: string[]; // 태그 목록
 }
 
 export interface FabricCanvasRef {
