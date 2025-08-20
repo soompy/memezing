@@ -227,31 +227,52 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
 
-      // 최대 크기 제한
-      const maxWidth = Math.min(containerWidth - 32, width); // 여백 32px
-      const maxHeight = Math.min(containerHeight - 32, height);
+      // 여백을 고려한 최대 사용 가능 공간 계산
+      const padding = 64; // 패딩 32px씩 양쪽
+      const availableWidth = Math.max(containerWidth - padding, 200); // 최소 200px
+      const availableHeight = Math.max(containerHeight - padding, 150); // 최소 150px
 
-      // 비율 계산
-      const scaleX = maxWidth / width;
-      const scaleY = maxHeight / height;
-      const newScale = Math.min(scaleX, scaleY, 1); // 1을 넘지 않도록
+      // 캔버스 원본 비율 유지하면서 컨테이너에 맞게 스케일 계산
+      const scaleX = availableWidth / width;
+      const scaleY = availableHeight / height;
+      const newScale = Math.min(scaleX, scaleY, 1); // 1을 넘지 않도록 (확대하지 않음)
 
-      const newWidth = width * newScale;
-      const newHeight = height * newScale;
+      const scaledWidth = Math.floor(width * newScale);
+      const scaledHeight = Math.floor(height * newScale);
 
-      setCanvasSize({ width: newWidth, height: newHeight });
+      setCanvasSize({ width: scaledWidth, height: scaledHeight });
       setScale(newScale);
 
-      // Fabric.js 캔버스 크기 업데이트
+      // Fabric.js 캔버스 크기 설정 (실제 크기)
       fabricCanvasRef.current.setDimensions({ 
-        width: newWidth, 
-        height: newHeight 
+        width: width, 
+        height: height 
       });
 
-      // CSS 스타일도 업데이트
-      if (canvasRef.current) {
-        canvasRef.current.style.width = `${newWidth}px`;
-        canvasRef.current.style.height = `${newHeight}px`;
+      // 캔버스 컨테이너와 모든 캔버스 엘리먼트에 동일한 스타일 적용
+      const canvasContainer = fabricCanvasRef.current.getElement().parentElement;
+      if (canvasContainer) {
+        // 컨테이너 스타일 설정
+        canvasContainer.style.width = `${scaledWidth}px`;
+        canvasContainer.style.height = `${scaledHeight}px`;
+        canvasContainer.style.position = 'relative';
+        
+        // 모든 캔버스 엘리먼트에 동일한 스타일 적용
+        const canvasElements = canvasContainer.querySelectorAll('canvas');
+        canvasElements.forEach((canvas, index) => {
+          canvas.style.width = `${scaledWidth}px`;
+          canvas.style.height = `${scaledHeight}px`;
+          canvas.style.maxWidth = 'none';
+          canvas.style.maxHeight = 'none';
+          canvas.style.display = 'block';
+          
+          // 하위 캔버스(배경)에만 테두리와 그림자 적용
+          if (index === 0) {
+            canvas.style.border = '1px solid #e5e7eb';
+            canvas.style.borderRadius = '8px';
+            canvas.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+          }
+        });
       }
 
       fabricCanvasRef.current.renderAll();
@@ -265,14 +286,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     return () => window.removeEventListener('resize', handleResize);
   }, [width, height]);
 
-  // 크기 변경 시 캔버스 크기 업데이트 (외부 props 변경 시)
-  useEffect(() => {
-    if (fabricCanvasRef.current && (width !== canvasSize.width || height !== canvasSize.height)) {
-      fabricCanvasRef.current.setDimensions({ width, height });
-      setCanvasSize({ width, height });
-      fabricCanvasRef.current.renderAll();
-    }
-  }, [width, height, canvasSize.width, canvasSize.height]);
+  // props가 변경되면 초기화 useEffect의 dependency에 의해 자동으로 handleResize가 호출됨
 
   // 이미지를 캔버스에 추가하는 함수
   const addImageFromUrl = useCallback(async (url: string): Promise<void> => {
@@ -681,13 +695,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
       const scaleX = newWidth / currentWidth;
       const scaleY = newHeight / currentHeight;
 
-      // 캔버스 크기 변경
-      fabricCanvasRef.current.setDimensions(
-        { width: newWidth, height: newHeight },
-        { cssOnly: false, backstoreOnly: false }
-      );
-
-      // 모든 객체들의 크기와 위치를 비례적으로 조정
+      // 모든 객체들의 크기와 위치를 비례적으로 조정 (캔버스 크기 변경 전에)
       const objects = fabricCanvasRef.current.getObjects();
       objects.forEach(obj => {
         if (obj.left !== undefined && obj.top !== undefined) {
@@ -705,9 +713,56 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
         }
       });
 
-      // 캔버스 상태 업데이트
-      setCanvasSize({ width: newWidth, height: newHeight });
-      fabricCanvasRef.current.renderAll?.() || fabricCanvasRef.current.requestRenderAll?.();
+      // 캔버스 실제 크기 변경
+      fabricCanvasRef.current.setDimensions(
+        { width: newWidth, height: newHeight },
+        { cssOnly: false, backstoreOnly: false }
+      );
+
+      // 즉시 반응형 크기 조정 로직 실행
+      if (containerRef.current) {
+        const container = containerRef.current;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        
+        const padding = 64;
+        const availableWidth = Math.max(containerWidth - padding, 200);
+        const availableHeight = Math.max(containerHeight - padding, 150);
+        
+        const scaleXResp = availableWidth / newWidth;
+        const scaleYResp = availableHeight / newHeight;
+        const newScale = Math.min(scaleXResp, scaleYResp, 1);
+        
+        const scaledWidth = Math.floor(newWidth * newScale);
+        const scaledHeight = Math.floor(newHeight * newScale);
+        
+        setCanvasSize({ width: scaledWidth, height: scaledHeight });
+        setScale(newScale);
+        
+        // 캔버스 표시 크기 조정
+        const canvasContainer = fabricCanvasRef.current.getElement().parentElement;
+        if (canvasContainer) {
+          canvasContainer.style.width = `${scaledWidth}px`;
+          canvasContainer.style.height = `${scaledHeight}px`;
+          
+          const canvasElements = canvasContainer.querySelectorAll('canvas');
+          canvasElements.forEach((canvas, index) => {
+            canvas.style.width = `${scaledWidth}px`;
+            canvas.style.height = `${scaledHeight}px`;
+            canvas.style.maxWidth = 'none';
+            canvas.style.maxHeight = 'none';
+            
+            // 하위 캔버스(배경)에만 테두리와 그림자 적용
+            if (index === 0) {
+              canvas.style.border = '1px solid #e5e7eb';
+              canvas.style.borderRadius = '8px';
+              canvas.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+            }
+          });
+        }
+      }
+
+      fabricCanvasRef.current.renderAll();
       saveCanvasState();
     } catch (error) {
       console.error('Error setting canvas size:', error);
@@ -824,11 +879,14 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
   return (
     <div 
       ref={containerRef}
-      className={`fabric-canvas-container w-full h-full flex items-center justify-center ${className}`}
+      className={`fabric-canvas-container w-full h-full flex items-center justify-center p-4 ${className}`}
+      style={{ minHeight: 0, overflow: 'hidden' }}
     >
       <canvas 
         ref={canvasRef}
-        className="border border-gray-200 rounded-lg shadow-lg max-w-full max-h-full"
+        style={{ 
+          display: 'block'
+        }}
       />
     </div>
   );

@@ -679,7 +679,7 @@ export default function MemeGeneratorPage() {
             )}
 
             {/* 모바일 캔버스 영역 */}
-            <div className="flex-1 flex items-center justify-center p-4 bg-gray-100">
+            <div className="flex-1 flex items-center justify-center bg-gray-100">
               <div className="w-full h-full max-w-4xl relative">
                 {isLoading && (
                   <div className="text-center mb-4">
@@ -695,7 +695,7 @@ export default function MemeGeneratorPage() {
                   width={canvasSize.width}
                   height={canvasSize.height}
                   onSelectionChange={setSelectedObject}
-                  className="w-full h-full"
+                  className=""
                 />
 
                 <CanvasOverlay
@@ -845,7 +845,7 @@ export default function MemeGeneratorPage() {
             rightPanel={
               <div className="flex flex-col h-full">
                 {/* 캔버스 컨테이너 */}
-                <div className="flex-1 flex items-center justify-center p-4 md:p-8 bg-gray-100 min-h-0">
+                <div className="flex-1 flex items-center justify-center bg-gray-100 min-h-0">
                   <div className="w-full h-full max-w-4xl relative">
                     {isLoading && (
                       <div className="text-center mb-4">
@@ -861,7 +861,7 @@ export default function MemeGeneratorPage() {
                       width={canvasSize.width}
                       height={canvasSize.height}
                       onSelectionChange={setSelectedObject}
-                      className="w-full h-full"
+                      className=""
                     />
 
                     {/* 캔버스 오버레이 */}
