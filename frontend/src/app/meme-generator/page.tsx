@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowLeft, Download, RefreshCw, Type, Image as ImageIcon, X, AlertTriangle, Users, Sparkles, LogIn, User, Coins } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Edit, Image as ImageIcon, X, AlertTriangle, Users, Sparkles, LogIn, User, Coins } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
@@ -20,6 +20,8 @@ import MemeCoinTextSuggestions from '@/components/meme/MemeCoinTextSuggestions';
 import { memeCoinTemplates } from '@/data/memeCoinTemplates';
 import { useTemplates } from '@/hooks/useTemplates';
 import UnifiedTemplateGrid from '@/components/common/UnifiedTemplateGrid';
+import CanvasSizeControls, { CanvasSize, PRESET_CANVAS_SIZES } from '@/components/meme/CanvasSizeControls';
+import BackgroundColorControls from '@/components/meme/BackgroundColorControls';
 
 export default function MemeGeneratorPage() {
   const router = useRouter();
@@ -43,6 +45,10 @@ export default function MemeGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(null);
+  
+  // 캔버스 사이즈 및 배경색 상태
+  const [canvasSize, setCanvasSize] = useState<CanvasSize>(PRESET_CANVAS_SIZES[0]); // 기본 사이즈
+  const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff'); // 기본 배경색
   
   // 새로운 템플릿 시스템 사용
   const {
@@ -391,9 +397,35 @@ export default function MemeGeneratorPage() {
     };
   }, []);
 
+  // 캔버스 사이즈 변경 핸들러
+  const handleCanvasSizeChange = useCallback((newSize: CanvasSize) => {
+    if (!canvasRef.current) return;
+    
+    try {
+      canvasRef.current.changeCanvasSize(newSize.width, newSize.height);
+      setCanvasSize(newSize);
+    } catch (error) {
+      console.error('Failed to change canvas size:', error);
+      showAlert('크기 변경 실패', '캔버스 크기 변경에 실패했습니다. 다시 시도해주세요.', 'danger');
+    }
+  }, [showAlert]);
+
+  // 배경색 변경 핸들러
+  const handleBackgroundColorChange = useCallback((color: string) => {
+    if (!canvasRef.current) return;
+    
+    try {
+      canvasRef.current.setBackgroundColor(color);
+      setBackgroundColor(color);
+    } catch (error) {
+      console.error('Failed to change background color:', error);
+      showAlert('배경색 변경 실패', '배경색 변경에 실패했습니다. 다시 시도해주세요.', 'danger');
+    }
+  }, [showAlert]);
+
   const tabs = [
     { key: 'images', label: '이미지 선택', icon: ImageIcon },
-    { key: 'text', label: '텍스트', icon: Type }
+    { key: 'text', label: '편집', icon: Edit }
   ];
 
   // 커뮤니티 페이지 이동
@@ -556,6 +588,38 @@ export default function MemeGeneratorPage() {
                   
                   {activeTab === 'text' && (
                     <div className="space-y-6">
+                      {/* 캔버스 스타일 섹션 */}
+                      <div>
+                        <div className="mb-4">
+                          <h3 className="text-lg font-semibold flex items-center mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2" aria-hidden="true">
+                              <rect width="18" height="18" x="3" y="3" rx="2"/>
+                              <path d="M9 9h6v6H9z"/>
+                            </svg>
+                            캔버스 스타일
+                          </h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          {/* 캔버스 크기 조절 */}
+                          <CanvasSizeControls
+                            currentSize={canvasSize}
+                            onSizeChange={handleCanvasSizeChange}
+                            disabled={isLoading}
+                          />
+
+                          {/* 배경색 설정 */}
+                          <BackgroundColorControls
+                            currentColor={backgroundColor}
+                            onColorChange={handleBackgroundColorChange}
+                            disabled={isLoading}
+                          />
+                        </div>
+                      </div>
+
+                      {/* 구분선 */}
+                      <div className="border-t border-gray-200"></div>
+
                       {/* 글귀 입력 섹션 */}
                       <div>
                         <TextInputArea
@@ -628,8 +692,8 @@ export default function MemeGeneratorPage() {
                 
                 <FabricCanvas
                   ref={canvasRef}
-                  width={800}
-                  height={600}
+                  width={canvasSize.width}
+                  height={canvasSize.height}
                   onSelectionChange={setSelectedObject}
                   className="w-full h-full"
                 />
@@ -697,6 +761,38 @@ export default function MemeGeneratorPage() {
                     
                     {activeTab === 'text' && (
                       <div className="space-y-6">
+                        {/* 캔버스 스타일 섹션 */}
+                        <div>
+                          <div className="mb-4">
+                            <h3 className="text-lg font-semibold flex items-center mb-3">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2" aria-hidden="true">
+                                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                                <path d="M9 9h6v6H9z"/>
+                              </svg>
+                              캔버스 스타일
+                            </h3>
+                          </div>
+                          
+                          <div className="space-y-4">
+                            {/* 캔버스 크기 조절 */}
+                            <CanvasSizeControls
+                              currentSize={canvasSize}
+                              onSizeChange={handleCanvasSizeChange}
+                              disabled={isLoading}
+                            />
+
+                            {/* 배경색 설정 */}
+                            <BackgroundColorControls
+                              currentColor={backgroundColor}
+                              onColorChange={handleBackgroundColorChange}
+                              disabled={isLoading}
+                            />
+                          </div>
+                        </div>
+
+                        {/* 구분선 */}
+                        <div className="border-t border-gray-200"></div>
+
                         {/* 글귀 입력 섹션 */}
                         <div>
                           <TextInputArea
@@ -762,8 +858,8 @@ export default function MemeGeneratorPage() {
                     
                     <FabricCanvas
                       ref={canvasRef}
-                      width={800}
-                      height={600}
+                      width={canvasSize.width}
+                      height={canvasSize.height}
                       onSelectionChange={setSelectedObject}
                       className="w-full h-full"
                     />

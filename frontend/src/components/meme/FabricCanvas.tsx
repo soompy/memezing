@@ -51,6 +51,10 @@ export interface FabricCanvasRef {
   getCanvas: () => fabric.Canvas | null;
   getCanvasContainer: () => HTMLDivElement | null;
   getAllTexts: () => string[];
+  changeCanvasSize: (width: number, height: number) => void;
+  setBackgroundColor: (color: string) => void;
+  getCanvasSize: () => { width: number; height: number };
+  getBackgroundColor: () => string;
 }
 
 interface FabricCanvasProps {
@@ -665,6 +669,133 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     return texts;
   }, []);
 
+  // 캔버스 사이즈 변경
+  const changeCanvasSize = useCallback((newWidth: number, newHeight: number) => {
+    if (!fabricCanvasRef.current) return;
+
+    try {
+      // 기존 객체들의 위치 비율 계산
+      const currentWidth = fabricCanvasRef.current.width || 800;
+      const currentHeight = fabricCanvasRef.current.height || 600;
+      const scaleX = newWidth / currentWidth;
+      const scaleY = newHeight / currentHeight;
+
+      // 캔버스 크기 변경
+      fabricCanvasRef.current.setDimensions(
+        { width: newWidth, height: newHeight },
+        { cssOnly: false, backstoreOnly: false }
+      );
+
+      // 모든 객체들의 크기와 위치를 비례적으로 조정
+      const objects = fabricCanvasRef.current.getObjects();
+      objects.forEach(obj => {
+        if (obj.left !== undefined && obj.top !== undefined) {
+          const scaleFactorX = obj.scaleX || 1;
+          const scaleFactorY = obj.scaleY || 1;
+          
+          obj.set({
+            left: obj.left * scaleX,
+            top: obj.top * scaleY,
+            scaleX: scaleFactorX * Math.min(scaleX, scaleY), // 비례 유지
+            scaleY: scaleFactorY * Math.min(scaleX, scaleY),
+          });
+          
+          obj.setCoords?.();
+        }
+      });
+
+      // 캔버스 상태 업데이트
+      setCanvasSize({ width: newWidth, height: newHeight });
+      fabricCanvasRef.current.renderAll?.() || fabricCanvasRef.current.requestRenderAll?.();
+      saveCanvasState();
+    } catch (error) {
+      console.error('Error setting canvas size:', error);
+    }
+  }, [saveCanvasState]);
+
+  // 배경색 변경
+  const setBackgroundColor = useCallback((color: string) => {
+    if (!fabricCanvasRef.current) return;
+
+    try {
+      // 그라데이션 처리
+      if (color.startsWith('gradient-')) {
+        const gradientMap: Record<string, string> = {
+          'gradient-blue-purple': 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+          'gradient-pink-red': 'linear-gradient(45deg, #f093fb 0%, #f5576c 100%)',
+          'gradient-blue-cyan': 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)',
+          'gradient-green-cyan': 'linear-gradient(45deg, #43e97b 0%, #38f9d7 100%)',
+          'gradient-pink-yellow': 'linear-gradient(45deg, #fa709a 0%, #fee140 100%)',
+          'gradient-mint-pink': 'linear-gradient(45deg, #a8edea 0%, #fed6e3 100%)',
+        };
+
+        const gradientCSS = gradientMap[color];
+        if (gradientCSS && typeof fabric.Gradient !== 'undefined') {
+          // CSS 그라데이션을 Fabric.js 그라데이션으로 변환
+          const canvasWidth = fabricCanvasRef.current.width || 800;
+          const canvasHeight = fabricCanvasRef.current.height || 600;
+          
+          const gradient = new fabric.Gradient({
+            type: 'linear',
+            coords: { x1: 0, y1: 0, x2: canvasWidth, y2: canvasHeight },
+            colorStops: [
+              { offset: 0, color: extractGradientColors(gradientCSS)[0] },
+              { offset: 1, color: extractGradientColors(gradientCSS)[1] }
+            ]
+          });
+          
+          fabricCanvasRef.current.backgroundColor = gradient;
+          fabricCanvasRef.current.renderAll?.() || fabricCanvasRef.current.requestRenderAll?.();
+        }
+      } else {
+        // 단색 배경
+        fabricCanvasRef.current.backgroundColor = color;
+        fabricCanvasRef.current.renderAll?.() || fabricCanvasRef.current.requestRenderAll?.();
+      }
+
+      saveCanvasState();
+    } catch (error) {
+      console.error('Error setting background color:', error);
+    }
+  }, [saveCanvasState]);
+
+  // 그라데이션에서 색상 추출 (간단한 파싱)
+  const extractGradientColors = (gradientCSS: string): [string, string] => {
+    const matches = gradientCSS.match(/#[a-fA-F0-9]{6}/g);
+    return matches && matches.length >= 2 ? [matches[0], matches[1]] : ['#ffffff', '#000000'];
+  };
+
+  // 현재 캔버스 사이즈 반환
+  const getCanvasSize = useCallback(() => {
+    try {
+      return {
+        width: fabricCanvasRef.current?.width || canvasSize.width,
+        height: fabricCanvasRef.current?.height || canvasSize.height
+      };
+    } catch (error) {
+      console.error('Error getting canvas size:', error);
+      return canvasSize;
+    }
+  }, [canvasSize]);
+
+  // 현재 배경색 반환
+  const getBackgroundColor = useCallback(() => {
+    try {
+      if (!fabricCanvasRef.current) return '#ffffff';
+      
+      const bgColor = fabricCanvasRef.current.backgroundColor;
+      if (typeof bgColor === 'string') {
+        return bgColor;
+      }
+      
+      // 그라데이션인 경우 기본값 반환
+      return '#ffffff';
+    } catch (error) {
+      console.error('Error getting background color:', error);
+      return '#ffffff';
+    }
+  }, []);
+
   // ref 메서드들 노출
   useImperativeHandle(ref, () => ({
     exportAsImage,
@@ -682,8 +813,12 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     redo,
     getCanvas,
     getCanvasContainer,
-    getAllTexts
-  }), [exportAsImage, addText, updateTextStyle, resetSelectedTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts]);
+    getAllTexts,
+    changeCanvasSize,
+    setBackgroundColor,
+    getCanvasSize,
+    getBackgroundColor
+  }), [exportAsImage, addText, updateTextStyle, resetSelectedTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts, changeCanvasSize, setBackgroundColor, getCanvasSize, getBackgroundColor]);
 
   return (
     <div 
