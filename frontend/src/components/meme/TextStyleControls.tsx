@@ -313,7 +313,7 @@ export default function TextStyleControls({ style, onChange, onPreviewChange, on
             onChange={(value) => updateStyle({ strokeWidth: value })}
             label="테두리 두께"
             unit="px"
-            variant="secondary"
+            variant="primary"
             showValueOnHover
           />
         </div>

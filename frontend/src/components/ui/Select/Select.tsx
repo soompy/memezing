@@ -8,6 +8,8 @@ export interface SelectOption {
   value: string;
   label: string;
   category?: string;
+  colorPreview?: string;
+  gradientPreview?: string;
 }
 
 export interface SelectGroup {
@@ -147,7 +149,22 @@ export default function Select({
               >
                 <div className={styles.optionContent}>
                   <div className={styles.optionInfo}>
-                    <span className={styles.optionLabel}>{option.label}</span>
+                    <div className="flex items-center gap-2">
+                      {/* 색상 미리보기 */}
+                      {option.colorPreview && (
+                        <div
+                          className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+                          style={{ backgroundColor: option.colorPreview }}
+                        />
+                      )}
+                      {option.gradientPreview && (
+                        <div
+                          className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+                          style={{ background: option.gradientPreview }}
+                        />
+                      )}
+                      <span className={styles.optionLabel}>{option.label}</span>
+                    </div>
                     <span className={styles.optionPreview}>
                       가나다 ABC 123
                     </span>
@@ -172,7 +189,22 @@ export default function Select({
         >
           <div className={styles.optionContent}>
             <div className={styles.optionInfo}>
-              <span className={styles.optionLabel}>{option.label}</span>
+              <div className="flex items-center gap-2">
+                {/* 색상 미리보기 */}
+                {option.colorPreview && (
+                  <div
+                    className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+                    style={{ backgroundColor: option.colorPreview }}
+                  />
+                )}
+                {option.gradientPreview && (
+                  <div
+                    className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+                    style={{ background: option.gradientPreview }}
+                  />
+                )}
+                <span className={styles.optionLabel}>{option.label}</span>
+              </div>
               <span className={styles.optionPreview}>
                 가나다 ABC 123
               </span>
@@ -205,9 +237,23 @@ export default function Select({
           className={getTriggerClasses()}
         >
           <div className={styles.triggerContent}>
-            <span className={`${styles.triggerText} ${!selectedOption ? styles.placeholder : ''}`}>
-              {selectedOption ? selectedOption.label : placeholder}
-            </span>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {selectedOption?.colorPreview && (
+                <div
+                  className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+                  style={{ backgroundColor: selectedOption.colorPreview }}
+                />
+              )}
+              {selectedOption?.gradientPreview && (
+                <div
+                  className="w-4 h-4 rounded border border-gray-300 flex-shrink-0"
+                  style={{ background: selectedOption.gradientPreview }}
+                />
+              )}
+              <span className={`${styles.triggerText} ${!selectedOption ? styles.placeholder : ''}`}>
+                {selectedOption ? selectedOption.label : placeholder}
+              </span>
+            </div>
             <ChevronDown 
               className={`${styles.chevron} ${isOpen ? styles.open : ''}`}
             />

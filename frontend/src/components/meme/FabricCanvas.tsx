@@ -152,13 +152,13 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     }
   }, []);
 
-  // Fabric.js 캔버스 초기화
+  // Fabric.js 캔버스 초기화 (한 번만 실행)
   useEffect(() => {
     if (!canvasRef.current || fabricCanvasRef.current) return;
 
     const canvas = new fabric.Canvas(canvasRef.current, {
-      width: canvasSize.width,
-      height: canvasSize.height,
+      width: width,
+      height: height,
       backgroundColor: '#ffffff',
       preserveObjectStacking: true
     });
@@ -216,7 +216,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
       canvas.dispose();
       fabricCanvasRef.current = null;
     };
-  }, [canvasSize.width, canvasSize.height, onSelectionChange, onTextChange]);
+  }, [onSelectionChange, onTextChange, saveCanvasState]); // canvasSize 의존성 제거
 
   // 반응형 크기 조정
   useEffect(() => {
@@ -265,13 +265,14 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     return () => window.removeEventListener('resize', handleResize);
   }, [width, height]);
 
-  // 크기 변경 시 캔버스 크기 업데이트
+  // 크기 변경 시 캔버스 크기 업데이트 (외부 props 변경 시)
   useEffect(() => {
-    if (fabricCanvasRef.current) {
+    if (fabricCanvasRef.current && (width !== canvasSize.width || height !== canvasSize.height)) {
       fabricCanvasRef.current.setDimensions({ width, height });
+      setCanvasSize({ width, height });
       fabricCanvasRef.current.renderAll();
     }
-  }, [width, height]);
+  }, [width, height, canvasSize.width, canvasSize.height]);
 
   // 이미지를 캔버스에 추가하는 함수
   const addImageFromUrl = useCallback(async (url: string): Promise<void> => {

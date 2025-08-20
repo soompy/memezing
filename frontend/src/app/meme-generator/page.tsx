@@ -560,34 +560,6 @@ export default function MemeGeneratorPage() {
                 <div className="p-4">
                   {activeTab === 'images' && (
                     <div className="space-y-6">
-                      {/* 이미지 선택 섹션 */}
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4">이미지 선택</h3>
-                        <ImageSelectorTabs
-                          onImageSelect={handleImageUpload}
-                          onImageUrl={handleImageUrl}
-                        />
-                      </div>
-
-                      {/* 구분선 */}
-                      <div className="border-t border-gray-200"></div>
-
-                      {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
-                      <UnifiedTemplateGrid
-                        templates={availableTemplates}
-                        selectedTemplate={selectedTemplate}
-                        onTemplateSelect={handleTemplateSelect}
-                        isLoading={isLoading || templatesLoading}
-                        onSidebarClose={() => setIsSidebarOpen(false)}
-                        onRefreshTemplates={refreshTemplates}
-                        error={templatesError}
-                      />
-                    </div>
-                  )}
-
-                  
-                  {activeTab === 'text' && (
-                    <div className="space-y-6">
                       {/* 캔버스 스타일 섹션 */}
                       <div>
                         <div className="mb-4">
@@ -620,6 +592,34 @@ export default function MemeGeneratorPage() {
                       {/* 구분선 */}
                       <div className="border-t border-gray-200"></div>
 
+                      {/* 이미지 선택 섹션 */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4">이미지 선택</h3>
+                        <ImageSelectorTabs
+                          onImageSelect={handleImageUpload}
+                          onImageUrl={handleImageUrl}
+                        />
+                      </div>
+
+                      {/* 구분선 */}
+                      <div className="border-t border-gray-200"></div>
+
+                      {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
+                      <UnifiedTemplateGrid
+                        templates={availableTemplates}
+                        selectedTemplate={selectedTemplate}
+                        onTemplateSelect={handleTemplateSelect}
+                        isLoading={isLoading || templatesLoading}
+                        onSidebarClose={() => setIsSidebarOpen(false)}
+                        onRefreshTemplates={refreshTemplates}
+                        error={templatesError}
+                      />
+                    </div>
+                  )}
+
+                  
+                  {activeTab === 'text' && (
+                    <div className="space-y-6">
                       {/* 글귀 입력 섹션 */}
                       <div>
                         <TextInputArea
@@ -734,33 +734,6 @@ export default function MemeGeneratorPage() {
                   <div className="p-4">
                     {activeTab === 'images' && (
                       <div className="space-y-6">
-                        {/* 이미지 선택 섹션 */}
-                        <div>
-                          <h3 className="text-lg font-semibold mb-4">이미지 선택</h3>
-                          <ImageSelectorTabs
-                            onImageSelect={handleImageUpload}
-                            onImageUrl={handleImageUrl}
-                          />
-                        </div>
-
-                        {/* 구분선 */}
-                        <div className="border-t border-gray-200"></div>
-
-                        {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
-                        <UnifiedTemplateGrid
-                          templates={availableTemplates}
-                          selectedTemplate={selectedTemplate}
-                          onTemplateSelect={handleTemplateSelect}
-                          isLoading={isLoading || templatesLoading}
-                          onRefreshTemplates={refreshTemplates}
-                          error={templatesError}
-                        />
-                      </div>
-                    )}
-
-                    
-                    {activeTab === 'text' && (
-                      <div className="space-y-6">
                         {/* 캔버스 스타일 섹션 */}
                         <div>
                           <div className="mb-4">
@@ -793,6 +766,33 @@ export default function MemeGeneratorPage() {
                         {/* 구분선 */}
                         <div className="border-t border-gray-200"></div>
 
+                        {/* 이미지 선택 섹션 */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">이미지 선택</h3>
+                          <ImageSelectorTabs
+                            onImageSelect={handleImageUpload}
+                            onImageUrl={handleImageUrl}
+                          />
+                        </div>
+
+                        {/* 구분선 */}
+                        <div className="border-t border-gray-200"></div>
+
+                        {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
+                        <UnifiedTemplateGrid
+                          templates={availableTemplates}
+                          selectedTemplate={selectedTemplate}
+                          onTemplateSelect={handleTemplateSelect}
+                          isLoading={isLoading || templatesLoading}
+                          onRefreshTemplates={refreshTemplates}
+                          error={templatesError}
+                        />
+                      </div>
+                    )}
+
+                    
+                    {activeTab === 'text' && (
+                      <div className="space-y-6">
                         {/* 글귀 입력 섹션 */}
                         <div>
                           <TextInputArea
