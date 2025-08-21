@@ -328,7 +328,19 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
 
           canvas.add(fabricImg);
           canvas.sendObjectToBack(fabricImg);
+          
+          // 현재 배경색을 보존
+          const currentBgColor = canvas.backgroundColor;
+          
           canvas.renderAll();
+          
+          // 렌더링 후 배경색이 제대로 유지되는지 확인하고 재설정
+          setTimeout(() => {
+            if (canvas.backgroundColor !== currentBgColor) {
+              canvas.backgroundColor = currentBgColor;
+              canvas.renderAll();
+            }
+          }, 50);
           
           // 히스토리 저장
           setTimeout(saveCanvasState, 100);
@@ -370,7 +382,19 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
 
             canvas.add(fabricImg);
             canvas.sendObjectToBack(fabricImg);
+            
+            // 현재 배경색을 보존
+            const currentBgColor = canvas.backgroundColor;
+            
             canvas.renderAll();
+            
+            // 렌더링 후 배경색이 제대로 유지되는지 확인하고 재설정
+            setTimeout(() => {
+              if (canvas.backgroundColor !== currentBgColor) {
+                canvas.backgroundColor = currentBgColor;
+                canvas.renderAll();
+              }
+            }, 50);
             
             // 히스토리 저장
             setTimeout(saveCanvasState, 100);
@@ -516,9 +540,12 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
   const loadTemplate = useCallback(async (template: MemeTemplate): Promise<void> => {
     if (!fabricCanvasRef.current) return;
 
-    // 캔버스 클리어
+    // 현재 배경색 보존
+    const currentBgColor = fabricCanvasRef.current.backgroundColor || '#ffffff';
+    
+    // 캔버스 클리어 (배경색은 유지)
     fabricCanvasRef.current.clear();
-    fabricCanvasRef.current.backgroundColor = '#ffffff';
+    fabricCanvasRef.current.backgroundColor = currentBgColor;
     fabricCanvasRef.current.renderAll();
 
     try {

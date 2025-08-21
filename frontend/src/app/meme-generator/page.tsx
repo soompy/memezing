@@ -326,6 +326,7 @@ export default function MemeGeneratorPage() {
     
     canvasRef.current.clearCanvas();
     setSelectedTemplate(null);
+    setBackgroundColor('#ffffff'); // 배경색 상태도 초기화
   }, []);
 
   // 선택된 객체 삭제
