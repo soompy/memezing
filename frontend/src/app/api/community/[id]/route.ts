@@ -29,6 +29,9 @@ export async function GET(
           }
         },
         comments: {
+          where: {
+            parentId: null // 최상위 댓글만
+          },
           include: {
             user: {
               select: {
@@ -36,6 +39,21 @@ export async function GET(
                 name: true,
                 image: true,
                 isVerified: true
+              }
+            },
+            replies: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                    isVerified: true
+                  }
+                }
+              },
+              orderBy: {
+                createdAt: 'asc'
               }
             }
           },
@@ -107,11 +125,21 @@ export async function GET(
     const formattedComments = meme.comments.map(comment => ({
       id: comment.id,
       author: comment.user.name || '익명',
+      authorAvatar: comment.user.image,
       content: comment.content,
       createdAt: formatTimeAgo(comment.createdAt),
-      likes: 0, // TODO: 댓글 좋아요 기능 추가시
-      isLiked: false, // TODO: 댓글 좋아요 기능 추가시
-      user: comment.user
+      likes: comment.likesCount,
+      isLiked: false, // TODO: 댓글 좋아요 상태 확인
+      user: comment.user,
+      replies: comment.replies?.map(reply => ({
+        id: reply.id,
+        author: reply.user.name || '익명',
+        authorAvatar: reply.user.image,
+        content: reply.content,
+        createdAt: formatTimeAgo(reply.createdAt),
+        likes: reply.likesCount,
+        isLiked: false // TODO: 댓글 좋아요 상태 확인
+      })) || []
     }));
 
     return NextResponse.json({

@@ -151,7 +151,10 @@ export async function POST(request: NextRequest) {
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET ||
         process.env.CLOUDINARY_CLOUD_NAME === 'your-cloudinary-cloud-name' ||
         process.env.CLOUDINARY_API_KEY === 'your-cloudinary-api-key' ||
-        process.env.CLOUDINARY_API_SECRET === 'your-cloudinary-api-secret') {
+        process.env.CLOUDINARY_API_SECRET === 'your-cloudinary-api-secret' ||
+        process.env.CLOUDINARY_CLOUD_NAME === 'demo' ||
+        process.env.CLOUDINARY_API_KEY === 'placeholder-key' ||
+        process.env.CLOUDINARY_API_SECRET === 'placeholder-secret') {
       console.log('Cloudinary not configured, using placeholder URL');
       const placeholderUrl = `data:${imageFile.type};base64,${Buffer.from(await imageFile.arrayBuffer()).toString('base64')}`;
       

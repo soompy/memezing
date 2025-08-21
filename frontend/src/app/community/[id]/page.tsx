@@ -48,6 +48,53 @@ async function fetchMemeData(id: string): Promise<{ meme: MemePost; comments: Co
   }
 }
 
+// 댓글 목록을 가져오는 함수
+async function fetchComments(memeId: string): Promise<Comment[]> {
+  try {
+    const response = await fetch(`/api/memes/${memeId}/comments`);
+    const data = await response.json();
+    
+    if (data.success) {
+      return data.data.comments.map((comment: any) => ({
+        id: comment.id,
+        author: comment.user.name || '익명',
+        authorAvatar: comment.user.image,
+        content: comment.content,
+        createdAt: formatTimeAgo(new Date(comment.createdAt)),
+        likes: comment.likesCount,
+        isLiked: comment.isLikedByCurrentUser,
+        replies: comment.replies?.map((reply: any) => ({
+          id: reply.id,
+          author: reply.user.name || '익명',
+          authorAvatar: reply.user.image,
+          content: reply.content,
+          createdAt: formatTimeAgo(new Date(reply.createdAt)),
+          likes: reply.likesCount,
+          isLiked: reply.isLikedByCurrentUser
+        })) || []
+      }));
+    } else {
+      throw new Error(data.error || 'Failed to fetch comments');
+    }
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    return [];
+  }
+}
+
+// 시간 포맷팅 함수
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return '방금 전';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}분 전`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}시간 전`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}일 전`;
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)}개월 전`;
+  return `${Math.floor(diffInSeconds / 31536000)}년 전`;
+}
+
 export default function MemeDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -69,7 +116,9 @@ export default function MemeDetailPage() {
       
       if (data) {
         setMeme(data.meme);
-        setComments(data.comments);
+        // 댓글은 별도 API에서 가져오기
+        const commentsData = await fetchComments(params.id as string);
+        setComments(commentsData);
       }
       
       setLoading(false);
@@ -122,74 +171,94 @@ export default function MemeDetailPage() {
     document.body.removeChild(link);
   }, [meme]);
 
-  const handleCommentLike = useCallback((commentId: string) => {
-    setComments(prev => prev.map(comment => {
-      if (comment.id === commentId) {
-        return {
-          ...comment,
-          isLiked: !comment.isLiked,
-          likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1
-        };
+  const handleCommentLike = useCallback(async (commentId: string) => {
+    try {
+      const response = await fetch(`/api/comments/${commentId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 댓글 목록 새로고침
+        if (params?.id) {
+          const updatedComments = await fetchComments(params.id as string);
+          setComments(updatedComments);
+        }
+      } else {
+        throw new Error(data.error || '좋아요 처리에 실패했습니다.');
       }
-      // 대댓글 처리
-      if (comment.replies) {
-        return {
-          ...comment,
-          replies: comment.replies.map(reply => 
-            reply.id === commentId 
-              ? {
-                  ...reply,
-                  isLiked: !reply.isLiked,
-                  likes: reply.isLiked ? reply.likes - 1 : reply.likes + 1
-                }
-              : reply
-          )
-        };
+    } catch (error) {
+      console.error('Error liking comment:', error);
+    }
+  }, [params?.id]);
+
+  const handleAddComment = useCallback(async () => {
+    if (!newComment.trim() || !params?.id) return;
+
+    try {
+      const response = await fetch(`/api/memes/${params.id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newComment.trim()
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // 댓글 목록 새로고침
+        const updatedComments = await fetchComments(params.id as string);
+        setComments(updatedComments);
+        setNewComment('');
+        showSuccess(data.message || '댓글이 작성되었습니다.');
+      } else {
+        throw new Error(data.error || '댓글 작성에 실패했습니다.');
       }
-      return comment;
-    }));
-  }, []);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      showSuccess('댓글 작성 중 오류가 발생했습니다.');
+    }
+  }, [newComment, params?.id, showSuccess]);
 
-  const handleAddComment = useCallback(() => {
-    if (!newComment.trim()) return;
+  const handleAddReply = useCallback(async (parentId: string) => {
+    if (!replyContent.trim() || !params?.id) return;
 
-    const comment: Comment = {
-      id: Date.now().toString(),
-      author: '나',
-      content: newComment,
-      createdAt: '방금 전',
-      likes: 0,
-      isLiked: false
-    };
+    try {
+      const response = await fetch(`/api/memes/${params.id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: replyContent.trim(),
+          parentId: parentId
+        })
+      });
 
-    setComments(prev => [comment, ...prev]);
-    setNewComment('');
-  }, [newComment]);
+      const data = await response.json();
 
-  const handleAddReply = useCallback((parentId: string) => {
-    if (!replyContent.trim()) return;
-
-    const reply: Comment = {
-      id: `${parentId}-${Date.now()}`,
-      author: '나',
-      content: replyContent,
-      createdAt: '방금 전',
-      likes: 0,
-      isLiked: false
-    };
-
-    setComments(prev => prev.map(comment => 
-      comment.id === parentId
-        ? {
-            ...comment,
-            replies: [...(comment.replies || []), reply]
-          }
-        : comment
-    ));
-    
-    setReplyContent('');
-    setReplyTo(null);
-  }, [replyContent]);
+      if (data.success) {
+        // 댓글 목록 새로고침
+        const updatedComments = await fetchComments(params.id as string);
+        setComments(updatedComments);
+        setReplyContent('');
+        setReplyTo(null);
+        showSuccess(data.message || '답글이 작성되었습니다.');
+      } else {
+        throw new Error(data.error || '답글 작성에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error adding reply:', error);
+      showSuccess('답글 작성 중 오류가 발생했습니다.');
+    }
+  }, [replyContent, params?.id, showSuccess]);
 
   // 조회수 증가 (실제 구현에서는 API 호출)
   useEffect(() => {

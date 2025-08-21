@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
@@ -23,8 +23,6 @@ export default function CommunityUploadPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const tagInputRef = useRef<HTMLInputElement>(null);
-  const isAddingTagRef = useRef(false);
   const { showSuccess, showError } = useToastContext();
   
   const [form, setForm] = useState<UploadForm>({
@@ -39,6 +37,7 @@ export default function CommunityUploadPage() {
   const [tagInput, setTagInput] = useState('');
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isAddingTag, setIsAddingTag] = useState(false);
 
   // 뒤로가기
   const handleBack = useCallback(() => {
@@ -87,48 +86,55 @@ export default function CommunityUploadPage() {
     }
   }, []);
 
-  // 태그 추가
-  const handleAddTag = useCallback(() => {
-    // 중복 실행 방지
-    if (isAddingTagRef.current) {
-      console.log('Tag adding already in progress, skipping');
-      return;
-    }
-
-    const tag = tagInput.trim();
-    console.log('handleAddTag called with:', tag, 'existing tags:', form.tags);
+  // 디바운싱된 태그 추가 함수
+  const handleAddTag = useMemo(() => {
+    let timeoutId: NodeJS.Timeout | null = null;
     
-    if (tag && !form.tags.includes(tag) && form.tags.length < 5) {
-      isAddingTagRef.current = true;
-      console.log('Adding tag:', tag);
-      
-      // 상태와 DOM 입력값 모두 즉시 클리어
-      setTagInput('');
-      if (tagInputRef.current) {
-        tagInputRef.current.value = '';
+    return () => {
+      // 이미 실행 중이면 무시
+      if (isAddingTag) {
+        return;
       }
       
-      setForm(prev => {
-        const newTags = [...prev.tags, tag];
-        console.log('New tags array:', newTags);
-        return {
-          ...prev,
-          tags: newTags
-        };
-      });
+      // 기존 타이머가 있으면 취소
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       
-      // 다음 렌더링 사이클 후 플래그 리셋
-      setTimeout(() => {
-        isAddingTagRef.current = false;
-      }, 0);
-    } else {
-      console.log('Tag not added. Reasons:', {
-        emptyTag: !tag,
-        duplicate: form.tags.includes(tag),
-        tooManyTags: form.tags.length >= 5
-      });
-    }
-  }, [tagInput, form.tags]);
+      // 50ms 디바운싱
+      timeoutId = setTimeout(() => {
+        const tag = tagInput.trim();
+        
+        // 빈 태그나 중복 태그, 최대 개수 초과 체크
+        if (!tag || form.tags.includes(tag) || form.tags.length >= 5) {
+          return;
+        }
+        
+        // 한글, 영문, 숫자만 허용 (공백, 특수문자 제외)
+        if (!/^[가-힣a-zA-Z0-9]+$/.test(tag)) {
+          showError('태그는 한글, 영문, 숫자만 입력 가능합니다.');
+          return;
+        }
+        
+        // 중복 실행 방지 플래그 설정
+        setIsAddingTag(true);
+        
+        // 태그 추가
+        setForm(prev => ({
+          ...prev,
+          tags: [...prev.tags, tag]
+        }));
+        
+        // 입력 필드 초기화
+        setTagInput('');
+        
+        // 플래그 해제
+        setTimeout(() => {
+          setIsAddingTag(false);
+        }, 200);
+      }, 50);
+    };
+  }, [tagInput, form.tags, showError, isAddingTag]);
 
   // 태그 제거
   const handleRemoveTag = useCallback((tagToRemove: string) => {
@@ -361,28 +367,40 @@ export default function CommunityUploadPage() {
             <div className="space-y-3">
               <div className="flex space-x-2">
                 <input
-                  ref={tagInputRef}
                   type="text"
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={(e) => {
+                    // 태그 추가 중이면 키 입력 무시
+                    if (isAddingTag) {
+                      e.preventDefault();
+                      return;
+                    }
+                    
                     if (e.key === 'Enter') {
                       e.preventDefault();
                       e.stopPropagation();
                       handleAddTag();
                     }
+                    // 스페이스바, 쉼표로도 태그 추가 가능
+                    else if (e.key === ' ' || e.key === ',' || e.key === 'Tab') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleAddTag();
+                    }
                   }}
-                  placeholder="태그를 입력하세요"
+                  disabled={isAddingTag}
+                  placeholder="태그를 입력하세요 (Enter, Space, 쉼표로 추가)"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   maxLength={20}
                 />
                 <Button
                   type="button"
                   onClick={handleAddTag}
-                  disabled={!tagInput.trim() || form.tags.length >= 5}
+                  disabled={!tagInput.trim() || form.tags.length >= 5 || isAddingTag}
                   size="sm"
                 >
-                  추가
+                  {isAddingTag ? '추가 중...' : '추가'}
                 </Button>
               </div>
               
