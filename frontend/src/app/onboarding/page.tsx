@@ -130,7 +130,7 @@ export default function Onboarding() {
                   <div 
                     className="absolute inset-0 rounded-full animate-ping opacity-50"
                     style={{
-                      background: 'linear-gradient(to right, #FF6B47, #4ECDC4)'
+                      background: 'linear-gradient(to right, #9069eb, #6de0d8)'
                     }}
                   ></div>
                 )}

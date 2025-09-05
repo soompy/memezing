@@ -78,15 +78,15 @@ const flicker = keyframes`
 const pulseRing = keyframes`
   0% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 107, 71, 0.7);
+    box-shadow: 0 0 0 0 rgba(144, 105, 235, 0.7);
   }
   70% {
     transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(255, 107, 71, 0);
+    box-shadow: 0 0 0 10px rgba(144, 105, 235, 0);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 107, 71, 0);
+    box-shadow: 0 0 0 0 rgba(144, 105, 235, 0);
   }
 `;
 

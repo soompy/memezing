@@ -80,12 +80,12 @@ const HiddenInput = styled.input`
   
   &:checked + label {
     background: linear-gradient(135deg, 
-      rgba(255, 107, 71, 0.08) 0%, 
-      rgba(255, 107, 71, 0.12) 100%
+      rgba(144, 105, 235, 0.08) 0%, 
+      rgba(144, 105, 235, 0.12) 100%
     );
     border-color: var(--brand-primary);
     border-width: 2px;
-    box-shadow: 0 0 0 3px rgba(255, 107, 71, 0.1);
+    box-shadow: 0 0 0 3px rgba(144, 105, 235, 0.1);
     
     ${CheckIndicator} {
       background: var(--brand-primary);
@@ -125,8 +125,8 @@ const RadioLabel = styled.label<{ variant: string }>`
   min-height: ${({ variant }) => variant === 'card' ? '80px' : '60px'};
   
   &:hover {
-    border-color: var(--brand-primary, #ff6b47);
-    background: rgba(255, 107, 71, 0.02);
+    border-color: var(--brand-primary, #9069eb);
+    background: rgba(144, 105, 235, 0.02);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
@@ -139,7 +139,7 @@ const RadioLabel = styled.label<{ variant: string }>`
     right: 0;
     bottom: 0;
     border-radius: inherit;
-    background: linear-gradient(135deg, transparent 0%, rgba(255, 107, 71, 0.03) 100%);
+    background: linear-gradient(135deg, transparent 0%, rgba(144, 105, 235, 0.03) 100%);
     opacity: 0;
     transition: opacity 200ms ease;
   }

@@ -20,11 +20,11 @@ export default function Hero() {
       {/* 배경 데코레이션 - sticky */}
       <div className="fixed inset-0 overflow-hidden -z-10"
            style={{ 
-             background: 'linear-gradient(135deg, #FFF5F3 0%, #ffffff 50%, #F0FDFC 100%)' 
+             background: 'linear-gradient(135deg, #f7f5ff 0%, #ffffff 50%, #f0fffe 100%)' 
            }}>
         <div 
           className="absolute -top-40 -right-32 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"
-          style={{ backgroundColor: '#87E8DF' }}
+          style={{ backgroundColor: '#5eead6' }}
         ></div>
         <div 
           className="absolute -bottom-40 -left-32 w-80 h-80 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"

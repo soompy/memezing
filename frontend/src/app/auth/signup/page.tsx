@@ -123,10 +123,13 @@ export default function SignUpPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="px-4 md:px-6 py-4">
           <div className="flex items-center space-x-4">
-            <Button variant="secondary" size="sm" onClick={handleBack}>
+            <button 
+              onClick={handleBack} 
+              className="flex items-center p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            >
               <ArrowLeft size={16} className="mr-2" />
               뒤로가기
-            </Button>
+            </button>
             <h1 className="text-gray-900 leading-tight" style={{fontFamily: "'Black Han Sans', sans-serif", fontSize: '1.7rem', fontWeight: 'light'}}>
               회원가입
             </h1>

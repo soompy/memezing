@@ -2,30 +2,30 @@
 export const brandColors = {
   // 메인 브랜드 컬러
   primary: {
-    50: '#FFF5F3',
-    100: '#FFE6E0',
-    200: '#FFD1C7',
-    300: '#FFB3A3',
-    400: '#FF8B6F',
-    500: '#FF6B47', // 메인 브랜드 컬러
-    600: '#FF4A1F',
-    700: '#E6330A',
-    800: '#B8260A',
-    900: '#8A1D08',
+    50: '#f7f5ff',
+    100: '#ede9fe',
+    200: '#ddd6fe',
+    300: '#c4b5fd',
+    400: '#a78bfa',
+    500: '#9069eb', // 메인 브랜드 컬러
+    600: '#7c3aed',
+    700: '#6d28d9',
+    800: '#5b21b6',
+    900: '#4c1d95',
   },
   
   // 보조 브랜드 컬러
   secondary: {
-    50: '#F0FDFC',
-    100: '#D9F9F6',
-    200: '#B8F2ED',
-    300: '#87E8DF',
-    400: '#4ECDC4', // 보조 브랜드 컬러
-    500: '#1F9B92',
-    600: '#1B7F78',
-    700: '#16635E',
-    800: '#124B47',
-    900: '#0F3633',
+    50: '#f0fffe',
+    100: '#ccfbf4',
+    200: '#99f6e9',
+    300: '#5eead6',
+    400: '#6de0d8', // 보조 브랜드 컬러
+    500: '#14b8a6',
+    600: '#0d9488',
+    700: '#0f766e',
+    800: '#115e59',
+    900: '#134e4a',
   },
   
   // 액센트 컬러
@@ -59,9 +59,9 @@ export const brandColors = {
   // 특수 용도 컬러
   special: {
     gradient: {
-      primary: 'linear-gradient(135deg, #FF6B47 0%, #4ECDC4 100%)',
+      primary: 'linear-gradient(135deg, #9069eb 0%, #6de0d8 100%)',
       secondary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      accent: 'linear-gradient(to right, #FFD93D, #FF6B47)',
+      accent: 'linear-gradient(to right, #FFD93D, #9069eb)',
       purple: 'linear-gradient(to bottom right, #581C87, #1E3A8A, #4C1D95)',
     },
     social: {

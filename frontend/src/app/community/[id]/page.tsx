@@ -273,10 +273,13 @@ export default function MemeDetailPage() {
       <header className="bg-white border-b border-gray-200 px-4 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button variant="secondary" size="sm" onClick={handleBack}>
-              <ArrowLeft size={16} className="mr-2" />
-              뒤로가기
-            </Button>
+            <button 
+              onClick={handleBack} 
+              title="뒤로가기"
+              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft size={16} />
+            </button>
             <h1 className="text-gray-900" style={{fontFamily: "'Black Han Sans', sans-serif", fontSize: '1.7rem', fontWeight: 'light'}}>
               밈징 커뮤니티
             </h1>
@@ -297,7 +300,12 @@ export default function MemeDetailPage() {
           <div className="flex items-center justify-center min-h-96">
             <div className="text-center">
               <p className="text-gray-600 mb-4">밈을 찾을 수 없습니다.</p>
-              <Button onClick={handleBack}>뒤로가기</Button>
+              <button 
+                onClick={handleBack} 
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              >
+                뒤로가기
+              </button>
             </div>
           </div>
         ) : (

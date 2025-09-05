@@ -245,9 +245,12 @@ function CommunityPageContent() {
         <div className="md:hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center space-x-3">
-              <Button variant="secondary" size="sm" onClick={handleBack} className="p-2">
+              <button 
+                onClick={handleBack} 
+                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
                 <ArrowLeft size={18} />
-              </Button>
+              </button>
               <h1 className="text-gray-900 text-lg" style={{fontFamily: "'Black Han Sans', sans-serif", fontSize: '1.5rem', fontWeight: 'light'}}>
                 밈징 커뮤니티
               </h1>
@@ -300,10 +303,13 @@ function CommunityPageContent() {
         <div className="hidden md:block px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="secondary" size="sm" onClick={handleBack}>
+              <button 
+                onClick={handleBack} 
+                className="flex items-center p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
                 <ArrowLeft size={16} className="mr-2" />
                 뒤로가기
-              </Button>
+              </button>
               <h1 className="text-gray-900 leading-tight" style={{fontFamily: "'Black Han Sans', sans-serif", fontSize: '1.7rem', fontWeight: 'light'}}>
                 밈징 커뮤니티
               </h1>

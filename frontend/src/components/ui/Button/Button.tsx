@@ -102,7 +102,7 @@ const StyledButton = styled.button<{ variant: string; size: string }>`
           color: white;
           
           &:hover:not(:disabled) {
-            background: #ff4a1f;
+            background: #7c3aed;
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
           }
@@ -170,7 +170,7 @@ const StyledButton = styled.button<{ variant: string; size: string }>`
           color: white;
           
           &:hover:not(:disabled) {
-            background: linear-gradient(135deg, #ff4a1f 0%, #3db8b8 100%);
+            background: linear-gradient(135deg, #7c3aed 0%, #3db8b8 100%);
             transform: translateY(-1px);
             box-shadow: var(--shadow-lg);
           }

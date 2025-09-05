@@ -237,10 +237,13 @@ export default function CommunityUploadPage() {
         <div className="px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="secondary" size="sm" onClick={handleBack}>
-                <ArrowLeft size={16} className="mr-2" />
-                뒤로가기
-              </Button>
+              <button 
+                onClick={handleBack} 
+                title="뒤로가기"
+                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft size={16} />
+              </button>
               <h1 className="text-gray-900 leading-tight" style={{fontFamily: "'Black Han Sans', sans-serif", fontSize: '1.7rem', fontWeight: 'light'}}>
                 밈 업로드
               </h1>
@@ -459,10 +462,10 @@ export default function CommunityUploadPage() {
           <div className="flex space-x-3 pt-4">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               size="lg"
               onClick={handleBack}
-              className="flex-1"
+              className="flex-1 bg-white text-gray-600 hover:text-gray-800"
               disabled={uploading}
             >
               취소

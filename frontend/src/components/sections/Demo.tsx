@@ -117,7 +117,7 @@ export default function Demo() {
                 }`}
                 style={{
                   background: currentStep === step.id 
-                    ? 'linear-gradient(to right, #FFF5F3, #F0FDFC)' 
+                    ? 'linear-gradient(to right, #f7f5ff, #f0fffe)' 
                     : '#F9FAFB',
                   borderColor: currentStep === step.id ? '#FFD1C7' : 'transparent'
                 }}
@@ -132,7 +132,7 @@ export default function Demo() {
                   }`}
                   style={{
                     background: currentStep === step.id 
-                      ? 'linear-gradient(to right, #FF6B47, #4ECDC4)' 
+                      ? 'linear-gradient(to right, #9069eb, #6de0d8)' 
                       : '#E5E7EB',
                     color: currentStep === step.id ? '#ffffff' : '#6B7280'
                   }}
@@ -150,7 +150,7 @@ export default function Demo() {
                   </p>
                   
                   {currentStep === step.id && (
-                    <div className="inline-flex items-center text-sm font-medium" style={{ color: '#FF6B47' }}>
+                    <div className="inline-flex items-center text-sm font-medium" style={{ color: '#9069eb' }}>
                       {step.action}
                       <ArrowRight className="ml-1 w-4 h-4" />
                     </div>
@@ -203,7 +203,7 @@ export default function Demo() {
                 <div className="space-y-4">
                   <div 
                     className="w-full h-32 rounded-lg flex items-center justify-center relative"
-                    style={{ background: 'linear-gradient(to right, #FFE6E0, #D9F9F6)' }}
+                    style={{ background: 'linear-gradient(to right, #ede9fe, #ccfbf4)' }}
                   >
                     <div className="absolute top-2 left-2 right-2 bg-white/90 rounded p-2 text-center text-sm font-bold">
                       상단 텍스트 입력...
@@ -224,7 +224,7 @@ export default function Demo() {
                 <div className="space-y-4">
                   <div 
                     className="w-full h-32 rounded-lg flex items-center justify-center relative"
-                    style={{ background: 'linear-gradient(to right, #FFF5F3, #F0FDFC)' }}
+                    style={{ background: 'linear-gradient(to right, #f7f5ff, #f0fffe)' }}
                   >
                     <div className="absolute top-2 left-2 right-2 bg-black/80 text-white rounded p-2 text-center text-sm font-bold">
                       나만의 스타일로!
@@ -320,7 +320,7 @@ export default function Demo() {
                     <div 
                       className="h-2 rounded-full transition-all duration-300"
                       style={{ 
-                        background: 'linear-gradient(to right, #FF6B47, #4ECDC4)',
+                        background: 'linear-gradient(to right, #9069eb, #6de0d8)',
                         width: template.usage
                       }}
                     ></div>

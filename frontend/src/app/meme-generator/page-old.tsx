@@ -1185,7 +1185,7 @@ export default function MemeGenerator() {
                       }`}
                       style={currentStep === step ? {
                         animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        boxShadow: '0 0 0 4px rgba(255, 107, 71, 0.3)'
+                        boxShadow: '0 0 0 4px rgba(144, 105, 235, 0.3)'
                       } : {}}
                     >
                       {currentStep > step ? (

@@ -570,16 +570,16 @@ export default function ComponentsPage() {
                                           <h4 className="font-medium mb-3">Active State</h4>
                                           <div className="space-y-2 text-sm">
                                               <div className="flex items-center space-x-2">
-                                                  <div className="w-4 h-4 rounded bg-[#4ECDC4]"></div>
-                                                  <span>Border: #4ECDC4 (Secondary 400)</span>
+                                                  <div className="w-4 h-4 rounded bg-[#6de0d8]"></div>
+                                                  <span>Border: #6de0d8 (Secondary 400)</span>
                                               </div>
                                               <div className="flex items-center space-x-2">
-                                                  <div className="w-4 h-4 rounded bg-[#1F9B92]"></div>
-                                                  <span>Text: #1F9B92 (Secondary 500)</span>
+                                                  <div className="w-4 h-4 rounded bg-[#14b8a6]"></div>
+                                                  <span>Text: #14b8a6 (Secondary 500)</span>
                                               </div>
                                               <div className="flex items-center space-x-2">
-                                                  <div className="w-4 h-4 rounded bg-[#F0FDFC]"></div>
-                                                  <span>Background: #F0FDFC (Secondary 50)</span>
+                                                  <div className="w-4 h-4 rounded bg-[#f0fffe]"></div>
+                                                  <span>Background: #f0fffe (Secondary 50)</span>
                                               </div>
                                           </div>
                                       </div>
@@ -588,16 +588,16 @@ export default function ComponentsPage() {
                                           <h4 className="font-medium mb-3">Hover State</h4>
                                           <div className="space-y-2 text-sm">
                                               <div className="flex items-center space-x-2">
-                                                  <div className="w-4 h-4 rounded bg-[#B8F2ED]"></div>
-                                                  <span>Border: #B8F2ED (Secondary 200)</span>
+                                                  <div className="w-4 h-4 rounded bg-[#99f6e9]"></div>
+                                                  <span>Border: #99f6e9 (Secondary 200)</span>
                                               </div>
                                               <div className="flex items-center space-x-2">
-                                                  <div className="w-4 h-4 rounded bg-[#4ECDC4]"></div>
-                                                  <span>Text: #4ECDC4 (Secondary 400)</span>
+                                                  <div className="w-4 h-4 rounded bg-[#6de0d8]"></div>
+                                                  <span>Text: #6de0d8 (Secondary 400)</span>
                                               </div>
                                               <div className="flex items-center space-x-2">
-                                                  <div className="w-4 h-4 rounded bg-[#F0FDFC]"></div>
-                                                  <span>Background: #F0FDFC (Secondary 50)</span>
+                                                  <div className="w-4 h-4 rounded bg-[#f0fffe]"></div>
+                                                  <span>Background: #f0fffe (Secondary 50)</span>
                                               </div>
                                           </div>
                                       </div>
@@ -1148,25 +1148,25 @@ import { Heart } from 'lucide-react';
                                   <div className="space-y-2">
                                       <div
                                           className="w-full h-20 rounded-lg shadow-sm"
-                                          style={{ backgroundColor: "#FF6B47" }}
+                                          style={{ backgroundColor: "#9069eb" }}
                                       ></div>
                                       <p className="text-sm font-medium text-gray-700">
                                           Primary
                                       </p>
                                       <p className="text-xs text-gray-500">
-                                          #FF6B47 - 코랄 오렌지
+                                          #9069eb - 바이올렛 퍼플
                                       </p>
                                   </div>
                                   <div className="space-y-2">
                                       <div
                                           className="w-full h-20 rounded-lg shadow-sm"
-                                          style={{ backgroundColor: "#4ECDC4" }}
+                                          style={{ backgroundColor: "#6de0d8" }}
                                       ></div>
                                       <p className="text-sm font-medium text-gray-700">
                                           Secondary
                                       </p>
                                       <p className="text-xs text-gray-500">
-                                          #4ECDC4 - 틸 블루
+                                          #6de0d8 - 밝은 틸
                                       </p>
                                   </div>
                                   <div className="space-y-2">
@@ -1205,14 +1205,14 @@ import { Heart } from 'lucide-react';
                                           <div
                                               className="w-full h-16 rounded-lg shadow-sm"
                                               style={{
-                                                  backgroundColor: "#FFF5F3",
+                                                  backgroundColor: "#f7f5ff",
                                               }}
                                           ></div>
                                           <p className="text-xs text-gray-600">
                                               primary-50
                                           </p>
                                           <p className="text-xs text-gray-500">
-                                              #FFF5F3
+                                              #f7f5ff
                                           </p>
                                       </div>
                                       <div className="space-y-2">
@@ -1233,28 +1233,28 @@ import { Heart } from 'lucide-react';
                                           <div
                                               className="w-full h-16 rounded-lg shadow-sm"
                                               style={{
-                                                  backgroundColor: "#FF6B47",
+                                                  backgroundColor: "#9069eb",
                                               }}
                                           ></div>
                                           <p className="text-xs text-gray-600">
                                               primary-500
                                           </p>
                                           <p className="text-xs text-gray-500">
-                                              #FF6B47
+                                              #9069eb
                                           </p>
                                       </div>
                                       <div className="space-y-2">
                                           <div
                                               className="w-full h-16 rounded-lg shadow-sm"
                                               style={{
-                                                  backgroundColor: "#FF4A1F",
+                                                  backgroundColor: "#7c3aed",
                                               }}
                                           ></div>
                                           <p className="text-xs text-gray-600">
                                               primary-600
                                           </p>
                                           <p className="text-xs text-gray-500">
-                                              #FF4A1F
+                                              #7c3aed
                                           </p>
                                       </div>
                                       <div className="space-y-2">
@@ -1284,61 +1284,61 @@ import { Heart } from 'lucide-react';
                                   <div className="space-y-2">
                                       <div
                                           className="w-full h-16 rounded-lg shadow-sm"
-                                          style={{ backgroundColor: "#F0FDFC" }}
+                                          style={{ backgroundColor: "#f0fffe" }}
                                       ></div>
                                       <p className="text-xs text-gray-600">
                                           secondary-50
                                       </p>
                                       <p className="text-xs text-gray-500">
-                                          #F0FDFC
+                                          #f0fffe
                                       </p>
                                   </div>
                                   <div className="space-y-2">
                                       <div
                                           className="w-full h-16 rounded-lg shadow-sm"
-                                          style={{ backgroundColor: "#B8F2ED" }}
+                                          style={{ backgroundColor: "#99f6e9" }}
                                       ></div>
                                       <p className="text-xs text-gray-600">
                                           secondary-200
                                       </p>
                                       <p className="text-xs text-gray-500">
-                                          #B8F2ED
+                                          #99f6e9
                                       </p>
                                   </div>
                                   <div className="space-y-2">
                                       <div
                                           className="w-full h-16 rounded-lg shadow-sm"
-                                          style={{ backgroundColor: "#4ECDC4" }}
+                                          style={{ backgroundColor: "#6de0d8" }}
                                       ></div>
                                       <p className="text-xs text-gray-600">
                                           secondary-400
                                       </p>
                                       <p className="text-xs text-gray-500">
-                                          #4ECDC4
+                                          #6de0d8
                                       </p>
                                   </div>
                                   <div className="space-y-2">
                                       <div
                                           className="w-full h-16 rounded-lg shadow-sm"
-                                          style={{ backgroundColor: "#1F9B92" }}
+                                          style={{ backgroundColor: "#14b8a6" }}
                                       ></div>
                                       <p className="text-xs text-gray-600">
                                           secondary-600
                                       </p>
                                       <p className="text-xs text-gray-500">
-                                          #1F9B92
+                                          #14b8a6
                                       </p>
                                   </div>
                                   <div className="space-y-2">
                                       <div
                                           className="w-full h-16 rounded-lg shadow-sm"
-                                          style={{ backgroundColor: "#1B7F78" }}
+                                          style={{ backgroundColor: "#0f766e" }}
                                       ></div>
                                       <p className="text-xs text-gray-600">
                                           secondary-700
                                       </p>
                                       <p className="text-xs text-gray-500">
-                                          #1B7F78
+                                          #0f766e
                                       </p>
                                   </div>
                               </div>

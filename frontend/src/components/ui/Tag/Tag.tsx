@@ -75,9 +75,9 @@ const StyledTag = styled.span<{ variant: string; size: string }>`
         `;
       case 'secondary':
         return `
-          background: var(--brand-secondary-light, rgba(78, 205, 196, 0.15));
+          background: var(--brand-secondary-light, rgba(109, 224, 216, 0.15));
           color: var(--brand-secondary-dark, #2d7a73);
-          border: 1px solid var(--brand-secondary-light, rgba(78, 205, 196, 0.3));
+          border: 1px solid var(--brand-secondary-light, rgba(109, 224, 216, 0.3));
         `;
       case 'accent':
         return `

@@ -46,18 +46,18 @@ const SecondaryTabGroup: React.FC<SecondaryTabGroupProps> = ({
     return cn(baseClasses,
       isActive
         ? `
-          border-[#4ECDC4] text-[#1F9B92] bg-[#F0FDFC]
+          border-[#6de0d8] text-[#14b8a6] bg-[#f0fffe]
           shadow-sm font-semibold
         `
         : `
           border-transparent text-gray-500 
-          hover:text-[#4ECDC4] hover:border-[#B8F2ED] hover:bg-[#F0FDFC]
+          hover:text-[#6de0d8] hover:border-[#99f6e9] hover:bg-[#f0fffe]
         `
     );
   };
 
   return (
-    <div className={cn('border-b border-[#B8F2ED]', className)}>
+    <div className={cn('border-b border-[#99f6e9]', className)}>
       <nav 
         className="flex space-x-6" 
         aria-label="Tabs"
@@ -77,7 +77,7 @@ const SecondaryTabGroup: React.FC<SecondaryTabGroupProps> = ({
                 <Icon 
                   className={cn(
                     iconSizes[size],
-                    isActive ? 'text-[#1F9B92]' : 'text-current'
+                    isActive ? 'text-[#14b8a6]' : 'text-current'
                   )} 
                 />
               )}

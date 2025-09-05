@@ -73,8 +73,8 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   
   /* 밈징어 브랜드 색상 */
-  --brand-primary: #FF6B47;
-  --brand-secondary: #4ECDC4;
+  --brand-primary: #9069eb;
+  --brand-secondary: #6de0d8;
   --brand-accent: #FFD93D;
 }
 
@@ -117,8 +117,8 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
   
   /* 밈징어 브랜드 색상 (다크모드에서 밝게) */
-  --brand-primary: #FF8A6B;
-  --brand-secondary: #6BE4DB;
+  --brand-primary: #a78bfa;
+  --brand-secondary: #6de0d8;
   --brand-accent: #FFE76B;
 }
 
@@ -209,31 +209,31 @@ body {
 
 /* 밈징어 디자인 시스템 - 배경색 클래스 */
 .bg-primary {
-  background-color: #FF6B47 !important;
+  background-color: #9069eb !important;
 }
 
 .bg-primary-50 {
-  background-color: #FFF5F3 !important;
+  background-color: #f7f5ff !important;
 }
 
 .bg-primary-100 {
-  background-color: #FFE6E0 !important;
+  background-color: #ede9fe !important;
 }
 
 .bg-primary-500 {
-  background-color: #FF6B47 !important;
+  background-color: #9069eb !important;
 }
 
 .bg-secondary {
-  background-color: #4ECDC4 !important;
+  background-color: #6de0d8 !important;
 }
 
 .bg-secondary-50 {
-  background-color: #F0FDFC !important;
+  background-color: #f0fffe !important;
 }
 
 .bg-secondary-100 {
-  background-color: #D9F9F6 !important;
+  background-color: #ccfbf4 !important;
 }
 
 .bg-accent {
@@ -242,15 +242,15 @@ body {
 
 /* 밈징어 디자인 시스템 - 텍스트 색상 클래스 */
 .text-primary {
-  color: #FF6B47 !important;
+  color: #9069eb !important;
 }
 
 .text-primary-600 {
-  color: #FF4A1F !important;
+  color: #7c3aed !important;
 }
 
 .text-secondary {
-  color: #4ECDC4 !important;
+  color: #6de0d8 !important;
 }
 
 .text-accent {
@@ -259,11 +259,11 @@ body {
 
 /* 호버 상태 */
 .hover\:bg-primary:hover {
-  background-color: #FF6B47 !important;
+  background-color: #9069eb !important;
 }
 
 .hover\:text-primary:hover {
-  color: #FF6B47 !important;
+  color: #9069eb !important;
 }
 
 /* 진행 상태 애니메이션 */
@@ -323,14 +323,14 @@ body {
 /* 키프레임 애니메이션 */
 @keyframes pulse-primary {
   0%, 100% {
-    box-shadow: 0 4px 12px rgba(255, 107, 71, 0.4);
+    box-shadow: 0 4px 12px rgba(144, 105, 235, 0.4);
     transform: scale(1.1);
-    background-color: #FF6B47;
+    background-color: #9069eb;
   }
   50% {
-    box-shadow: 0 8px 25px rgba(255, 107, 71, 0.8);
+    box-shadow: 0 8px 25px rgba(144, 105, 235, 0.8);
     transform: scale(1.2);
-    background-color: #FF4A1F;
+    background-color: #7c3aed;
   }
 }
 

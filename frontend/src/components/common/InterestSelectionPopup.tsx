@@ -17,12 +17,12 @@ interface Interest {
 const interests: Interest[] = [
   { id: 'daily', label: '일상/라이프', icon: Heart, color: '#ec4899', bgColor: '#fdf2f8' },
   { id: 'social', label: '소셜/친구', icon: Users, color: '#2563eb', bgColor: '#eff6ff' },
-  { id: 'cafe', label: '카페/맛집', icon: Coffee, color: '#d97706', bgColor: '#fffbeb' },
+  { id: 'cafe', label: '카페/맛집', icon: Coffee, color: '#9069eb', bgColor: '#f7f5ff' },
   { id: 'music', label: '음악/엔터', icon: Music, color: '#dc2626', bgColor: '#fef2f2' },
   { id: 'photo', label: '사진/여행', icon: Camera, color: '#16a34a', bgColor: '#f0fdf4' },
   { id: 'work', label: '직장/업무', icon: Briefcase, color: '#4b5563', bgColor: '#f9fafb' },
   { id: 'study', label: '학습/교육', icon: GraduationCap, color: '#4f46e5', bgColor: '#eef2ff' },
-  { id: 'trend', label: '트렌드/이슈', icon: Sparkles, color: '#ea580c', bgColor: '#fff7ed' }
+  { id: 'trend', label: '트렌드/이슈', icon: Sparkles, color: '#7c3aed', bgColor: '#ede9fe' }
 ];
 
 interface InterestSelectionPopupProps {
@@ -104,7 +104,7 @@ export default function InterestSelectionPopup({
                   
                   <Icon 
                     size={32} 
-                    color={isSelected ? '#E65100' : interest.color}
+                    color={isSelected ? '#9069eb' : interest.color}
                     style={{ marginBottom: '0.75rem' }}
                   />
                   
@@ -281,7 +281,7 @@ const InterestButton = styled.button<{ isSelected: boolean; bgColor: string }>`
   padding: 1rem;
   margin: 0.25rem;
   border-radius: 0.75rem;
-  border: 2px solid ${props => props.isSelected ? '#E65100' : '#e5e7eb'};
+  border: 2px solid ${props => props.isSelected ? '#9069eb' : '#e5e7eb'};
   background: ${props => props.isSelected ? '#f3f4f6' : props.bgColor};
   transition: all 0.2s ease;
   text-align: center;
@@ -322,7 +322,7 @@ const SelectedBadge = styled.div`
   right: -0.25rem;
   width: 1.5rem;
   height: 1.5rem;
-  background: #E65100;
+  background: #9069eb;
   border-radius: 50%;
   display: flex;
   align-items: center;
