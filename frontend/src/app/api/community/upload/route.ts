@@ -155,15 +155,36 @@ export async function POST(request: NextRequest) {
         process.env.CLOUDINARY_CLOUD_NAME === 'demo' ||
         process.env.CLOUDINARY_API_KEY === 'placeholder-key' ||
         process.env.CLOUDINARY_API_SECRET === 'placeholder-secret') {
-      console.log('Cloudinary not configured, using placeholder URL');
-      const placeholderUrl = `data:${imageFile.type};base64,${Buffer.from(await imageFile.arrayBuffer()).toString('base64')}`;
+      console.log('Cloudinary not configured, saving to local filesystem');
       
-      // 데이터베이스에 밈 정보 저장 (Cloudinary 없이)
+      // 로컬 파일시스템에 이미지 저장
+      const fs = require('fs');
+      const path = require('path');
+      
+      // uploads 디렉토리 생성 (없을 경우)
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // 파일명 생성 (timestamp + random)
+      const fileExtension = imageFile.name.split('.').pop() || 'jpg';
+      const filename = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`;
+      const filepath = path.join(uploadsDir, filename);
+      
+      // 파일 저장
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      fs.writeFileSync(filepath, buffer);
+      
+      // 공개 URL 생성
+      const publicUrl = `/uploads/${filename}`;
+      
+      // 데이터베이스에 밈 정보 저장 (로컬 파일 경로 사용)
       const meme = await prisma.meme.create({
         data: {
           title: title.trim(),
           description: description?.trim() || '',
-          imageUrl: placeholderUrl.substring(0, 500), // URL 길이 제한
+          imageUrl: publicUrl,
           userId: user.id,
           isPublic: isPublic,
           tags: tags.length > 0 ? tags : undefined,
@@ -200,7 +221,7 @@ export async function POST(request: NextRequest) {
           createdAt: meme.createdAt.toISOString(),
           user: meme.user
         },
-        message: '밈이 성공적으로 업로드되었습니다! (Cloudinary 미설정)'
+        message: '밈이 성공적으로 업로드되었습니다! (로컬 저장)'
       });
     }
 
