@@ -104,6 +104,7 @@ export default function MemeDetailPage() {
   const [newComment, setNewComment] = useState('');
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const [likedAnimations, setLikedAnimations] = useState<{ [key: string]: boolean }>({});
   const { showSuccess } = useToastContext();
 
   // API에서 데이터 가져오기
@@ -133,6 +134,12 @@ export default function MemeDetailPage() {
 
   const handleLike = useCallback(() => {
     if (!meme) return;
+    
+    // 애니메이션 트리거
+    setLikedAnimations(prev => ({ ...prev, 'main-post': true }));
+    setTimeout(() => {
+      setLikedAnimations(prev => ({ ...prev, 'main-post': false }));
+    }, 600);
     
     setMeme(prev => prev ? ({
       ...prev,
@@ -172,6 +179,62 @@ export default function MemeDetailPage() {
   }, [meme]);
 
   const handleCommentLike = useCallback(async (commentId: string) => {
+    // 애니메이션 트리거
+    setLikedAnimations(prev => ({ ...prev, [commentId]: true }));
+    setTimeout(() => {
+      setLikedAnimations(prev => ({ ...prev, [commentId]: false }));
+    }, 600);
+    
+    // 현재 댓글의 상태를 미리 확인
+    let currentComment: Comment | null = null;
+    
+    // 댓글 또는 대댓글 찾기
+    for (const comment of comments) {
+      if (comment.id === commentId) {
+        currentComment = comment;
+        break;
+      }
+      if (comment.replies) {
+        const reply = comment.replies.find(r => r.id === commentId);
+        if (reply) {
+          currentComment = reply;
+          break;
+        }
+      }
+    }
+    
+    if (!currentComment) return;
+    
+    // 즉시 UI 업데이트 (낙관적 업데이트)
+    const wasLiked = currentComment.isLiked;
+    setComments(prevComments => 
+      prevComments.map(comment => {
+        if (comment.id === commentId) {
+          return {
+            ...comment,
+            isLiked: !wasLiked,
+            likes: wasLiked ? comment.likes - 1 : comment.likes + 1
+          };
+        }
+        // 대댓글도 확인
+        if (comment.replies) {
+          return {
+            ...comment,
+            replies: comment.replies.map(reply => 
+              reply.id === commentId 
+                ? {
+                    ...reply,
+                    isLiked: !wasLiked,
+                    likes: wasLiked ? reply.likes - 1 : reply.likes + 1
+                  }
+                : reply
+            )
+          };
+        }
+        return comment;
+      })
+    );
+
     try {
       const response = await fetch(`/api/comments/${commentId}/like`, {
         method: 'POST',
@@ -182,19 +245,40 @@ export default function MemeDetailPage() {
 
       const data = await response.json();
 
-      if (data.success) {
-        // 댓글 목록 새로고침
-        if (params?.id) {
-          const updatedComments = await fetchComments(params.id as string);
-          setComments(updatedComments);
-        }
-      } else {
+      if (!data.success) {
+        // 실패 시 UI 롤백
+        setComments(prevComments => 
+          prevComments.map(comment => {
+            if (comment.id === commentId) {
+              return {
+                ...comment,
+                isLiked: wasLiked,
+                likes: wasLiked ? comment.likes + 1 : comment.likes - 1
+              };
+            }
+            if (comment.replies) {
+              return {
+                ...comment,
+                replies: comment.replies.map(reply => 
+                  reply.id === commentId 
+                    ? {
+                        ...reply,
+                        isLiked: wasLiked,
+                        likes: wasLiked ? reply.likes + 1 : reply.likes - 1
+                      }
+                    : reply
+                )
+              };
+            }
+            return comment;
+          })
+        );
         throw new Error(data.error || '좋아요 처리에 실패했습니다.');
       }
     } catch (error) {
       console.error('Error liking comment:', error);
     }
-  }, [params?.id]);
+  }, [comments]);
 
   const handleAddComment = useCallback(async () => {
     if (!newComment.trim() || !params?.id) return;
@@ -371,7 +455,11 @@ export default function MemeDetailPage() {
                   >
                     <Heart 
                       size={16} 
-                      className={`mr-2 ${meme.isLiked ? 'fill-current' : ''}`} 
+                      className={`mr-2 transition-all duration-300 ${
+                        meme.isLiked ? 'fill-current' : ''
+                      } ${
+                        likedAnimations['main-post'] ? 'animate-bounce scale-125' : 'hover:scale-110'
+                      }`} 
                     />
                     좋아요
                   </Button>
@@ -452,12 +540,19 @@ export default function MemeDetailPage() {
                         <div className="flex items-center space-x-3 text-xs">
                           <button
                             onClick={() => handleCommentLike(comment.id)}
-                            className={`flex items-center space-x-1 hover:text-red-500 ${
+                            className={`flex items-center space-x-1 hover:text-red-500 transition-colors duration-200 ${
                               comment.isLiked ? 'text-red-500' : 'text-gray-500'
                             }`}
                           >
-                            <Heart size={12} className={comment.isLiked ? 'fill-current' : ''} />
-                            <span>{comment.likes}</span>
+                            <Heart 
+                              size={12} 
+                              className={`transition-all duration-300 ${
+                                comment.isLiked ? 'fill-current' : ''
+                              } ${
+                                likedAnimations[comment.id] ? 'animate-bounce scale-125' : 'hover:scale-110'
+                              }`} 
+                            />
+                            <span className="transition-all duration-300">{comment.likes}</span>
                           </button>
                           <button
                             onClick={() => setReplyTo(comment.id)}
@@ -515,12 +610,19 @@ export default function MemeDetailPage() {
                                 <p className="text-sm text-gray-700 mb-1">{reply.content}</p>
                                 <button
                                   onClick={() => handleCommentLike(reply.id)}
-                                  className={`flex items-center space-x-1 text-xs hover:text-red-500 ${
+                                  className={`flex items-center space-x-1 text-xs hover:text-red-500 transition-colors duration-200 ${
                                     reply.isLiked ? 'text-red-500' : 'text-gray-500'
                                   }`}
                                 >
-                                  <Heart size={10} className={reply.isLiked ? 'fill-current' : ''} />
-                                  <span>{reply.likes}</span>
+                                  <Heart 
+                                    size={10} 
+                                    className={`transition-all duration-300 ${
+                                      reply.isLiked ? 'fill-current' : ''
+                                    } ${
+                                      likedAnimations[reply.id] ? 'animate-bounce scale-125' : 'hover:scale-110'
+                                    }`} 
+                                  />
+                                  <span className="transition-all duration-300">{reply.likes}</span>
                                 </button>
                               </div>
                             </div>
