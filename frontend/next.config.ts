@@ -53,6 +53,12 @@ const nextConfig: NextConfig = {
         hostname: 'imgflip.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
