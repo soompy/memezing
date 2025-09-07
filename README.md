@@ -15,8 +15,9 @@
 - ⚡ **성능 최적화** - Fabric.js 이중 캔버스 동기화 개선
 
 ### 🌐 배포된 사이트
-- **Production**: [https://frontend-gamma-smoky-64.vercel.app/](https://frontend-gamma-smoky-64.vercel.app/)
-- **Components Demo**: [/components](https://frontend-gamma-smoky-64.vercel.app/components)
+- **Production**: [https://memezing-34jq5fgeh-suris-projects.vercel.app](https://memezing-34jq5fgeh-suris-projects.vercel.app)
+- **Legacy**: [https://frontend-gamma-smoky-64.vercel.app/](https://frontend-gamma-smoky-64.vercel.app/)
+- **Components Demo**: [/components](https://memezing-34jq5fgeh-suris-projects.vercel.app/components)
 
 ## 🚀 프로젝트 구조
 
@@ -238,7 +239,7 @@ GET/POST /api/auth/[...nextauth]  # 소셜 로그인
 ### 컴포넌트 사용법
 프로젝트의 모든 UI 컴포넌트는 `/components` 페이지에서 확인할 수 있습니다:
 ```
-https://frontend-gamma-smoky-64.vercel.app/components
+https://memezing-34jq5fgeh-suris-projects.vercel.app/components
 ```
 
 ### 디자인 시스템 (v1.4.0 업데이트)
@@ -257,10 +258,10 @@ MIT License
 
 ---
 
-> 🚀 **프로덕션 사이트**: [https://frontend-gamma-smoky-64.vercel.app](https://frontend-gamma-smoky-64.vercel.app)  
-> 📚 **컴포넌트 데모**: [/components](https://frontend-gamma-smoky-64.vercel.app/components)  
-> 🎨 **밈 생성기**: [/meme-generator](https://frontend-gamma-smoky-64.vercel.app/meme-generator)  
-> 📅 **마지막 업데이트**: 2025.08.20
+> 🚀 **프로덕션 사이트**: [https://memezing-34jq5fgeh-suris-projects.vercel.app](https://memezing-34jq5fgeh-suris-projects.vercel.app)  
+> 📚 **컴포넌트 데모**: [/components](https://memezing-34jq5fgeh-suris-projects.vercel.app/components)  
+> 🎨 **밈 생성기**: [/meme-generator](https://memezing-34jq5fgeh-suris-projects.vercel.app/meme-generator)  
+> 📅 **마지막 업데이트**: 2025.09.05
 
 ## 🔧 통합 배포 아키텍처
 
