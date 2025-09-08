@@ -62,6 +62,16 @@ const NaverProvider: Provider = {
   },
 };
 
+// 환경변수 디버깅 로그
+console.log('NextAuth Environment Check:', {
+  hasGoogleClientId: !!process.env.GOOGLE_CLIENT_ID,
+  hasGoogleClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+  hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
+  hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
+  googleClientIdLength: process.env.GOOGLE_CLIENT_ID?.length || 0,
+  nextAuthUrl: process.env.NEXTAUTH_URL
+});
+
 const authOptions: NextAuthOptions = {
   // 데이터베이스 URL이 있을 때만 PrismaAdapter 사용
   ...(process.env.DATABASE_URL && process.env.DATABASE_URL !== 'your-database-connection-string' ? {
@@ -124,14 +134,11 @@ const authOptions: NextAuthOptions = {
         }
       }
     }),
-    // 환경변수가 있을 때만 각 제공자 활성화
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && 
-        process.env.GOOGLE_CLIENT_ID !== 'your-google-client-id' ? [
-      GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      })
-    ] : []),
+    // Google OAuth 프로바이더 (항상 활성화 시도)
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    }),
     ...(process.env.KAKAO_CLIENT_ID && process.env.KAKAO_CLIENT_SECRET &&
         process.env.KAKAO_CLIENT_ID !== 'your-kakao-client-id' ? [
       KakaoProvider
