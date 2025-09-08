@@ -16,6 +16,14 @@ cloudinary.config({
 export async function POST(request: NextRequest) {
   try {
     console.log('Upload API called');
+    console.log('Environment check:', {
+      hasCloudinaryName: !!process.env.CLOUDINARY_CLOUD_NAME,
+      hasCloudinaryKey: !!process.env.CLOUDINARY_API_KEY,
+      hasCloudinarySecret: !!process.env.CLOUDINARY_API_SECRET,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME,
+      databaseUrl: process.env.DATABASE_URL ? 'configured' : 'not configured'
+    });
     
     const session = await getServerSession(authOptions);
     console.log('Session:', session);
@@ -169,7 +177,7 @@ export async function POST(request: NextRequest) {
       
       // 파일명 생성 (timestamp + random)
       const fileExtension = imageFile.name.split('.').pop() || 'jpg';
-      const filename = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExtension}`;
+      const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}.${fileExtension}`;
       const filepath = path.join(uploadsDir, filename);
       
       // 파일 저장
