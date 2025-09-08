@@ -42,11 +42,32 @@ export async function POST(request: NextRequest) {
     // 데이터베이스가 설정되지 않은 경우 테스트 응답
     if (!process.env.DATABASE_URL || 
         process.env.DATABASE_URL === 'your-database-connection-string' ||
-        process.env.DATABASE_URL.includes('username:password@localhost')) {
-      console.log('Database not configured, returning test response');
+        process.env.DATABASE_URL.includes('username:password@localhost') ||
+        process.env.DATABASE_URL.includes('localhost:5432')) {
+      console.log('Database not configured or localhost detected, returning test response');
+      
+      // FormData 파싱해서 로그 출력
+      const formData = await request.formData();
+      const title = formData.get('title') as string;
+      const description = formData.get('description') as string;
+      const imageFile = formData.get('image') as File;
+      
+      console.log('Test mode upload attempt:', {
+        title: title,
+        description: description,
+        hasImage: !!imageFile,
+        imageSize: imageFile?.size
+      });
+      
       return NextResponse.json({
         success: true,
-        message: '업로드가 완료되었습니다! (테스트 모드 - 데이터베이스 미연결)'
+        message: '업로드가 완료되었습니다! (테스트 모드 - 데이터베이스 미연결)',
+        data: {
+          id: `test-${Date.now()}`,
+          title: title || '테스트 밈',
+          imageUrl: '/images/fallback/meme-placeholder.jpg',
+          author: '테스트 사용자'
+        }
       });
     }
 
@@ -306,15 +327,38 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Community upload error:', error);
     
+    // 환경변수 디버깅 로그
+    console.error('Environment debugging:', {
+      nodeEnv: process.env.NODE_ENV,
+      hasCloudinaryName: !!process.env.CLOUDINARY_CLOUD_NAME,
+      hasCloudinaryKey: !!process.env.CLOUDINARY_API_KEY,
+      hasCloudinarySecret: !!process.env.CLOUDINARY_API_SECRET,
+      hasDatabaseUrl: !!process.env.DATABASE_URL,
+      hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
+      hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET
+    });
+    
     return NextResponse.json(
       {
         success: false,
         error: '업로드 중 오류가 발생했습니다.',
         details: error instanceof Error ? error.message : 'Unknown error',
+        debug: process.env.NODE_ENV === 'development' ? {
+          stack: error instanceof Error ? error.stack : null,
+          env: {
+            hasCloudinary: !!(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET),
+            hasDatabase: !!process.env.DATABASE_URL,
+            hasAuth: !!(process.env.NEXTAUTH_URL && process.env.NEXTAUTH_SECRET)
+          }
+        } : undefined
       },
       { status: 500 }
     );
   } finally {
-    await prisma.$disconnect();
+    try {
+      await prisma.$disconnect();
+    } catch (disconnectError) {
+      console.error('Prisma disconnect error:', disconnectError);
+    }
   }
 }

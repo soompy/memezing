@@ -145,10 +145,10 @@ const authOptions: NextAuthOptions = {
     strategy: 'jwt', // JWT 세션 사용
   },
   callbacks: {
-    async session({ session, user }) {
-      // 세션에 사용자 ID 추가
-      if (session.user && user) {
-        session.user.id = user.id;
+    async session({ session, token }) {
+      // JWT 토큰에서 세션으로 사용자 ID 전달
+      if (session.user && token) {
+        session.user.id = token.id as string;
       }
       return session;
     },
