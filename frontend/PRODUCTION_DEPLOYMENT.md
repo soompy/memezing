@@ -35,7 +35,7 @@ vercel env add NEXTAUTH_SECRET
 
 #### 프로덕션 URL 업데이트:
 ```bash
-NEXTAUTH_URL="https://your-app-name.vercel.app"
+NEXTAUTH_URL="https://memezing.vercel.app/"
 ```
 
 ---
