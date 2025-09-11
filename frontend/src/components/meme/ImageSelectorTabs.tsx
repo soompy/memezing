@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import ImageUploadComponent from './ImageUploadComponent';
+import ImageUploadComponent, { ImageFillOption } from './ImageUploadComponent';
 
 interface ImageSelectorTabsProps {
-  onImageSelect: (file: File) => void;
-  onImageUrl: (url: string) => void;
+  onImageSelect: (file: File, fillOption?: ImageFillOption) => void;
+  onImageUrl: (url: string, fillOption?: ImageFillOption) => void;
   onImageUpload?: (url: string) => void;
   className?: string;
 }

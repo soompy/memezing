@@ -34,14 +34,17 @@ export interface MemeTemplate {
   tags?: string[]; // 태그 목록
 }
 
+export type ImageFillOption = 'fill' | 'fit' | 'stretch' | 'center';
+
 export interface FabricCanvasRef {
   exportAsImage: () => string | null;
   addText: (text: string, options?: any) => void;
   updateTextStyle: (style: Partial<TextStyle>) => void;
   resetSelectedTextStyle: (defaultStyle: TextStyle) => boolean;
   loadTemplate: (template: MemeTemplate) => Promise<void>;
-  addImageFromUrl: (url: string) => Promise<void>;
-  addImageFromFile: (file: File) => Promise<void>;
+  addImageFromUrl: (url: string, fillOption?: ImageFillOption) => Promise<void>;
+  addImageFromFile: (file: File, fillOption?: ImageFillOption) => Promise<void>;
+  updateSelectedImageFill: (fillOption: ImageFillOption) => void;
   deleteSelectedObject: () => void;
   duplicateSelectedObject: () => void;
   rotateSelectedObject: () => void;
@@ -288,8 +291,57 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
 
   // props가 변경되면 초기화 useEffect의 dependency에 의해 자동으로 handleResize가 호출됨
 
+  // 이미지 크기 및 위치 계산 헬퍼 함수
+  const calculateImageDimensions = useCallback((
+    fabricImg: fabric.Image, 
+    canvasWidth: number, 
+    canvasHeight: number, 
+    fillOption: ImageFillOption = 'fill'
+  ) => {
+    const imgWidth = fabricImg.width!;
+    const imgHeight = fabricImg.height!;
+    
+    let scaleX, scaleY, left, top;
+    
+    switch (fillOption) {
+      case 'fill': // 캔버스에 꽉 채우기 (비율 유지, 잘림 가능)
+        scaleX = canvasWidth / imgWidth;
+        scaleY = canvasHeight / imgHeight;
+        const fillScale = Math.max(scaleX, scaleY);
+        scaleX = scaleY = fillScale;
+        left = (canvasWidth - imgWidth * fillScale) / 2;
+        top = (canvasHeight - imgHeight * fillScale) / 2;
+        break;
+        
+      case 'fit': // 비율 유지해서 맞추기 (전체 이미지 보임)
+        scaleX = canvasWidth / imgWidth;
+        scaleY = canvasHeight / imgHeight;
+        const fitScale = Math.min(scaleX, scaleY);
+        scaleX = scaleY = fitScale;
+        left = (canvasWidth - imgWidth * fitScale) / 2;
+        top = (canvasHeight - imgHeight * fitScale) / 2;
+        break;
+        
+      case 'stretch': // 늘려서 채우기 (비율 무시)
+        scaleX = canvasWidth / imgWidth;
+        scaleY = canvasHeight / imgHeight;
+        left = 0;
+        top = 0;
+        break;
+        
+      case 'center': // 가운데 정렬 (원본 크기)
+      default:
+        scaleX = scaleY = 1;
+        left = (canvasWidth - imgWidth) / 2;
+        top = (canvasHeight - imgHeight) / 2;
+        break;
+    }
+    
+    return { scaleX, scaleY, left, top };
+  }, []);
+
   // 이미지를 캔버스에 추가하는 함수
-  const addImageFromUrl = useCallback(async (url: string): Promise<void> => {
+  const addImageFromUrl = useCallback(async (url: string, fillOption: ImageFillOption = 'fill'): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (!fabricCanvasRef.current) {
         reject(new Error('Canvas not initialized'));
@@ -312,15 +364,18 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
 
           // 이미지 크기를 캔버스에 맞게 조정
           const canvas = fabricCanvasRef.current;
-          const scaleX = canvas.width! / fabricImg.width!;
-          const scaleY = canvas.height! / fabricImg.height!;
-          const scale = Math.min(scaleX, scaleY);
+          const { scaleX, scaleY, left, top } = calculateImageDimensions(
+            fabricImg, 
+            canvas.width!, 
+            canvas.height!, 
+            fillOption
+          );
 
           fabricImg.set({
-            scaleX: scale,
-            scaleY: scale,
-            left: (canvas.width! - fabricImg.width! * scale) / 2,
-            top: (canvas.height! - fabricImg.height! * scale) / 2,
+            scaleX,
+            scaleY,
+            left,
+            top,
             selectable: true,
             evented: true,
             name: 'background-image'
@@ -366,15 +421,18 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
             }
 
             const canvas = fabricCanvasRef.current;
-            const scaleX = canvas.width! / fabricImg.width!;
-            const scaleY = canvas.height! / fabricImg.height!;
-            const scale = Math.min(scaleX, scaleY);
+            const { scaleX, scaleY, left, top } = calculateImageDimensions(
+              fabricImg, 
+              canvas.width!, 
+              canvas.height!, 
+              fillOption
+            );
 
             fabricImg.set({
-              scaleX: scale,
-              scaleY: scale,
-              left: (canvas.width! - fabricImg.width! * scale) / 2,
-              top: (canvas.height! - fabricImg.height! * scale) / 2,
+              scaleX,
+              scaleY,
+              left,
+              top,
               selectable: true,
               evented: true,
               name: 'background-image'
@@ -418,12 +476,12 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
   }, [saveCanvasState]);
 
   // 파일에서 이미지 추가
-  const addImageFromFile = useCallback(async (file: File): Promise<void> => {
+  const addImageFromFile = useCallback(async (file: File, fillOption: ImageFillOption = 'fill'): Promise<void> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const dataURL = e.target?.result as string;
-        addImageFromUrl(dataURL).then(resolve).catch(reject);
+        addImageFromUrl(dataURL, fillOption).then(resolve).catch(reject);
       };
       reader.onerror = () => reject(new Error('Failed to read file'));
       reader.readAsDataURL(file);
@@ -607,6 +665,42 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
       multiplier: 2 // 고해상도 내보내기
     });
   }, []);
+
+  // 선택된 이미지의 채우기 옵션 업데이트
+  const updateSelectedImageFill = useCallback((fillOption: ImageFillOption) => {
+    if (!fabricCanvasRef.current) return;
+    
+    const activeObject = fabricCanvasRef.current.getActiveObject();
+    if (!activeObject || activeObject.type !== 'image') return;
+    
+    const fabricImg = activeObject as fabric.Image;
+    const canvas = fabricCanvasRef.current;
+    
+    // 원본 이미지 크기 가져오기 (스케일링 되기 전)
+    const originalWidth = fabricImg.width! / (fabricImg.scaleX || 1);
+    const originalHeight = fabricImg.height! / (fabricImg.scaleY || 1);
+    
+    // 새로운 크기 및 위치 계산
+    const { scaleX, scaleY, left, top } = calculateImageDimensions(
+      { width: originalWidth, height: originalHeight } as fabric.Image,
+      canvas.width!,
+      canvas.height!,
+      fillOption
+    );
+    
+    // 이미지 속성 업데이트
+    fabricImg.set({
+      scaleX,
+      scaleY,
+      left,
+      top
+    });
+    
+    canvas.renderAll();
+    
+    // 히스토리 저장
+    setTimeout(saveCanvasState, 100);
+  }, [calculateImageDimensions, saveCanvasState]);
 
   // 선택된 객체 삭제
   const deleteSelectedObject = useCallback(() => {
@@ -888,6 +982,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     loadTemplate,
     addImageFromUrl,
     addImageFromFile,
+    updateSelectedImageFill,
     deleteSelectedObject,
     duplicateSelectedObject,
     rotateSelectedObject,
@@ -901,7 +996,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     setBackgroundColor,
     getCanvasSize,
     getBackgroundColor
-  }), [exportAsImage, addText, updateTextStyle, resetSelectedTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts, changeCanvasSize, setBackgroundColor, getCanvasSize, getBackgroundColor]);
+  }), [exportAsImage, addText, updateTextStyle, resetSelectedTextStyle, loadTemplate, addImageFromUrl, addImageFromFile, updateSelectedImageFill, deleteSelectedObject, duplicateSelectedObject, rotateSelectedObject, clearCanvas, undo, redo, getCanvas, getCanvasContainer, getAllTexts, changeCanvasSize, setBackgroundColor, getCanvasSize, getBackgroundColor]);
 
   return (
     <div 

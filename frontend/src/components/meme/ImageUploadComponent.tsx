@@ -5,10 +5,12 @@ import { Upload, Image as ImageIcon, AlertCircle, CheckCircle } from 'lucide-rea
 import Button from '@/components/ui/Button';
 import { validateImageFile } from '@/lib/upload';
 import { useToastContext } from '@/context/ToastContext';
+import ImageFillControls from './ImageFillControls';
+import { ImageFillOption } from './FabricCanvas';
 
 interface ImageUploadComponentProps {
-  onImageSelect: (file: File) => void;
-  onImageUrl: (url: string) => void;
+  onImageSelect: (file: File, fillOption?: ImageFillOption) => void;
+  onImageUrl: (url: string, fillOption?: ImageFillOption) => void;
   onImageUpload?: (url: string) => void; // 업로드 완료 시 URL 반환
   className?: string;
   accept?: string;
@@ -31,6 +33,7 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
   const [isUrlMode, setIsUrlMode] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [selectedFillOption, setSelectedFillOption] = useState<ImageFillOption>('fill');
   const { showError, showSuccess } = useToastContext();
 
   // 상태 초기화
@@ -55,12 +58,12 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
     }
 
     // 서버 업로드 없이 바로 로컬 파일 전달
-    onImageSelect(file);
+    onImageSelect(file, selectedFillOption);
     setUploadSuccess('이미지가 추가되었습니다!');
     
     // 3초 후 성공 메시지 제거
     setTimeout(() => setUploadSuccess(null), 3000);
-  }, [onImageSelect, showError]);
+  }, [onImageSelect, showError, selectedFillOption]);
 
   // 드래그 앤 드롭 핸들러
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -86,13 +89,13 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
     try {
       // URL 유효성 검사
       new URL(urlInput);
-      onImageUrl(urlInput);
+      onImageUrl(urlInput, selectedFillOption);
       setUrlInput('');
       setIsUrlMode(false);
     } catch {
       showError('유효하지 않은 URL입니다.');
     }
-  }, [urlInput, onImageUrl]);
+  }, [urlInput, onImageUrl, selectedFillOption]);
 
   // 파일 입력 클릭
   const handleFileInputClick = useCallback((e: React.MouseEvent) => {
@@ -211,6 +214,15 @@ const ImageUploadComponent: React.FC<ImageUploadComponentProps> = ({
           <p className="text-sm text-green-700">{uploadSuccess}</p>
         </div>
       )}
+
+      {/* 이미지 채우기 옵션 */}
+      <div className="mt-4">
+        <ImageFillControls
+          currentFillOption={selectedFillOption}
+          onFillOptionChange={setSelectedFillOption}
+          disabled={false}
+        />
+      </div>
 
       {/* 모드 전환 버튼 */}
       <div className="flex justify-center mt-4 space-x-2">

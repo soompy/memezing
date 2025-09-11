@@ -7,9 +7,10 @@ import { ArrowLeft, Download, RefreshCw, Edit, Image as ImageIcon, X, AlertTrian
 import Button from '@/components/ui/Button';
 import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
-import FabricCanvas, { FabricCanvasRef, MemeTemplate } from '@/components/meme/FabricCanvas';
+import FabricCanvas, { FabricCanvasRef, MemeTemplate, ImageFillOption } from '@/components/meme/FabricCanvas';
 import ImageUploadComponent from '@/components/meme/ImageUploadComponent';
 import ImageSelectorTabs from '@/components/meme/ImageSelectorTabs';
+import ImageFillControls from '@/components/meme/ImageFillControls';
 import TextInputArea from '@/components/meme/TextInputArea';
 import CanvasOverlay from '@/components/meme/CanvasOverlay';
 import ResizablePanel from '@/components/ui/ResizablePanel';
@@ -45,6 +46,7 @@ export default function MemeGeneratorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(null);
+  const [currentImageFillOption, setCurrentImageFillOption] = useState<ImageFillOption>('fill');
   
   // 캔버스 사이즈 및 배경색 상태
   const [canvasSize, setCanvasSize] = useState<CanvasSize>(PRESET_CANVAS_SIZES[0]); // 기본 사이즈
@@ -269,12 +271,12 @@ export default function MemeGeneratorPage() {
   }, []);
 
   // 이미지 파일 업로드
-  const handleImageUpload = useCallback(async (file: File) => {
+  const handleImageUpload = useCallback(async (file: File, fillOption?: ImageFillOption) => {
     if (!canvasRef.current) return;
     
     setIsLoading(true);
     try {
-      await canvasRef.current.addImageFromFile(file);
+      await canvasRef.current.addImageFromFile(file, fillOption);
     } catch (error) {
       console.error('Image upload failed:', error);
       showAlert('업로드 실패', '이미지 업로드에 실패했습니다. 파일 형식이나 크기를 확인해주세요.', 'danger');
@@ -284,12 +286,12 @@ export default function MemeGeneratorPage() {
   }, [showAlert]);
 
   // 이미지 URL 추가
-  const handleImageUrl = useCallback(async (url: string) => {
+  const handleImageUrl = useCallback(async (url: string, fillOption?: ImageFillOption) => {
     if (!canvasRef.current) return;
     
     setIsLoading(true);
     try {
-      await canvasRef.current.addImageFromUrl(url);
+      await canvasRef.current.addImageFromUrl(url, fillOption);
     } catch (error) {
       console.error('Image URL loading failed:', error);
       showAlert('URL 로딩 실패', '이미지 URL 로딩에 실패했습니다. URL이 올바른지 확인해주세요.', 'danger');
@@ -474,6 +476,19 @@ export default function MemeGeneratorPage() {
     if (!selectedTemplate) return null;
     return memeCoinTemplates.find(coin => coin.id === selectedTemplate.id) || null;
   }, [selectedTemplate]);
+
+  // 선택된 객체가 이미지인지 확인
+  const isSelectedObjectImage = useCallback(() => {
+    return selectedObject && selectedObject.type === 'image';
+  }, [selectedObject]);
+
+  // 이미지 채우기 옵션 변경 핸들러
+  const handleImageFillOptionChange = useCallback((fillOption: ImageFillOption) => {
+    if (!canvasRef.current || !isSelectedObjectImage()) return;
+    
+    canvasRef.current.updateSelectedImageFill(fillOption);
+    setCurrentImageFillOption(fillOption);
+  }, [isSelectedObjectImage]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -791,6 +806,26 @@ export default function MemeGeneratorPage() {
                       </div>
                     )}
 
+                    {/* 선택된 이미지의 채우기 옵션 (이미지가 선택되었을 때만 표시) */}
+                    {activeTab === 'images' && isSelectedObjectImage() && (
+                      <>
+                        <div className="border-t border-gray-200"></div>
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2" aria-hidden="true">
+                              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                              <circle cx="12" cy="13" r="3"/>
+                            </svg>
+                            선택된 이미지 채우기 옵션
+                          </h3>
+                          <ImageFillControls
+                            currentFillOption={currentImageFillOption}
+                            onFillOptionChange={handleImageFillOptionChange}
+                            disabled={isLoading}
+                          />
+                        </div>
+                      </>
+                    )}
                     
                     {activeTab === 'text' && (
                       <div className="space-y-6">
