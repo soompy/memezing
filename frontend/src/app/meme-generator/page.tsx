@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowLeft, Download, RefreshCw, Edit, Image as ImageIcon, X, AlertTriangle, Users, Sparkles, LogIn, User, Coins } from 'lucide-react';
+import { ArrowLeft, Download, RefreshCw, Edit, Image as ImageIcon, X, AlertTriangle, Users, Sparkles, LogIn, User, Coins, Sticker } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import TabGroup from '@/components/ui/TabGroup';
 import TextStyleControls, { TextStyle } from '@/components/meme/TextStyleControls';
@@ -20,9 +20,14 @@ import RecommendedMemesModal from '@/components/meme/RecommendedMemesModal';
 import MemeCoinTextSuggestions from '@/components/meme/MemeCoinTextSuggestions';
 import { memeCoinTemplates } from '@/data/memeCoinTemplates';
 import { useTemplates } from '@/hooks/useTemplates';
-import UnifiedTemplateGrid from '@/components/common/UnifiedTemplateGrid';
+import TemplateCategories from '@/components/meme/TemplateCategories';
 import CanvasSizeControls, { CanvasSize, PRESET_CANVAS_SIZES } from '@/components/meme/CanvasSizeControls';
 import BackgroundColorControls from '@/components/meme/BackgroundColorControls';
+import StickerCollection from '@/components/meme/StickerCollection';
+import SpeechBubbleEditor from '@/components/meme/SpeechBubbleEditor';
+import StickerManager from '@/components/meme/StickerManager';
+import LayerPanel, { LayerItem } from '@/components/meme/LayerPanel';
+import type { Sticker as StickerType, CanvasSpeechBubble } from '@/types/sticker';
 
 export default function MemeGeneratorPage() {
   const router = useRouter();
@@ -47,6 +52,14 @@ export default function MemeGeneratorPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [canvasContainer, setCanvasContainer] = useState<HTMLDivElement | null>(null);
   const [currentImageFillOption, setCurrentImageFillOption] = useState<ImageFillOption>('fill');
+  
+  // 스티커 관련 상태
+  const [selectedSpeechBubble, setSelectedSpeechBubble] = useState<CanvasSpeechBubble | null>(null);
+  const [showSpeechBubbleEditor, setShowSpeechBubbleEditor] = useState(false);
+
+  // 레이어 관리 상태
+  const [layers, setLayers] = useState<LayerItem[]>([]);
+  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
   
   // 캔버스 사이즈 및 배경색 상태
   const [canvasSize, setCanvasSize] = useState<CanvasSize>(PRESET_CANVAS_SIZES[0]); // 기본 사이즈
@@ -288,13 +301,45 @@ export default function MemeGeneratorPage() {
   // 이미지 URL 추가
   const handleImageUrl = useCallback(async (url: string, fillOption?: ImageFillOption) => {
     if (!canvasRef.current) return;
-    
+
     setIsLoading(true);
     try {
       await canvasRef.current.addImageFromUrl(url, fillOption);
     } catch (error) {
       console.error('Image URL loading failed:', error);
       showAlert('URL 로딩 실패', '이미지 URL 로딩에 실패했습니다. URL이 올바른지 확인해주세요.', 'danger');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [showAlert]);
+
+  // 배경 이미지 파일 업로드
+  const handleBackgroundImageUpload = useCallback(async (file: File, fillOption?: ImageFillOption) => {
+    if (!canvasRef.current) return;
+
+    setIsLoading(true);
+    try {
+      await canvasRef.current.setBackgroundImageFromFile(file, fillOption);
+      showAlert('배경 설정 완료', '배경 이미지가 성공적으로 설정되었습니다!', 'success');
+    } catch (error) {
+      console.error('Background image upload failed:', error);
+      showAlert('배경 설정 실패', '배경 이미지 설정에 실패했습니다. 파일 형식이나 크기를 확인해주세요.', 'danger');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [showAlert]);
+
+  // 배경 이미지 URL 추가
+  const handleBackgroundImageUrl = useCallback(async (url: string, fillOption?: ImageFillOption) => {
+    if (!canvasRef.current) return;
+
+    setIsLoading(true);
+    try {
+      await canvasRef.current.setBackgroundImageFromUrl(url, fillOption);
+      showAlert('배경 설정 완료', '배경 이미지가 성공적으로 설정되었습니다!', 'success');
+    } catch (error) {
+      console.error('Background image URL loading failed:', error);
+      showAlert('배경 설정 실패', '배경 이미지 URL 로딩에 실패했습니다. URL이 올바른지 확인해주세요.', 'danger');
     } finally {
       setIsLoading(false);
     }
@@ -403,10 +448,15 @@ export default function MemeGeneratorPage() {
   // 캔버스 사이즈 변경 핸들러
   const handleCanvasSizeChange = useCallback((newSize: CanvasSize) => {
     if (!canvasRef.current) return;
-    
+
     try {
-      canvasRef.current.changeCanvasSize(newSize.width, newSize.height);
+      // 즉시 상태 업데이트
       setCanvasSize(newSize);
+
+      // 캔버스 크기 변경
+      canvasRef.current.changeCanvasSize(newSize.width, newSize.height);
+
+      showAlert('크기 변경 완료', `캔버스 크기가 ${newSize.name}로 변경되었습니다.`, 'success');
     } catch (error) {
       console.error('Failed to change canvas size:', error);
       showAlert('크기 변경 실패', '캔버스 크기 변경에 실패했습니다. 다시 시도해주세요.', 'danger');
@@ -428,7 +478,13 @@ export default function MemeGeneratorPage() {
 
   const tabs = [
     { key: 'images', label: '이미지 선택', icon: ImageIcon },
-    { key: 'text', label: '편집', icon: Edit }
+    { key: 'stickers', label: '스티커', icon: Sticker },
+    { key: 'text', label: '편집', icon: Edit },
+    { key: 'layers', label: '레이어', icon: () => (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    )}
   ];
 
   // 커뮤니티 페이지 이동
@@ -477,9 +533,19 @@ export default function MemeGeneratorPage() {
     return memeCoinTemplates.find(coin => coin.id === selectedTemplate.id) || null;
   }, [selectedTemplate]);
 
-  // 선택된 객체가 이미지인지 확인
+  // 선택된 객체가 이미지인지 확인 (배경 이미지 제외)
   const isSelectedObjectImage = useCallback(() => {
-    return selectedObject && selectedObject.type === 'image';
+    if (!selectedObject || selectedObject.type !== 'image') {
+      return false;
+    }
+
+    // 배경 이미지와 템플릿 이미지는 제외
+    const objectName = (selectedObject as any).name;
+    if (objectName === 'canvas-background-image' || objectName === 'template-background') {
+      return false;
+    }
+
+    return true;
   }, [selectedObject]);
 
   // 이미지 채우기 옵션 변경 핸들러
@@ -489,6 +555,138 @@ export default function MemeGeneratorPage() {
     canvasRef.current.updateSelectedImageFill(fillOption);
     setCurrentImageFillOption(fillOption);
   }, [isSelectedObjectImage]);
+
+  // 스티커 선택 핸들러
+  const handleStickerSelect = useCallback(async (sticker: StickerType) => {
+    if (!canvasRef.current) return;
+    
+    setIsLoading(true);
+    try {
+      await canvasRef.current.addSticker(sticker);
+    } catch (error) {
+      console.error('Sticker loading failed:', error);
+      showAlert('스티커 추가 실패', '스티커를 추가하는데 실패했습니다. 다시 시도해주세요.', 'danger');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [showAlert]);
+
+  // 말풍선 편집 핸들러
+  const handleSpeechBubbleEdit = useCallback((bubble: CanvasSpeechBubble) => {
+    setSelectedSpeechBubble(bubble);
+    setShowSpeechBubbleEditor(true);
+  }, []);
+
+  // 말풍선 속성 업데이트 핸들러
+  const handleSpeechBubbleUpdate = useCallback((properties: any) => {
+    if (!canvasRef.current || !selectedSpeechBubble) return;
+    
+    try {
+      // updateSpeechBubble 메서드가 없다면 updateSpeechBubbleText 사용
+      if (properties.text && canvasRef.current.updateSpeechBubbleText) {
+        canvasRef.current.updateSpeechBubbleText(properties.text);
+      }
+      // 다른 속성들은 직접 객체에 적용
+      if (selectedSpeechBubble.bubbleData) {
+        Object.assign(selectedSpeechBubble.bubbleData, properties);
+      }
+      canvasRef.current.getCanvas()?.renderAll();
+    } catch (error) {
+      console.error('Speech bubble update failed:', error);
+      showAlert('말풍선 업데이트 실패', '말풍선 속성 변경에 실패했습니다.', 'danger');
+    }
+  }, [selectedSpeechBubble, showAlert]);
+
+  // 말풍선 에디터 닫기
+  const handleSpeechBubbleEditorClose = useCallback(() => {
+    setShowSpeechBubbleEditor(false);
+    setSelectedSpeechBubble(null);
+  }, []);
+
+  // 레이어 관련 핸들러들
+  const updateLayers = useCallback(() => {
+    if (canvasRef.current) {
+      const newLayers = canvasRef.current.getAllLayers();
+      setLayers(newLayers);
+    }
+  }, []);
+
+  // 캔버스 객체 변경시 레이어 업데이트
+  useEffect(() => {
+    const timer = setInterval(updateLayers, 500); // 0.5초마다 레이어 상태 동기화
+    return () => clearInterval(timer);
+  }, [updateLayers]);
+
+  // 레이어 선택 핸들러
+  const handleLayerSelect = useCallback((layerId: string) => {
+    setSelectedLayerId(layerId);
+    if (canvasRef.current) {
+      canvasRef.current.selectLayerById(layerId);
+    }
+  }, []);
+
+  // 레이어 가시성 토글
+  const handleLayerVisibilityToggle = useCallback((layerId: string) => {
+    if (canvasRef.current) {
+      const layer = layers.find(l => l.id === layerId);
+      if (layer) {
+        canvasRef.current.setLayerVisibility(layerId, !layer.visible);
+        updateLayers();
+      }
+    }
+  }, [layers, updateLayers]);
+
+  // 레이어 잠금 토글
+  const handleLayerLockToggle = useCallback((layerId: string) => {
+    if (canvasRef.current) {
+      const layer = layers.find(l => l.id === layerId);
+      if (layer) {
+        canvasRef.current.setLayerLock(layerId, !layer.locked);
+        updateLayers();
+      }
+    }
+  }, [layers, updateLayers]);
+
+  // 레이어 삭제
+  const handleLayerDelete = useCallback((layerId: string) => {
+    if (canvasRef.current) {
+      canvasRef.current.deleteLayerById(layerId);
+      updateLayers();
+      if (selectedLayerId === layerId) {
+        setSelectedLayerId(null);
+      }
+    }
+  }, [selectedLayerId, updateLayers]);
+
+  // 레이어 복사
+  const handleLayerDuplicate = useCallback((layerId: string) => {
+    if (canvasRef.current) {
+      canvasRef.current.duplicateLayerById(layerId);
+      updateLayers();
+    }
+  }, [updateLayers]);
+
+  // 레이어 순서 변경
+  const handleLayerReorder = useCallback((layerId: string, direction: 'up' | 'down') => {
+    if (canvasRef.current) {
+      canvasRef.current.reorderLayer(layerId, direction);
+      updateLayers();
+    }
+  }, [updateLayers]);
+
+  // 레이어 이름 변경
+  const handleLayerRename = useCallback((layerId: string, newName: string) => {
+    if (canvasRef.current) {
+      canvasRef.current.renameLayer(layerId, newName);
+      updateLayers();
+    }
+  }, [updateLayers]);
+
+  // 드래그 앤 드롭 핸들러
+  const handleImageDrop = useCallback((file: File) => {
+    showAlert('이미지 추가 완료', `${file.name}이(가) 캔버스에 추가되었습니다!`, 'success');
+    updateLayers(); // 레이어 목록 업데이트
+  }, [showAlert, updateLayers]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -614,14 +812,16 @@ export default function MemeGeneratorPage() {
                         <ImageSelectorTabs
                           onImageSelect={handleImageUpload}
                           onImageUrl={handleImageUrl}
+                          onBackgroundImageSelect={handleBackgroundImageUpload}
+                          onBackgroundImageUrl={handleBackgroundImageUrl}
                         />
                       </div>
 
                       {/* 구분선 */}
                       <div className="border-t border-gray-200"></div>
 
-                      {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
-                      <UnifiedTemplateGrid
+                      {/* 템플릿 그리드 (카테고리별 분류) */}
+                      <TemplateCategories
                         templates={availableTemplates}
                         selectedTemplate={selectedTemplate}
                         onTemplateSelect={handleTemplateSelect}
@@ -633,6 +833,44 @@ export default function MemeGeneratorPage() {
                     </div>
                   )}
 
+                  {activeTab === 'stickers' && (
+                    <div className="space-y-6">
+                      {/* 스티커 컬렉션 */}
+                      <div>
+                        <h3 className="text-lg font-semibold mb-4">스티커 컬렉션</h3>
+                        <StickerCollection
+                          onStickerSelect={handleStickerSelect}
+                        />
+                      </div>
+
+                      {/* 구분선 */}
+                      <div className="border-t border-gray-200"></div>
+
+                      {/* 스티커 관리 */}
+                      <div>
+                        <StickerManager
+                          canvas={canvasRef.current?.getCanvas() || null}
+                          selectedObject={selectedObject}
+                          onObjectSelect={setSelectedObject}
+                          onEditSpeechBubble={handleSpeechBubbleEdit}
+                        />
+                      </div>
+
+                      {/* 말풍선 에디터 (말풍선이 선택되었을 때만 표시) */}
+                      {showSpeechBubbleEditor && selectedSpeechBubble && (
+                        <>
+                          <div className="border-t border-gray-200"></div>
+                          <div>
+                            <SpeechBubbleEditor
+                              selectedBubble={selectedSpeechBubble}
+                              onUpdate={handleSpeechBubbleUpdate}
+                              onClose={handleSpeechBubbleEditorClose}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
                   
                   {activeTab === 'text' && (
                     <div className="space-y-6">
@@ -681,6 +919,22 @@ export default function MemeGeneratorPage() {
                       </div>
                     </div>
                   )}
+
+                  {activeTab === 'layers' && (
+                    <div className="space-y-6">
+                      <LayerPanel
+                        layers={layers}
+                        selectedLayerId={selectedLayerId}
+                        onLayerSelect={handleLayerSelect}
+                        onLayerVisibilityToggle={handleLayerVisibilityToggle}
+                        onLayerLockToggle={handleLayerLockToggle}
+                        onLayerDelete={handleLayerDelete}
+                        onLayerDuplicate={handleLayerDuplicate}
+                        onLayerReorder={handleLayerReorder}
+                        onLayerRename={handleLayerRename}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -711,6 +965,7 @@ export default function MemeGeneratorPage() {
                   width={canvasSize.width}
                   height={canvasSize.height}
                   onSelectionChange={setSelectedObject}
+                  onImageDrop={handleImageDrop}
                   className=""
                 />
 
@@ -788,14 +1043,16 @@ export default function MemeGeneratorPage() {
                           <ImageSelectorTabs
                             onImageSelect={handleImageUpload}
                             onImageUrl={handleImageUrl}
+                            onBackgroundImageSelect={handleBackgroundImageUpload}
+                            onBackgroundImageUrl={handleBackgroundImageUrl}
                           />
                         </div>
 
                         {/* 구분선 */}
                         <div className="border-t border-gray-200"></div>
 
-                        {/* 템플릿 그리드 (ImgFlip API + 큐레이션) */}
-                        <UnifiedTemplateGrid
+                        {/* 템플릿 그리드 (카테고리별 분류) */}
+                        <TemplateCategories
                           templates={availableTemplates}
                           selectedTemplate={selectedTemplate}
                           onTemplateSelect={handleTemplateSelect}
@@ -825,6 +1082,45 @@ export default function MemeGeneratorPage() {
                           />
                         </div>
                       </>
+                    )}
+
+                    {activeTab === 'stickers' && (
+                      <div className="space-y-6">
+                        {/* 스티커 컬렉션 */}
+                        <div>
+                          <h3 className="text-lg font-semibold mb-4">스티커 컬렉션</h3>
+                          <StickerCollection
+                            onStickerSelect={handleStickerSelect}
+                          />
+                        </div>
+
+                        {/* 구분선 */}
+                        <div className="border-t border-gray-200"></div>
+
+                        {/* 스티커 관리 */}
+                        <div>
+                          <StickerManager
+                            canvas={canvasRef.current?.getCanvas() || null}
+                            selectedObject={selectedObject}
+                            onObjectSelect={setSelectedObject}
+                            onEditSpeechBubble={handleSpeechBubbleEdit}
+                          />
+                        </div>
+
+                        {/* 말풍선 에디터 (말풍선이 선택되었을 때만 표시) */}
+                        {showSpeechBubbleEditor && selectedSpeechBubble && (
+                          <>
+                            <div className="border-t border-gray-200"></div>
+                            <div>
+                              <SpeechBubbleEditor
+                                selectedBubble={selectedSpeechBubble}
+                                onUpdate={handleSpeechBubbleUpdate}
+                                onClose={handleSpeechBubbleEditorClose}
+                              />
+                            </div>
+                          </>
+                        )}
+                      </div>
                     )}
                     
                     {activeTab === 'text' && (
@@ -874,6 +1170,22 @@ export default function MemeGeneratorPage() {
                         </div>
                       </div>
                     )}
+
+                    {activeTab === 'layers' && (
+                      <div className="space-y-6">
+                        <LayerPanel
+                          layers={layers}
+                          selectedLayerId={selectedLayerId}
+                          onLayerSelect={handleLayerSelect}
+                          onLayerVisibilityToggle={handleLayerVisibilityToggle}
+                          onLayerLockToggle={handleLayerLockToggle}
+                          onLayerDelete={handleLayerDelete}
+                          onLayerDuplicate={handleLayerDuplicate}
+                          onLayerReorder={handleLayerReorder}
+                          onLayerRename={handleLayerRename}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
@@ -897,6 +1209,7 @@ export default function MemeGeneratorPage() {
                       width={canvasSize.width}
                       height={canvasSize.height}
                       onSelectionChange={setSelectedObject}
+                      onImageDrop={handleImageDrop}
                       className=""
                     />
 
