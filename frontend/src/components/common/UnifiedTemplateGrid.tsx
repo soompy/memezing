@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
-import ProxiedImage from '@/components/ui/ProxiedImage';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 import type { MemeTemplate } from '@/components/meme/FabricCanvas';
 
 interface UnifiedTemplateGridProps {
@@ -85,11 +85,15 @@ const UnifiedTemplateGrid: React.FC<UnifiedTemplateGridProps> = ({
             >
               {/* 템플릿 이미지 */}
               <div className="absolute inset-0 flex items-center justify-center p-4">
-                <ProxiedImage
+                <OptimizedImage
                   src={template.url}
                   alt={template.name}
-                  fallbackCategory="default"
-                  className="w-full h-full group-hover:scale-110 transition-transform duration-300"
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  lazy={true}
+                  priority={false}
+                  quality={75}
                 />
               </div>
 

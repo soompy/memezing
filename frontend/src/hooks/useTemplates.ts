@@ -10,6 +10,7 @@ import {
   clearTemplateCache
 } from '@/services/templateService';
 import { getCuratedTemplates } from '@/services/templateService';
+import { CURATED_TEMPLATES } from '@/data/koreanMemeTemplates';
 
 export interface UseTemplatesOptions {
   autoLoad?: boolean; // 자동으로 템플릿 로드할지 여부
@@ -122,13 +123,13 @@ export const useTemplates = (options: UseTemplatesOptions = {}): UseTemplatesRet
       
     } catch (error) {
       if (abortControllerRef.current?.signal.aborted) return;
-      await handleError(error, getCuratedTemplates);
+      await handleError(error, () => Promise.resolve(getCuratedTemplates()));
     } finally {
       loadingRef.current = false;
     }
   }, [updateState, handleError]);
 
-  // 랜덤 템플릿 로드
+  // 랜덤 템플릿 로드 (큐레이션 템플릿 포함)
   const loadRandomTemplates = useCallback(async (count: number = 20) => {
     if (loadingRef.current) return;
     
@@ -136,15 +137,24 @@ export const useTemplates = (options: UseTemplatesOptions = {}): UseTemplatesRet
     updateState({ isLoading: true, error: null });
     
     try {
-      const templates = await getRandomTemplates(count);
+      // ImgFlip API에서 랜덤 템플릿 가져오기
+      const apiTemplates = await getRandomTemplates(Math.max(1, count - CURATED_TEMPLATES.length));
+      
+      // 큐레이션 템플릿과 API 템플릿을 합치기
+      const allTemplates = [...CURATED_TEMPLATES, ...apiTemplates];
+      
+      // 요청된 개수만큼 랜덤하게 선택
+      const shuffled = allTemplates.sort(() => Math.random() - 0.5);
+      const selectedTemplates = shuffled.slice(0, count);
+      
       updateState({
-        templates,
+        templates: selectedTemplates,
         isLoading: false,
         lastUpdated: Date.now(),
       });
       
     } catch (error) {
-      await handleError(error, () => Promise.resolve(getCuratedTemplates().slice(0, count)));
+      await handleError(error, () => Promise.resolve(CURATED_TEMPLATES.slice(0, count)));
     } finally {
       loadingRef.current = false;
     }
@@ -166,7 +176,7 @@ export const useTemplates = (options: UseTemplatesOptions = {}): UseTemplatesRet
       });
       
     } catch (error) {
-      await handleError(error, getCuratedTemplates);
+      await handleError(error, () => Promise.resolve(getCuratedTemplates()));
     } finally {
       loadingRef.current = false;
     }
@@ -188,7 +198,7 @@ export const useTemplates = (options: UseTemplatesOptions = {}): UseTemplatesRet
       });
       
     } catch (error) {
-      await handleError(error, getCuratedTemplates);
+      await handleError(error, () => Promise.resolve(getCuratedTemplates()));
     } finally {
       loadingRef.current = false;
     }

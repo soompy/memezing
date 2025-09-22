@@ -7,6 +7,8 @@ interface ImageSelectorTabsProps {
   onImageSelect: (file: File, fillOption?: ImageFillOption) => void;
   onImageUrl: (url: string, fillOption?: ImageFillOption) => void;
   onImageUpload?: (url: string) => void;
+  onBackgroundImageSelect?: (file: File, fillOption?: ImageFillOption) => void;
+  onBackgroundImageUrl?: (url: string, fillOption?: ImageFillOption) => void;
   className?: string;
 }
 
@@ -14,6 +16,8 @@ const ImageSelectorTabs: React.FC<ImageSelectorTabsProps> = ({
   onImageSelect,
   onImageUrl,
   onImageUpload,
+  onBackgroundImageSelect,
+  onBackgroundImageUrl,
   className = ''
 }) => {
   return (
@@ -23,6 +27,8 @@ const ImageSelectorTabs: React.FC<ImageSelectorTabsProps> = ({
           onImageSelect={onImageSelect}
           onImageUrl={onImageUrl}
           onImageUpload={onImageUpload}
+          onBackgroundImageSelect={onBackgroundImageSelect}
+          onBackgroundImageUrl={onBackgroundImageUrl}
         />
       </div>
     </div>
