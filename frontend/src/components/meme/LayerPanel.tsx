@@ -42,7 +42,6 @@ export default function LayerPanel({
 }: LayerPanelProps) {
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [expandedLayers, setExpandedLayers] = useState<Set<string>>(new Set());
 
   // 레이어를 order 기준으로 정렬 (높은 order가 위쪽)
   const sortedLayers = [...layers].sort((a, b) => b.order - a.order);
@@ -96,22 +95,33 @@ export default function LayerPanel({
   };
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg ${className}`}>
-      {/* 헤더 */}
-      <div className="p-3 border-b border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-900 flex items-center">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          레이어 ({layers.length})
+    <div className={`${className}`}>
+      {/* 컴팩트 헤더 */}
+      <div className="mb-3">
+        <h3 className="text-md font-semibold text-gray-900 flex items-center justify-between">
+          <span className="flex items-center">
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            레이어 관리
+          </span>
+          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            {layers.length}개
+          </span>
         </h3>
       </div>
 
       {/* 레이어 목록 */}
-      <div className="max-h-80 overflow-y-auto">
+      <div className="bg-white border border-gray-200 rounded-lg max-h-64 overflow-y-auto">
         {sortedLayers.length === 0 ? (
           <div className="p-4 text-center text-gray-500 text-sm">
-            레이어가 없습니다
+            <div className="mb-2">
+              <svg className="w-8 h-8 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </div>
+            <p>아직 레이어가 없습니다</p>
+            <p className="text-xs text-gray-400 mt-1">텍스트나 이미지를 추가해보세요</p>
           </div>
         ) : (
           <div className="space-y-1 p-2">
@@ -248,13 +258,17 @@ export default function LayerPanel({
         )}
       </div>
 
-      {/* 하단 액션 */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50">
-        <div className="flex justify-between items-center text-xs text-gray-600">
-          <span>더블클릭으로 이름 편집</span>
-          <span>드래그해서 순서 변경 (개발 예정)</span>
+      {/* 하단 도움말 */}
+      {sortedLayers.length > 0 && (
+        <div className="mt-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs text-blue-700">
+          <p className="font-medium mb-1">💡 사용 팁</p>
+          <ul className="space-y-0.5 text-blue-600">
+            <li>• 더블클릭으로 레이어 이름 편집</li>
+            <li>• 👁️ 아이콘으로 표시/숨김 전환</li>
+            <li>• 🔒 아이콘으로 편집 잠금</li>
+          </ul>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -195,13 +195,13 @@ const StickerManager: React.FC<StickerManagerProps> = ({
 
   // Z-index 이동
   const handleMoveUp = useCallback((obj: fabric.Object) => {
-    canvas?.bringForward(obj);
+    canvas?.bringObjectForward(obj);
     canvas?.renderAll();
     updateObjectList();
   }, [canvas, updateObjectList]);
 
   const handleMoveDown = useCallback((obj: fabric.Object) => {
-    canvas?.sendBackwards(obj);
+    canvas?.sendObjectBackwards(obj);
     canvas?.renderAll();
     updateObjectList();
   }, [canvas, updateObjectList]);

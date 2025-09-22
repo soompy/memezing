@@ -1268,23 +1268,41 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
 
   // 모든 레이어 정보 가져오기
   const getAllLayers = useCallback((): LayerItem[] => {
-    if (!fabricCanvasRef.current) return [];
+    try {
+      if (!fabricCanvasRef.current) return [];
 
-    const objects = fabricCanvasRef.current.getObjects();
-    return objects.map((obj, index) => {
-      const name = (obj as any).name || 'Unnamed';
-      const type = getLayerTypeFromObject(obj);
+      const objects = fabricCanvasRef.current.getObjects();
+      return objects.map((obj, index) => {
+        try {
+          const name = (obj as any).name || 'Unnamed';
+          const type = getLayerTypeFromObject(obj);
 
-      return {
-        id: obj.__uid || `layer-${index}`,
-        name: getLayerName(obj, type),
-        type,
-        visible: obj.visible !== false,
-        locked: !obj.selectable,
-        order: objects.length - index, // 위쪽이 높은 order
-        opacity: obj.opacity || 1
-      };
-    });
+          return {
+            id: obj.__uid || `layer-${index}`,
+            name: getLayerName(obj, type),
+            type,
+            visible: obj.visible !== false,
+            locked: !obj.selectable,
+            order: objects.length - index, // 위쪽이 높은 order
+            opacity: obj.opacity || 1
+          };
+        } catch (error) {
+          console.error('Error processing layer object:', error);
+          return {
+            id: `layer-${index}`,
+            name: '알 수 없음',
+            type: 'text' as LayerItem['type'],
+            visible: true,
+            locked: false,
+            order: objects.length - index,
+            opacity: 1
+          };
+        }
+      });
+    } catch (error) {
+      console.error('Error getting all layers:', error);
+      return [];
+    }
   }, []);
 
   // 객체에서 레이어 타입 추출
@@ -1329,13 +1347,17 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
 
   // 레이어 가시성 변경
   const setLayerVisibility = useCallback((layerId: string, visible: boolean) => {
-    if (!fabricCanvasRef.current) return;
+    try {
+      if (!fabricCanvasRef.current) return;
 
-    const obj = findObjectById(layerId);
-    if (obj) {
-      obj.set('visible', visible);
-      fabricCanvasRef.current.renderAll();
-      saveCanvasState();
+      const obj = findObjectById(layerId);
+      if (obj) {
+        obj.set('visible', visible);
+        fabricCanvasRef.current.renderAll();
+        saveCanvasState();
+      }
+    } catch (error) {
+      console.error('Error setting layer visibility:', error);
     }
   }, [saveCanvasState]);
 
@@ -1361,7 +1383,7 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     if (!fabricCanvasRef.current) return null;
 
     const objects = fabricCanvasRef.current.getObjects();
-    return objects.find(obj => obj.__uid === layerId || `layer-${objects.indexOf(obj)}` === layerId) || null;
+    return objects.find(obj => (obj as any).id === layerId || `layer-${objects.indexOf(obj)}` === layerId) || null;
   };
 
   // 레이어 순서 변경
@@ -1372,9 +1394,9 @@ const FabricCanvas = forwardRef<FabricCanvasRef, FabricCanvasProps>(({
     if (!obj) return;
 
     if (direction === 'up') {
-      fabricCanvasRef.current.bringForward(obj);
+      fabricCanvasRef.current.bringObjectForward(obj);
     } else {
-      fabricCanvasRef.current.sendBackwards(obj);
+      fabricCanvasRef.current.sendObjectBackwards(obj);
     }
 
     fabricCanvasRef.current.renderAll();

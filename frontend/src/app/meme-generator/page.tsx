@@ -35,7 +35,7 @@ export default function MemeGeneratorPage() {
   const [searchParams, setSearchParams] = useState<URLSearchParams | null>(null);
   const canvasRef = useRef<FabricCanvasRef>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<MemeTemplate | null>(null);
-  const [activeTab, setActiveTab] = useState('images');
+  const [activeTab, setActiveTab] = useState('design');
   const [textStyle, setTextStyle] = useState<TextStyle>({
     fontSize: 40,
     fontFamily: 'Arial Black, Arial, sans-serif',
@@ -477,14 +477,13 @@ export default function MemeGeneratorPage() {
   }, [showAlert]);
 
   const tabs = [
-    { key: 'images', label: '이미지 선택', icon: ImageIcon },
-    { key: 'stickers', label: '스티커', icon: Sticker },
-    { key: 'text', label: '편집', icon: Edit },
-    { key: 'layers', label: '레이어', icon: () => (
+    { key: 'design', label: '디자인', icon: () => (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
       </svg>
-    )}
+    )},
+    { key: 'stickers', label: '스티커', icon: Sticker },
+    { key: 'text', label: '편집', icon: Edit }
   ];
 
   // 커뮤니티 페이지 이동
@@ -605,80 +604,130 @@ export default function MemeGeneratorPage() {
 
   // 레이어 관련 핸들러들
   const updateLayers = useCallback(() => {
-    if (canvasRef.current) {
-      const newLayers = canvasRef.current.getAllLayers();
-      setLayers(newLayers);
+    try {
+      if (canvasRef.current) {
+        const newLayers = canvasRef.current.getAllLayers();
+        setLayers(newLayers);
+      }
+    } catch (error) {
+      console.error('Failed to update layers:', error);
+      setLayers([]); // 에러 시 빈 배열로 초기화
     }
   }, []);
 
   // 캔버스 객체 변경시 레이어 업데이트
   useEffect(() => {
-    const timer = setInterval(updateLayers, 500); // 0.5초마다 레이어 상태 동기화
+    const timer = setInterval(updateLayers, 200); // 0.2초마다 레이어 상태 동기화 (더 빠른 반응)
     return () => clearInterval(timer);
   }, [updateLayers]);
 
+  // 선택된 객체가 변경될 때 레이어 선택 상태 동기화
+  useEffect(() => {
+    if (selectedObject && canvasRef.current) {
+      const currentLayers = canvasRef.current.getAllLayers();
+      const matchingLayer = currentLayers.find(layer =>
+        layer.id === (selectedObject as any).__uid ||
+        layer.id === `layer-${currentLayers.indexOf(selectedObject)}`
+      );
+      if (matchingLayer && matchingLayer.id !== selectedLayerId) {
+        setSelectedLayerId(matchingLayer.id);
+      }
+    } else if (!selectedObject && selectedLayerId) {
+      setSelectedLayerId(null);
+    }
+  }, [selectedObject, selectedLayerId]);
+
   // 레이어 선택 핸들러
   const handleLayerSelect = useCallback((layerId: string) => {
-    setSelectedLayerId(layerId);
-    if (canvasRef.current) {
-      canvasRef.current.selectLayerById(layerId);
+    try {
+      setSelectedLayerId(layerId);
+      if (canvasRef.current) {
+        canvasRef.current.selectLayerById(layerId);
+      }
+    } catch (error) {
+      console.error('Failed to select layer:', error);
+      setSelectedLayerId(null);
     }
   }, []);
 
   // 레이어 가시성 토글
   const handleLayerVisibilityToggle = useCallback((layerId: string) => {
-    if (canvasRef.current) {
-      const layer = layers.find(l => l.id === layerId);
-      if (layer) {
-        canvasRef.current.setLayerVisibility(layerId, !layer.visible);
-        updateLayers();
+    try {
+      if (canvasRef.current) {
+        const layer = layers.find(l => l.id === layerId);
+        if (layer) {
+          canvasRef.current.setLayerVisibility(layerId, !layer.visible);
+          updateLayers();
+        }
       }
+    } catch (error) {
+      console.error('Failed to toggle layer visibility:', error);
     }
   }, [layers, updateLayers]);
 
   // 레이어 잠금 토글
   const handleLayerLockToggle = useCallback((layerId: string) => {
-    if (canvasRef.current) {
-      const layer = layers.find(l => l.id === layerId);
-      if (layer) {
-        canvasRef.current.setLayerLock(layerId, !layer.locked);
-        updateLayers();
+    try {
+      if (canvasRef.current) {
+        const layer = layers.find(l => l.id === layerId);
+        if (layer) {
+          canvasRef.current.setLayerLock(layerId, !layer.locked);
+          updateLayers();
+        }
       }
+    } catch (error) {
+      console.error('Failed to toggle layer lock:', error);
     }
   }, [layers, updateLayers]);
 
   // 레이어 삭제
   const handleLayerDelete = useCallback((layerId: string) => {
-    if (canvasRef.current) {
-      canvasRef.current.deleteLayerById(layerId);
-      updateLayers();
-      if (selectedLayerId === layerId) {
-        setSelectedLayerId(null);
+    try {
+      if (canvasRef.current) {
+        canvasRef.current.deleteLayerById(layerId);
+        updateLayers();
+        if (selectedLayerId === layerId) {
+          setSelectedLayerId(null);
+        }
       }
+    } catch (error) {
+      console.error('Failed to delete layer:', error);
     }
   }, [selectedLayerId, updateLayers]);
 
   // 레이어 복사
   const handleLayerDuplicate = useCallback((layerId: string) => {
-    if (canvasRef.current) {
-      canvasRef.current.duplicateLayerById(layerId);
-      updateLayers();
+    try {
+      if (canvasRef.current) {
+        canvasRef.current.duplicateLayerById(layerId);
+        updateLayers();
+      }
+    } catch (error) {
+      console.error('Failed to duplicate layer:', error);
     }
   }, [updateLayers]);
 
   // 레이어 순서 변경
   const handleLayerReorder = useCallback((layerId: string, direction: 'up' | 'down') => {
-    if (canvasRef.current) {
-      canvasRef.current.reorderLayer(layerId, direction);
-      updateLayers();
+    try {
+      if (canvasRef.current) {
+        canvasRef.current.reorderLayer(layerId, direction);
+        updateLayers();
+      }
+    } catch (error) {
+      console.error('Failed to reorder layer:', error);
     }
   }, [updateLayers]);
 
   // 레이어 이름 변경
   const handleLayerRename = useCallback((layerId: string, newName: string) => {
-    if (canvasRef.current) {
-      canvasRef.current.renameLayer(layerId, newName);
-      updateLayers();
+    try {
+      if (canvasRef.current) {
+        canvasRef.current.renameLayer(layerId, newName);
+        updateLayers();
+      }
+    } catch (error) {
+      console.error('Failed to rename layer:', error);
     }
   }, [updateLayers]);
 
@@ -772,8 +821,26 @@ export default function MemeGeneratorPage() {
               {/* 스크롤 가능한 콘텐츠 영역 */}
               <div className="flex-1 overflow-y-auto">
                 <div className="p-4">
-                  {activeTab === 'images' && (
+                  {activeTab === 'design' && (
                     <div className="space-y-6">
+                      {/* 레이어 관리 섹션 - 상단 배치 */}
+                      <div>
+                        <LayerPanel
+                          layers={layers}
+                          selectedLayerId={selectedLayerId}
+                          onLayerSelect={handleLayerSelect}
+                          onLayerVisibilityToggle={handleLayerVisibilityToggle}
+                          onLayerLockToggle={handleLayerLockToggle}
+                          onLayerDelete={handleLayerDelete}
+                          onLayerDuplicate={handleLayerDuplicate}
+                          onLayerReorder={handleLayerReorder}
+                          onLayerRename={handleLayerRename}
+                        />
+                      </div>
+
+                      {/* 구분선 */}
+                      <div className="border-t border-gray-200"></div>
+
                       {/* 캔버스 스타일 섹션 */}
                       <div>
                         <div className="mb-4">
@@ -785,7 +852,7 @@ export default function MemeGeneratorPage() {
                             캔버스 스타일
                           </h3>
                         </div>
-                        
+
                         <div className="space-y-4">
                           {/* 캔버스 크기 조절 */}
                           <CanvasSizeControls
@@ -920,21 +987,6 @@ export default function MemeGeneratorPage() {
                     </div>
                   )}
 
-                  {activeTab === 'layers' && (
-                    <div className="space-y-6">
-                      <LayerPanel
-                        layers={layers}
-                        selectedLayerId={selectedLayerId}
-                        onLayerSelect={handleLayerSelect}
-                        onLayerVisibilityToggle={handleLayerVisibilityToggle}
-                        onLayerLockToggle={handleLayerLockToggle}
-                        onLayerDelete={handleLayerDelete}
-                        onLayerDuplicate={handleLayerDuplicate}
-                        onLayerReorder={handleLayerReorder}
-                        onLayerRename={handleLayerRename}
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -1003,8 +1055,26 @@ export default function MemeGeneratorPage() {
                 {/* 스크롤 가능한 콘텐츠 영역 */}
                 <div className="flex-1 overflow-y-auto">
                   <div className="p-4">
-                    {activeTab === 'images' && (
+                    {activeTab === 'design' && (
                       <div className="space-y-6">
+                        {/* 레이어 관리 섹션 - 상단 배치 */}
+                        <div>
+                          <LayerPanel
+                            layers={layers}
+                            selectedLayerId={selectedLayerId}
+                            onLayerSelect={handleLayerSelect}
+                            onLayerVisibilityToggle={handleLayerVisibilityToggle}
+                            onLayerLockToggle={handleLayerLockToggle}
+                            onLayerDelete={handleLayerDelete}
+                            onLayerDuplicate={handleLayerDuplicate}
+                            onLayerReorder={handleLayerReorder}
+                            onLayerRename={handleLayerRename}
+                          />
+                        </div>
+
+                        {/* 구분선 */}
+                        <div className="border-t border-gray-200"></div>
+
                         {/* 캔버스 스타일 섹션 */}
                         <div>
                           <div className="mb-4">
@@ -1016,7 +1086,7 @@ export default function MemeGeneratorPage() {
                               캔버스 스타일
                             </h3>
                           </div>
-                          
+
                           <div className="space-y-4">
                             {/* 캔버스 크기 조절 */}
                             <CanvasSizeControls
@@ -1064,7 +1134,7 @@ export default function MemeGeneratorPage() {
                     )}
 
                     {/* 선택된 이미지의 채우기 옵션 (이미지가 선택되었을 때만 표시) */}
-                    {activeTab === 'images' && isSelectedObjectImage() && (
+                    {activeTab === 'design' && isSelectedObjectImage() && (
                       <>
                         <div className="border-t border-gray-200"></div>
                         <div>
@@ -1171,21 +1241,6 @@ export default function MemeGeneratorPage() {
                       </div>
                     )}
 
-                    {activeTab === 'layers' && (
-                      <div className="space-y-6">
-                        <LayerPanel
-                          layers={layers}
-                          selectedLayerId={selectedLayerId}
-                          onLayerSelect={handleLayerSelect}
-                          onLayerVisibilityToggle={handleLayerVisibilityToggle}
-                          onLayerLockToggle={handleLayerLockToggle}
-                          onLayerDelete={handleLayerDelete}
-                          onLayerDuplicate={handleLayerDuplicate}
-                          onLayerReorder={handleLayerReorder}
-                          onLayerRename={handleLayerRename}
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               </>

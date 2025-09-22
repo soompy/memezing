@@ -283,12 +283,12 @@ export function getObjectType(obj: fabric.Object | null): 'sticker' | 'speech-bu
  * 스티커/말풍선 Z-index 관리
  */
 export function bringToFront(canvas: fabric.Canvas, obj: fabric.Object) {
-  canvas.bringToFront(obj);
+  canvas.bringObjectToFront(obj);
   canvas.renderAll();
 }
 
 export function sendToBack(canvas: fabric.Canvas, obj: fabric.Object) {
-  canvas.sendToBack(obj);
+  canvas.sendObjectToBack(obj);
   canvas.renderAll();
 }
 
